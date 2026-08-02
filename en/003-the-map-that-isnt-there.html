@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The map that isn't there</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --abisso:#08161F;
+  --abisso-2:#0C1E29;
+  --carta:#DCE6E4;
+  --fumo:#8FA3A8;
+  --rilievo:#7FD1C1;
+  --segnale:#E8A33D;
+  --errore:#E2645A;
+  --linea:rgba(127,209,193,.16);
+  --display:"Space Grotesk","Helvetica Neue",Arial,sans-serif;
+  --testo:"Newsreader",Georgia,"Times New Roman",serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background-color:var(--abisso);
+  background-image:
+    linear-gradient(var(--linea) 1px,transparent 1px),
+    linear-gradient(90deg,var(--linea) 1px,transparent 1px);
+  background-size:28px 28px;
+  background-attachment:fixed;
+  color:var(--carta);
+  font-family:var(--testo);
+  font-size:18px;
+  line-height:1.62;
+  font-weight:300;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px;position:relative}
+.col{max-width:660px;margin-left:auto;margin-right:auto}
+
+/* ---- rail ---- */
+.rail{
+  position:fixed;top:0;left:0;height:100vh;width:180px;
+  display:none;flex-direction:column;justify-content:center;gap:2px;
+  padding-left:28px;border-right:1px solid var(--linea);
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+}
+@media(min-width:1180px){.rail{display:flex}}
+.rail a{
+  color:var(--fumo);text-decoration:none;padding:7px 0;
+  display:flex;gap:10px;align-items:baseline;opacity:.55;transition:opacity .25s,color .25s;
+}
+.rail a:hover,.rail a.active{opacity:1;color:var(--rilievo)}
+.rail a .tick{width:14px;height:1px;background:currentColor;display:inline-block;transition:width .25s}
+.rail a.active .tick{width:26px}
+.rail .rl-cap{color:var(--fumo);opacity:.4;margin-bottom:14px;font-size:9px}
+
+/* ---- hero ---- */
+.hero{padding:16vh 0 12vh;border-bottom:1px solid var(--linea)}
+.eyebrow{
+  font-family:var(--mono);font-size:11px;letter-spacing:.22em;
+  color:var(--rilievo);text-transform:uppercase;margin:0 0 26px;
+}
+h1{
+  font-family:var(--display);font-weight:700;
+  font-size:clamp(42px,8.5vw,86px);line-height:.94;letter-spacing:-.035em;
+  margin:0 0 26px;
+}
+h1 em{font-style:normal;color:var(--segnale)}
+.sub{font-size:clamp(19px,2.4vw,23px);color:var(--carta);opacity:.82;margin:0 0 34px;max-width:36em}
+.meta{font-family:var(--mono);font-size:11px;color:var(--fumo);letter-spacing:.1em}
+
+/* ---- sections ---- */
+section{padding:11vh 0;border-bottom:1px solid var(--linea)}
+.lab{
+  font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:var(--fumo);
+  text-transform:uppercase;margin:0 0 18px;display:flex;gap:12px;align-items:center;
+}
+.lab::after{content:"";flex:1;height:1px;background:var(--linea)}
+h2{
+  font-family:var(--display);font-weight:700;
+  font-size:clamp(28px,4.6vw,44px);line-height:1.06;letter-spacing:-.025em;
+  margin:0 0 24px;
+}
+h3{font-family:var(--display);font-weight:500;font-size:21px;letter-spacing:-.01em;margin:38px 0 12px}
+p{margin:0 0 20px}
+p.lede{font-size:21px;color:var(--carta)}
+strong{font-weight:400;color:var(--segnale)}
+em.q{font-style:italic;color:var(--rilievo)}
+.pull{
+  border-left:2px solid var(--segnale);padding:4px 0 4px 22px;margin:34px 0;
+  font-size:21px;line-height:1.45;
+}
+ul{margin:0 0 20px;padding:0;list-style:none}
+ul li{position:relative;padding-left:24px;margin-bottom:14px}
+ul li::before{
+  content:"";position:absolute;left:0;top:.62em;width:9px;height:1px;background:var(--rilievo);
+}
+
+/* ---- test widget ---- */
+.card{
+  background:var(--abisso-2);border:1px solid var(--linea);border-radius:3px;
+  padding:26px;margin:0 0 16px;
+}
+.brief{
+  font-family:var(--mono);font-size:12.5px;line-height:1.7;color:var(--fumo);
+  background:rgba(127,209,193,.05);border:1px dashed var(--linea);
+  border-radius:3px;padding:18px 20px;margin:0 0 28px;
+}
+.brief b{color:var(--rilievo);font-weight:400}
+.duo{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:26px}
+@media(min-width:760px){.duo{grid-template-columns:1fr 1fr}}
+.rep .tag{
+  font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--rilievo);
+  display:block;margin-bottom:12px;
+}
+.rep p{font-size:16px;line-height:1.6;margin:0 0 12px;color:var(--carta);opacity:.9}
+.rep p:last-child{margin-bottom:0}
+
+.ask{font-family:var(--display);font-weight:500;font-size:20px;margin:0 0 18px}
+.opts{display:flex;flex-direction:column;gap:10px;margin-bottom:8px}
+.opt{
+  font-family:var(--mono);font-size:13px;text-align:left;cursor:pointer;
+  background:transparent;color:var(--carta);border:1px solid var(--linea);
+  border-radius:3px;padding:14px 18px;transition:border-color .2s,background .2s,color .2s;
+}
+.opt:hover{border-color:var(--rilievo);background:rgba(127,209,193,.06)}
+.opt:focus-visible,.copy:focus-visible,.tog:focus-visible,.rail a:focus-visible{
+  outline:2px solid var(--segnale);outline-offset:3px;
+}
+.opt.picked{border-color:var(--segnale);color:var(--segnale)}
+.opt[disabled]{cursor:default}
+.opt.right{border-color:var(--rilievo);color:var(--rilievo)}
+
+.reveal{
+  max-height:0;overflow:hidden;opacity:0;
+  transition:max-height .7s ease,opacity .5s ease .15s;
+}
+.reveal.open{max-height:2400px;opacity:1}
+.reveal-in{padding-top:30px}
+.verdetto{
+  font-family:var(--display);font-weight:500;font-size:22px;line-height:1.3;
+  color:var(--segnale);margin:0 0 18px;
+}
+
+/* ---- svg graph ---- */
+.graph{margin:26px 0 10px}
+.graph svg{width:100%;height:auto;display:block}
+.nd{fill:var(--abisso);stroke:var(--rilievo);stroke-width:1}
+.nl{font-family:var(--mono);font-size:11px;fill:var(--carta)}
+.ed{stroke:var(--rilievo);stroke-width:1;fill:none;opacity:.55}
+.hid{stroke:var(--segnale);stroke-width:1.5;fill:none;stroke-dasharray:6 5}
+.hid-box{fill:none;stroke:var(--segnale);stroke-width:1.5;stroke-dasharray:4 4}
+.hl{font-family:var(--mono);font-size:10.5px;fill:var(--segnale)}
+.draw{stroke-dasharray:520;stroke-dashoffset:520}
+.open .draw{animation:draw 1.1s ease .3s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.cap{font-family:var(--mono);font-size:11px;color:var(--fumo);line-height:1.65;margin-top:14px}
+
+/* ---- self check ---- */
+.dom{border-top:1px solid var(--linea);padding:22px 0;display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+.dom:last-of-type{border-bottom:1px solid var(--linea)}
+.dom .txt{flex:1 1 300px;font-size:17px}
+.dom .num{font-family:var(--mono);font-size:11px;color:var(--fumo);padding-top:5px}
+.togs{display:flex;gap:8px}
+.tog{
+  font-family:var(--mono);font-size:12px;cursor:pointer;background:transparent;
+  color:var(--fumo);border:1px solid var(--linea);border-radius:3px;padding:8px 16px;
+  transition:all .18s;
+}
+.tog:hover{border-color:var(--rilievo);color:var(--carta)}
+.tog.on{border-color:var(--segnale);color:var(--segnale);background:rgba(232,163,61,.07)}
+.esito{
+  margin-top:30px;padding:24px;border:1px solid var(--linea);border-radius:3px;
+  background:var(--abisso-2);min-height:96px;
+}
+.esito .t{font-family:var(--display);font-weight:500;font-size:20px;color:var(--segnale);margin:0 0 10px}
+.esito p{font-size:16.5px;margin:0;opacity:.9}
+.esito.vuoto .t{color:var(--fumo)}
+
+/* ---- prompt cards ---- */
+.pc{
+  border:1px solid var(--linea);border-radius:3px;padding:20px 22px;margin-bottom:12px;
+  display:flex;gap:18px;align-items:flex-start;background:var(--abisso-2);
+}
+.pc .body{flex:1}
+.pc .dm{font-family:var(--mono);font-size:13.5px;line-height:1.6;color:var(--rilievo);margin:0 0 8px}
+.pc .why{font-size:15.5px;margin:0;opacity:.78}
+.copy{
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;cursor:pointer;
+  background:transparent;color:var(--fumo);border:1px solid var(--linea);
+  border-radius:3px;padding:8px 12px;white-space:nowrap;transition:all .18s;
+}
+.copy:hover{border-color:var(--rilievo);color:var(--rilievo)}
+.copy.ok{border-color:var(--segnale);color:var(--segnale)}
+
+/* ---- close ---- */
+.close{padding:12vh 0 16vh;border-bottom:none}
+.close p{font-size:21px}
+footer{
+  padding:34px 0 60px;font-family:var(--mono);font-size:11px;color:var(--fumo);
+  letter-spacing:.08em;border-top:1px solid var(--linea);
+}
+
+/* ---- motion ---- */
+.rise{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
+.rise.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  .rise{opacity:1;transform:none}
+  html{scroll-behavior:auto}
+  .reveal{transition:none}
+}
+
+/* ---- guscio: navigazione e firma ---- */
+.topbar{
+  padding:26px 0 0;font-family:var(--mono);font-size:11px;
+  letter-spacing:.14em;text-transform:uppercase;
+}
+.topbar .col{display:flex;justify-content:space-between;align-items:baseline;gap:16px}
+.topbar a{color:var(--fumo);text-decoration:none}
+.topbar a:hover{color:var(--segnale)}
+.topbar .langs{display:flex;gap:12px;flex:none}
+.topbar .langs b{color:var(--segnale);font-weight:500}
+footer .sig{color:var(--segnale)}
+</style>
+</head>
+<body>
+
+<nav class="rail" aria-label="Contents">
+  <div class="rl-cap">LEGEND</div>
+  <a href="#mappa"><span class="tick"></span>WHAT IT IS</a>
+  <a href="#prova"><span class="tick"></span>THE TEST</a>
+  <a href="#dentro"><span class="tick"></span>THE SYMPTOM</a>
+  <a href="#vuoto"><span class="tick"></span>THE PROBLEM</a>
+  <a href="#obiezione"><span class="tick"></span>THE OBJECTION</a>
+  <a href="#diagrammi"><span class="tick"></span>A WARNING</a>
+  <a href="#domande"><span class="tick"></span>WHERE YOU ARE</a>
+  <a href="#abitudini"><span class="tick"></span>WHAT TO DO</a>
+</nav>
+
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="col">
+      <a href="index.html">← Archive</a>
+      <span class="langs"><a href="../003-la-mappa-che-non-ce.html">IT</a><b>EN</b></span>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="col">
+      <p class="eyebrow">Working with agents — internal note</p>
+      <h1>The map<br>that <em>isn't there</em></h1>
+      <p class="sub">Why an agent's explanation always convinces you, even when it has misread your project. And what can be done about it.</p>
+      <p class="meta">~8 MIN READ · WITH TWO HANDS-ON TESTS</p>
+    </div>
+  </header>
+
+  <section id="mappa" class="rise">
+    <div class="col">
+      <p class="lab">What it is</p>
+      <h2>Every project has a map</h2>
+      <p class="lede">When an agent works on your code it builds an idea of how the thing is put together: what depends on what, who touches which data, what breaks if I change this function. Call it <strong>the map</strong>.</p>
+      <p>When it then explains what it did, it is handing you a summary of its map. And there is the whole point, right there: you can only check a summary if you have a map of your own.</p>
+    </div>
+  </section>
+
+  <section id="prova" class="rise">
+    <div class="col">
+      <p class="lab">The test · 1 of 2</p>
+      <h2>Which one understood?</h2>
+      <p>Two agents were given the same assignment on a small e-commerce app. Read how each one describes the work, then answer.</p>
+
+      <div class="brief">
+        <b>PROJECT</b> &nbsp;internal shop · 4 services<br>
+        <b>ASSIGNMENT</b> &nbsp;add the loyalty discount to the cart total calculation
+      </div>
+
+      <div class="duo">
+        <div class="card rep">
+          <span class="tag">AGENT A</span>
+          <p>I added the discount in <code>CartService.calculateTotal()</code>. I pull the loyalty tier from the user profile and apply the percentage before VAT, so the taxable base stays correct.</p>
+          <p>I handled the case of a profile with no tier set, which otherwise threw the calculation off. I added two tests on the new branch.</p>
+        </div>
+        <div class="card rep">
+          <span class="tag">AGENT B</span>
+          <p>I extended <code>CartService</code> with the loyalty discount. The percentage comes from the user profile and is applied to the taxable base, before VAT.</p>
+          <p>I defaulted it to zero when the tier is missing, so users without a complete profile don't break. Tests updated.</p>
+        </div>
+      </div>
+
+      <p class="ask">Which of the two really understood the system?</p>
+      <div class="opts" id="opts">
+        <button class="opt" data-k="a">A — seems more precise about the details</button>
+        <button class="opt" data-k="b">B — seems more careful about users</button>
+        <button class="opt" data-k="c">You can't tell from these write-ups</button>
+      </div>
+
+      <div class="reveal" id="rev">
+        <div class="reveal-in">
+          <p class="verdetto" id="verd"></p>
+          <p>There was a difference, and it was a big one: <strong>the total is calculated in two different places in this project.</strong> <code>OrderService</code> recalculates it on its own at confirmation time. Agent A didn't know that, so in production the cart showed the discount and the final order didn't.</p>
+
+          <div class="graph">
+            <svg viewBox="0 0 640 300" role="img" aria-label="Graph of the four services: the total is calculated in two independent places">
+              <path class="ed" d="M170 92 L280 178"/>
+              <path class="ed" d="M470 92 L360 178"/>
+              <path class="ed" d="M380 210 L470 210"/>
+
+              <rect class="nd" x="70" y="52" width="200" height="42" rx="3"/>
+              <text class="nl" x="88" y="78">CartService</text>
+
+              <rect class="nd" x="370" y="52" width="200" height="42" rx="3"/>
+              <text class="nl" x="388" y="78">OrderService</text>
+
+              <rect class="nd" x="230" y="188" width="150" height="42" rx="3"/>
+              <text class="nl" x="248" y="214">Warehouse</text>
+
+              <rect class="nd" x="470" y="188" width="130" height="42" rx="3"/>
+              <text class="nl" x="488" y="214">StockCache</text>
+
+              <path class="hid draw" d="M270 73 L370 73"/>
+              <rect class="hid-box" x="366" y="48" width="208" height="50" rx="4"/>
+              <text class="hl" x="228" y="30">calculateTotal()</text>
+              <text class="hl" x="404" y="30">calculateTotal()</text>
+              <text class="hl" x="216" y="130">same logic, two places — and neither write-up says so</text>
+            </svg>
+          </div>
+          <p class="cap">That fact was not in the write-up. It was in the map.</p>
+
+          <p style="margin-top:26px">Reread the two write-ups knowing it: <strong>neither one says it checked where the total gets calculated.</strong> One of them had verified it and the other hadn't, but the sentence that tells them apart was never written — because an agent never writes you <em class="q">“I'm assuming this calculation exists in only one place”</em>. It simply proceeds as if that were true.</p>
+          <p>The mistakes are not in the sentences. They are in what the sentences don't say.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="dentro" class="rise">
+    <div class="col">
+      <p class="lab">The missing symptom</p>
+      <h2>From the inside everything looks fine</h2>
+      <p>Someone who has the map feels a small strain reading those two write-ups: they have to reconstruct in their head the pieces the text doesn't name. That strain is a signal, and it tells them the account isn't enough — that they need to go and look.</p>
+      <p>Someone who doesn't have the map feels no strain at all. Not because they understand it better: because there is nothing to reconstruct. That summary is all they have, so nothing strikes them as missing.</p>
+      <p class="pull">The condition erases the symptom that would let you discover it. The feeling of having understood proves nothing.</p>
+      <p>It is like proofreading a translation from Japanese without knowing Japanese. It will always look perfect — not because it is, but because you have no way of noticing the errors. It reads well, it makes sense, you approve it.</p>
+    </div>
+  </section>
+
+  <section id="vuoto" class="rise">
+    <div class="col">
+      <p class="lab">The real problem</p>
+      <h2>It isn't that you don't read the code</h2>
+      <p>It's that the map doesn't exist anywhere.</p>
+      <p>It isn't in your head. And it isn't in the agent in any stable way either: it rebuilds the map from scratch every time, out of whatever happens to fall under its eyes in that session, and throws it away at the end. A month from now, on the same project, it might build a different one.</p>
+      <p>Before agents, that knowledge lived in the head of whoever wrote the code. The risk now isn't that it moves somewhere else: it's that it isn't anywhere at all. <strong>Nobody accumulates anything.</strong></p>
+    </div>
+  </section>
+
+  <section id="obiezione" class="rise">
+    <div class="col">
+      <p class="lab">The objection</p>
+      <h2>“But I don't even know how the compiler works”</h2>
+      <p>A serious objection, and it deserves a serious answer. None of us knows the inner workings of the compiler, the garbage collector, the kernel. Abstraction means exactly this: ignoring what sits behind a boundary.</p>
+      <p>The difference is that that boundary is <strong>stable and documented</strong>. The compiler does the same thing tomorrow, a specification exists, and there are millions of people who would notice if it changed. You can afford not to look inside because the boundary holds on its own.</p>
+      <p>The code the agent generated for you on Tuesday has none of that: no specification, no guarantee that regenerating it produces the same thing, nobody protecting that boundary. It isn't abstraction. It's absence dressed as abstraction.</p>
+    </div>
+  </section>
+
+  <section id="diagrammi" class="rise">
+    <div class="col">
+      <p class="lab">A warning</p>
+      <h2>And diagrams won't save you</h2>
+      <p>You'd think it would be enough to ask the agent to draw what it does instead of describing it. It helps — but only if you already have a map of your own to compare against. It's for spotting the arrow too many, or the one that's missing.</p>
+      <p>Without a map, a diagram is the same thing as before, drawn better. And therefore <strong>more</strong> convincing: a wrong diagram persuades you more than the same mistake written out in words would. It makes the rubber stamp prettier, not better informed.</p>
+    </div>
+  </section>
+
+  <section id="domande" class="rise">
+    <div class="col">
+      <p class="lab">The test · 2 of 2</p>
+      <h2>Three questions to find out where you stand</h2>
+      <p>Think about the last thing you had an agent do. Answer honestly: nobody is watching.</p>
+
+      <div class="dom">
+        <span class="num">01</span>
+        <span class="txt"><strong>Before</strong> you launched it: could you say, even roughly, where the change would land and what else it would touch?</span>
+        <span class="togs">
+          <button class="tog" data-q="0" data-v="1">Yes</button>
+          <button class="tog" data-q="0" data-v="0">No</button>
+        </span>
+      </div>
+      <div class="dom">
+        <span class="num">02</span>
+        <span class="txt"><strong>After</strong>: could you explain out loud to a colleague why the code is the way it is, without rereading it?</span>
+        <span class="togs">
+          <button class="tog" data-q="1" data-v="1">Yes</button>
+          <button class="tog" data-q="1" data-v="0">No</button>
+        </span>
+      </div>
+      <div class="dom">
+        <span class="num">03</span>
+        <span class="txt"><strong>It breaks in a month</strong>: would you know where to start looking?</span>
+        <span class="togs">
+          <button class="tog" data-q="2" data-v="1">Yes</button>
+          <button class="tog" data-q="2" data-v="0">No</button>
+        </span>
+      </div>
+
+      <div class="esito vuoto" id="esito">
+        <p class="t">Waiting for all three answers</p>
+        <p>This is not a test of skill. It only shows whether the map is there.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="abitudini" class="rise">
+    <div class="col">
+      <p class="lab">What to do</p>
+      <h2>Five questions to ask the agent</h2>
+      <p>The map gets built by asking. These five questions cost ten seconds, and they are the ones senior developers got used to asking themselves back when the only way to get an answer was to go and find it in the code.</p>
+
+      <div class="pc">
+        <div class="body">
+          <p class="dm">Before you start: what do you think this change will touch, beyond the file I'm looking at?</p>
+          <p class="why">Make your own prediction <em class="q">before</em> reading the answer — wrong is fine, vague is fine. The value is in the gap between the two, and with no prediction there is no gap to see. This is the habit that changes the most.</p>
+        </div>
+        <button class="copy" type="button">COPY</button>
+      </div>
+
+      <div class="pc">
+        <div class="body">
+          <p class="dm">What did you NOT touch, and why were you confident you could leave it alone?</p>
+          <p class="why">It forces the agent to state the boundaries it is assuming. That is exactly where the mistakes hide: in the total calculation it thought lived in one place only.</p>
+        </div>
+        <button class="copy" type="button">COPY</button>
+      </div>
+
+      <div class="pc">
+        <div class="body">
+          <p class="dm">What else in the project uses this?</p>
+          <p class="why">Always ask before accepting a change to something shared. It is the question that would have saved Agent A.</p>
+        </div>
+        <button class="copy" type="button">COPY</button>
+      </div>
+
+      <div class="pc">
+        <div class="body">
+          <p class="dm">Why this way and not another? Which alternative did you discard?</p>
+          <p class="why">The <em class="q">what</em> is already in the diff; reading it narrated back is wasted time. The <em class="q">why</em> is written down nowhere, and it disappears at the end of the session if you don't pull it out.</p>
+        </div>
+        <button class="copy" type="button">COPY</button>
+      </div>
+
+      <div class="pc">
+        <div class="body">
+          <p class="dm">Which assumption are you making that you haven't verified?</p>
+          <p class="why">It doesn't always answer well, but when it does it hands you in one line the thing no summary contains.</p>
+        </div>
+        <button class="copy" type="button">COPY</button>
+      </div>
+
+      <h3>And now and then, a field test</h3>
+      <p>Predict what breaks if you change a value. Then actually change it and look. It is the fastest way there is to discover your map had a hole — and holes found that way you never forget.</p>
+    </div>
+  </section>
+
+  <section class="close rise">
+    <div class="col">
+      <p class="lede">None of this is an advanced technique.</p>
+      <p>The map is not a reward for seniority: it is the residue of those questions, asked many times over. The only difference today is that you have to remember to ask them, because there is someone ready to answer even when you don't.</p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="col">
+      INTERNAL NOTE · WORKING WITH AGENTS<br>
+      TEKSISTEMI · ISSUE 003 — JULY 26, 2026 · WRITTEN BY <span class="sig">ORLODAX</span>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* scroll reveal */
+  var risers = document.querySelectorAll('.rise');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+    },{threshold:.12});
+    risers.forEach(function(r){ io.observe(r); });
+  } else {
+    risers.forEach(function(r){ r.classList.add('in'); });
+  }
+
+  /* rail active state */
+  var links = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+  var secs = links.map(function(l){ return document.querySelector(l.getAttribute('href')); });
+  function markRail(){
+    var y = window.scrollY + window.innerHeight*0.35, best = -1;
+    secs.forEach(function(s,i){ if(s && s.offsetTop <= y) best = i; });
+    links.forEach(function(l,i){ l.classList.toggle('active', i===best); });
+  }
+  window.addEventListener('scroll', markRail, {passive:true});
+  markRail();
+
+  /* the two-reports test */
+  var verdetti = {
+    a: "You picked A. That is the one that broke production.",
+    b: "You picked B. Right answer — but not thanks to the write-up.",
+    c: "Exactly: from these two write-ups you cannot tell."
+  };
+  var rev = document.getElementById('rev');
+  var verd = document.getElementById('verd');
+  document.querySelectorAll('#opts .opt').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var k = btn.getAttribute('data-k');
+      document.querySelectorAll('#opts .opt').forEach(function(b){
+        b.disabled = true;
+        if(b.getAttribute('data-k') === 'c') b.classList.add('right');
+      });
+      btn.classList.add('picked');
+      verd.textContent = verdetti[k];
+      rev.classList.add('open');
+    });
+  });
+
+  /* self check */
+  var risp = [null,null,null];
+  var esito = document.getElementById('esito');
+  var esiti = {
+    3: ["The map is there.","Keep asking the questions below anyway: a map peels off fast if you stop updating it, and projects change quicker than memory."],
+    2: ["The map is there in patches.","Normal. Look at which of the three is the no — it usually points at exactly the part of the project you are delegating without looking."],
+    1: ["The map is nearly blank.","This is not a question of skill, and it is not fixed by reading more. It is fixed by making predictions before you launch the agent, wrong ones included."],
+    0: ["The map is not there yet.","That is everyone's starting point, and it is fine. Begin with the first question in the list below: just one, on the next thing you do."]
+  };
+  document.querySelectorAll('.tog').forEach(function(t){
+    t.addEventListener('click', function(){
+      var q = +t.getAttribute('data-q'), v = +t.getAttribute('data-v');
+      risp[q] = v;
+      document.querySelectorAll('.tog[data-q="'+q+'"]').forEach(function(o){ o.classList.remove('on'); });
+      t.classList.add('on');
+      if(risp.indexOf(null) === -1){
+        var n = risp.reduce(function(a,b){ return a+b; },0);
+        esito.classList.remove('vuoto');
+        esito.innerHTML = '<p class="t">'+esiti[n][0]+'</p><p>'+esiti[n][1]+'</p>';
+      }
+    });
+  });
+
+  /* copy prompts */
+  function fallbackCopy(txt){
+    var ta = document.createElement('textarea');
+    ta.value = txt;
+    ta.setAttribute('readonly','');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch(e){ ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+  document.querySelectorAll('.copy').forEach(function(b){
+    b.addEventListener('click', function(){
+      var txt = b.parentNode.querySelector('.dm').textContent.trim();
+      var done = function(ok){
+        b.textContent = ok ? 'COPIED' : 'SELECT IT';
+        b.classList.add('ok');
+        setTimeout(function(){ b.textContent='COPY'; b.classList.remove('ok'); }, 1900);
+      };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).then(function(){ done(true); }, function(){ done(fallbackCopy(txt)); });
+      } else {
+        done(fallbackCopy(txt));
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>

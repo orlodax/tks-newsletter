@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cosa fa l'AI alla nostra testa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E131C;
+    --panel:#151C28;
+    --panel-2:#1B2432;
+    --line:#2A3546;
+    --text:#C7D1DE;
+    --bright:#F2F6FB;
+    --dim:#76849A;
+    --amber:#E8B33E;   /* attenzione / sguardo */
+    --teal:#49B7A4;    /* comprensione */
+    --rose:#C96A7B;    /* rischio */
+    --serif:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    --sans:"IBM Plex Sans", system-ui, sans-serif;
+    --mono:"IBM Plex Mono", ui-monospace, monospace;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0}
+  html,body{height:100%}
+  body{
+    background:
+      radial-gradient(1200px 700px at 78% -10%, #1A2436 0%, transparent 60%),
+      radial-gradient(900px 600px at 0% 100%, #16202C 0%, transparent 55%),
+      var(--ink);
+    color:var(--text);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+
+  /* ---------- shell ---------- */
+  .deck{position:relative; height:100dvh; display:flex}
+
+  .rail{
+    width:210px; flex:0 0 210px;
+    border-right:1px solid var(--line);
+    padding:28px 20px;
+    display:flex; flex-direction:column; gap:2px;
+    background:rgba(10,14,21,.4);
+  }
+  .rail .brand{
+    font-family:var(--mono); font-size:10px; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--dim); margin-bottom:22px; line-height:1.6;
+  }
+  .rail button{
+    all:unset; cursor:pointer;
+    display:flex; gap:10px; align-items:baseline;
+    padding:7px 8px; border-radius:5px;
+    font-size:12.5px; color:var(--dim); line-height:1.3;
+  }
+  .rail button:hover{background:var(--panel); color:var(--text)}
+  .rail button:focus-visible{outline:2px solid var(--amber); outline-offset:1px}
+  .rail button .n{font-family:var(--mono); font-size:10px; opacity:.6; width:14px}
+  .rail button[aria-current="true"]{color:var(--bright); background:var(--panel)}
+  .rail button[aria-current="true"] .n{color:var(--amber); opacity:1}
+
+  .stage{flex:1; position:relative; overflow:hidden}
+
+  .slide{
+    position:absolute; inset:0;
+    padding:clamp(28px,4.5vw,72px);
+    display:none;
+    align-content:center;
+    overflow-y:auto;
+  }
+  .slide.active{display:grid}
+  .slide.active .up{animation:up .55s cubic-bezier(.2,.7,.2,1) both}
+  .slide.active .up:nth-child(2){animation-delay:.07s}
+  .slide.active .up:nth-child(3){animation-delay:.14s}
+  .slide.active .up:nth-child(4){animation-delay:.21s}
+  .slide.active .up:nth-child(5){animation-delay:.28s}
+  @keyframes up{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none}}
+
+  .eyebrow{
+    font-family:var(--mono); font-size:11px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--amber); margin-bottom:18px;
+  }
+  h1{
+    font-family:var(--serif); font-weight:800;
+    font-size:clamp(34px,5.2vw,68px); line-height:1.02;
+    letter-spacing:-.02em; color:var(--bright); max-width:16ch;
+  }
+  h2{
+    font-family:var(--serif); font-weight:800;
+    font-size:clamp(26px,3.4vw,44px); line-height:1.08;
+    letter-spacing:-.015em; color:var(--bright); max-width:20ch;
+  }
+  .lede{font-size:clamp(15px,1.35vw,19px); line-height:1.6; max-width:56ch; color:var(--text)}
+  .dim{color:var(--dim)}
+  .amber{color:var(--amber)}
+  .teal{color:var(--teal)}
+  .rose{color:var(--rose)}
+  em{font-style:normal; color:var(--bright); font-weight:600}
+
+  /* ---------- 1 cover ---------- */
+  .cover{max-width:900px}
+  .cover .sub{margin-top:26px; font-size:17px; color:var(--dim); max-width:48ch; line-height:1.6}
+  .pill{
+    display:inline-block; margin-top:34px;
+    font-family:var(--mono); font-size:11.5px; color:var(--text);
+    border:1px solid var(--line); border-radius:999px; padding:8px 14px;
+  }
+
+  /* ---------- 2 gaze ---------- */
+  .two{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:clamp(24px,3.5vw,56px); align-items:center}
+  .code{
+    background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:16px; position:relative;
+  }
+  .code svg{width:100%; height:auto; display:block}
+  .toggle{display:flex; gap:8px; margin-top:16px; flex-wrap:wrap}
+  .toggle button{
+    all:unset; cursor:pointer; font-family:var(--mono); font-size:11.5px;
+    padding:9px 13px; border-radius:6px; border:1px solid var(--line); color:var(--dim);
+  }
+  .toggle button:hover{color:var(--text); border-color:var(--dim)}
+  .toggle button:focus-visible{outline:2px solid var(--amber); outline-offset:2px}
+  .toggle button.on[data-g="a"]{color:var(--ink); background:var(--rose); border-color:var(--rose); font-weight:500}
+  .toggle button.on[data-g="b"]{color:var(--ink); background:var(--teal); border-color:var(--teal); font-weight:500}
+  .readout{margin-top:20px; min-height:120px}
+  .readout .rt{font-family:var(--serif); font-size:23px; font-weight:600; color:var(--bright); line-height:1.2; margin-bottom:10px}
+  .readout p{font-size:15px; line-height:1.6; color:var(--dim); max-width:40ch}
+  .stat{display:flex; gap:24px; margin-top:18px; font-family:var(--mono); font-size:11px; color:var(--dim)}
+  .stat b{display:block; font-family:var(--serif); font-size:26px; color:var(--bright); font-weight:800; margin-bottom:2px}
+
+  /* ---------- 3 gap ---------- */
+  .gapwrap{display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); gap:48px; align-items:center}
+  .gapwrap svg{width:100%; height:auto}
+
+  /* ---------- 4 bias cards ---------- */
+  .cards{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:34px}
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-top:2px solid var(--amber);
+    border-radius:8px; padding:20px;
+  }
+  .card:nth-child(2){border-top-color:var(--rose)}
+  .card:nth-child(3){border-top-color:var(--teal)}
+  .card .tag{font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); margin-bottom:12px}
+  .card h3{font-family:var(--serif); font-size:20px; font-weight:600; color:var(--bright); line-height:1.18; margin-bottom:10px}
+  .card p{font-size:14px; line-height:1.55; color:var(--dim)}
+  .card .us{margin-top:14px; padding-top:12px; border-top:1px dashed var(--line); font-size:13.5px; color:var(--text); line-height:1.5}
+
+  /* ---------- 5 rule ---------- */
+  .rule{max-width:900px}
+  .rule .big{
+    font-family:var(--serif); font-weight:800; letter-spacing:-.02em;
+    font-size:clamp(30px,4.4vw,58px); line-height:1.08; color:var(--bright);
+    border-left:3px solid var(--amber); padding-left:26px; margin:6px 0 30px;
+  }
+
+  /* ---------- 6 check ---------- */
+  .checks{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:26px; max-width:900px}
+  .chk{
+    all:unset; cursor:pointer; display:flex; gap:12px; align-items:flex-start;
+    background:var(--panel); border:1px solid var(--line); border-radius:8px;
+    padding:14px 16px; font-size:14.5px; line-height:1.45; color:var(--dim);
+  }
+  .chk:hover{border-color:var(--dim)}
+  .chk:focus-visible{outline:2px solid var(--amber); outline-offset:2px}
+  .chk .box{
+    flex:0 0 16px; width:16px; height:16px; margin-top:2px;
+    border:1px solid var(--dim); border-radius:3px; position:relative;
+  }
+  .chk.on{color:var(--bright); border-color:var(--amber); background:var(--panel-2)}
+  .chk.on .box{background:var(--amber); border-color:var(--amber)}
+  .chk.on .box::after{
+    content:""; position:absolute; left:5px; top:1px; width:4px; height:9px;
+    border:solid var(--ink); border-width:0 2px 2px 0; transform:rotate(42deg);
+  }
+  .verdict{
+    margin-top:24px; font-family:var(--serif); font-size:20px; color:var(--bright);
+    min-height:56px; max-width:60ch; line-height:1.35; font-weight:600;
+  }
+  .verdict span{color:var(--dim); font-family:var(--sans); font-size:15px; font-weight:400; display:block; margin-top:8px; line-height:1.55}
+
+  /* ---------- 7 rules of three ---------- */
+  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin-top:36px; border:1px solid var(--line); border-radius:10px; overflow:hidden}
+  .step{padding:24px; border-right:1px solid var(--line); background:var(--panel)}
+  .step:last-child{border-right:none}
+  .step .when{font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--amber); margin-bottom:14px}
+  .step h3{font-family:var(--serif); font-size:21px; font-weight:600; color:var(--bright); margin-bottom:10px; line-height:1.2}
+  .step p{font-size:14px; line-height:1.55; color:var(--dim)}
+
+  /* ---------- 8 metrics ---------- */
+  .metrics{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:32px}
+  .metric{border:1px solid var(--line); border-radius:8px; padding:22px; background:var(--panel)}
+  .metric .m{font-family:var(--serif); font-size:17px; color:var(--bright); font-weight:600; margin-bottom:8px; line-height:1.25}
+  .metric p{font-size:13.5px; color:var(--dim); line-height:1.55}
+  .note{margin-top:26px; font-size:14.5px; color:var(--dim); max-width:60ch; line-height:1.6; border-left:2px solid var(--teal); padding-left:16px}
+
+  /* ---------- 9 close ---------- */
+  .close{max-width:900px}
+  .q{
+    margin-top:34px; padding:24px 26px; border:1px solid var(--line);
+    border-radius:10px; background:var(--panel); max-width:62ch;
+  }
+  .q .qt{font-family:var(--mono); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--amber); margin-bottom:12px}
+  .q p{font-family:var(--serif); font-size:22px; line-height:1.35; color:var(--bright); font-weight:600}
+
+  /* ---------- nav ---------- */
+  .nav{
+    position:absolute; right:clamp(20px,3vw,44px); bottom:clamp(18px,2.6vw,32px);
+    display:flex; align-items:center; gap:12px; z-index:5;
+  }
+  .nav button{
+    all:unset; cursor:pointer; width:34px; height:34px; display:grid; place-items:center;
+    border:1px solid var(--line); border-radius:6px; color:var(--dim); font-size:14px;
+    background:rgba(14,19,28,.7);
+  }
+  .nav button:hover{color:var(--bright); border-color:var(--dim)}
+  .nav button:focus-visible{outline:2px solid var(--amber); outline-offset:2px}
+  .nav .count{font-family:var(--mono); font-size:11px; color:var(--dim); letter-spacing:.08em}
+
+  .hint{
+    position:absolute; left:clamp(20px,3vw,44px); bottom:clamp(18px,2.6vw,32px);
+    font-family:var(--mono); font-size:10.5px; color:var(--dim); opacity:.55; letter-spacing:.06em;
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:1000px){
+    .rail{display:none}
+    .two,.gapwrap{grid-template-columns:1fr; gap:28px}
+    .cards,.steps,.metrics,.checks{grid-template-columns:1fr}
+    .step{border-right:none; border-bottom:1px solid var(--line)}
+    .step:last-child{border-bottom:none}
+    .slide{align-content:start; padding-top:36px; padding-bottom:90px}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none !important; transition:none !important}
+  }
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <nav class="rail" aria-label="Indice">
+    <div class="brand">Teksistemi<br>nota interna · 9 slide</div>
+    <button data-go="0"><span class="n">01</span><span>Di cosa parliamo</span></button>
+    <button data-go="1"><span class="n">02</span><span>Due sguardi, stesso codice</span></button>
+    <button data-go="2"><span class="n">03</span><span>Il divario si allarga</span></button>
+    <button data-go="3"><span class="n">04</span><span>Perché ci inganna</span></button>
+    <button data-go="4"><span class="n">05</span><span>Il test onesto</span></button>
+    <button data-go="5"><span class="n">06</span><span>Questa settimana, noi</span></button>
+    <button data-go="6"><span class="n">07</span><span>Cosa proviamo a fare</span></button>
+    <button data-go="7"><span class="n">08</span><span>Come lo sapremo</span></button>
+    <button data-go="8"><span class="n">09</span><span>La domanda</span></button>
+  </nav>
+
+  <main class="stage">
+
+    <!-- 01 -->
+    <section class="slide active" id="s0">
+      <div class="cover">
+        <div class="eyebrow up">Da un esperimento con eye-tracker</div>
+        <h1 class="up">L'AI non ci rende<br>più stupidi.<br>Ci rende <span class="amber">più sicuri</span>.</h1>
+        <p class="sub up">Che è un problema diverso, e più difficile da vedere da dentro. Nove slide, cinque minuti. Poi ne parliamo insieme — non per decidere se usare l'AI, ma <em>come</em>.</p>
+        <div class="pill up">→ / ← per muoverti · o clicca l'indice a sinistra</div>
+      </div>
+    </section>
+
+    <!-- 02 -->
+    <section class="slide" id="s1">
+      <div class="two">
+        <div class="up">
+          <div class="eyebrow">Lo studio · dove cadono gli occhi</div>
+          <h2>Due studenti, stesso esercizio,<br>stesso codice funzionante.</h2>
+          <p class="lede" style="margin-top:18px">Un eye-tracker ha registrato dove guardavano mentre l'assistente suggeriva. Prova a far partire i due sguardi.</p>
+
+          <div class="toggle">
+            <button data-g="a" class="on">▶ Sguardo A · accetta</button>
+            <button data-g="b">▶ Sguardo B · verifica</button>
+          </div>
+
+          <div class="readout" id="readout">
+            <div class="rt"></div>
+            <p></p>
+            <div class="stat" id="stat"></div>
+          </div>
+        </div>
+
+        <div class="code up">
+          <svg viewBox="0 0 520 380" role="img" aria-label="Tracciato dello sguardo su un blocco di codice">
+            <!-- finte righe di codice -->
+            <g fill="#2E3A4C">
+              <rect x="24" y="30"  width="180" height="7" rx="3.5"/>
+              <rect x="44" y="56"  width="240" height="7" rx="3.5"/>
+              <rect x="44" y="82"  width="150" height="7" rx="3.5"/>
+              <rect x="64" y="108" width="210" height="7" rx="3.5"/>
+              <rect x="64" y="134" width="130" height="7" rx="3.5"/>
+              <rect x="44" y="160" width="260" height="7" rx="3.5"/>
+              <rect x="24" y="186" width="110" height="7" rx="3.5"/>
+            </g>
+            <!-- blocco suggerito dall'AI -->
+            <rect x="16" y="206" width="380" height="118" rx="6" fill="#1F2A3A" stroke="#3A4759" stroke-dasharray="4 3"/>
+            <text x="28" y="226" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#76849A" letter-spacing="1.4">SUGGERITO DALL'AI</text>
+            <g fill="#43526A">
+              <rect x="28" y="240" width="300" height="7" rx="3.5"/>
+              <rect x="48" y="264" width="230" height="7" rx="3.5"/>
+              <rect x="48" y="288" width="290" height="7" rx="3.5"/>
+              <rect x="28" y="308" width="170" height="7" rx="3.5"/>
+            </g>
+            <rect x="300" y="336" width="96" height="26" rx="5" fill="#232F40" stroke="#3A4759"/>
+            <text x="348" y="353" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#9BA9BC">Tab ↹</text>
+
+            <!-- tracciati -->
+            <g id="gazeA" opacity="0">
+              <polyline id="pathA" fill="none" stroke="#C96A7B" stroke-width="1.6" stroke-linejoin="round" stroke-opacity=".75"
+                points="70,34 200,244 348,349"/>
+              <circle cx="70"  cy="34"  r="7"  fill="#C96A7B" fill-opacity=".22" stroke="#C96A7B" class="fx" style="--d:0s"/>
+              <circle cx="200" cy="244" r="12" fill="#C96A7B" fill-opacity=".22" stroke="#C96A7B" class="fx" style="--d:.35s"/>
+              <circle cx="348" cy="349" r="9"  fill="#C96A7B" fill-opacity=".22" stroke="#C96A7B" class="fx" style="--d:.7s"/>
+            </g>
+
+            <g id="gazeB" opacity="0">
+              <polyline id="pathB" fill="none" stroke="#49B7A4" stroke-width="1.6" stroke-linejoin="round" stroke-opacity=".75"
+                points="70,34 140,60 100,86 170,112 110,138 250,244 120,86 300,268 160,138 320,292 90,190 348,349"/>
+              <circle cx="70"  cy="34"  r="6"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:0s"/>
+              <circle cx="140" cy="60"  r="6"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:.12s"/>
+              <circle cx="100" cy="86"  r="7"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:.24s"/>
+              <circle cx="170" cy="112" r="6"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:.36s"/>
+              <circle cx="110" cy="138" r="7"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:.48s"/>
+              <circle cx="250" cy="244" r="9"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:.6s"/>
+              <circle cx="120" cy="86"  r="8"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:.72s"/>
+              <circle cx="300" cy="268" r="8"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:.84s"/>
+              <circle cx="160" cy="138" r="7"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:.96s"/>
+              <circle cx="320" cy="292" r="8"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:1.08s"/>
+              <circle cx="90"  cy="190" r="7"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:1.2s"/>
+              <circle cx="348" cy="349" r="8"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:1.32s"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 -->
+    <section class="slide" id="s2">
+      <div class="gapwrap">
+        <div class="up">
+          <div class="eyebrow">L'effetto forbice</div>
+          <h2>L'AI non alza tutti.<br>Allarga la distanza.</h2>
+          <p class="lede" style="margin-top:18px">Chi ha già i modelli mentali usa l'AI come <span class="teal">acceleratore</span>: legge, scarta, corregge. Chi non li ha ancora costruiti accumula <span class="rose">codice che funziona e che nessuno capisce</span> — incluso chi l'ha consegnato.</p>
+          <p class="lede dim" style="margin-top:16px">In alcuni corsi introduttivi, dopo l'arrivo degli assistenti, i tassi di insuccesso sono <em>saliti</em>, non scesi. Il codice consegnato era migliore. Le persone no.</p>
+        </div>
+        <div class="up">
+          <svg viewBox="0 0 520 320" role="img" aria-label="Grafico: la distanza tra i due gruppi si allarga nel tempo">
+            <line x1="60" y1="270" x2="490" y2="270" stroke="#2A3546"/>
+            <line x1="60" y1="30"  x2="60"  y2="270" stroke="#2A3546"/>
+            <text x="60" y="296" font-family="IBM Plex Mono, monospace" font-size="10" fill="#76849A">prima dell'AI</text>
+            <text x="490" y="296" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10" fill="#76849A">6 mesi dopo</text>
+            <text x="46" y="36" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10" fill="#76849A" transform="rotate(-90 46 36)">capacità reale</text>
+
+            <path class="gline" d="M60,180 C180,168 300,120 490,62" fill="none" stroke="#49B7A4" stroke-width="2.2"/>
+            <path class="gline" style="--d:.25s" d="M60,190 C180,196 300,214 490,246" fill="none" stroke="#C96A7B" stroke-width="2.2"/>
+
+            <line x1="490" y1="62" x2="490" y2="246" stroke="#E8B33E" stroke-width="1" stroke-dasharray="3 3"/>
+            <text x="478" y="158" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10" fill="#E8B33E">il divario</text>
+
+            <circle cx="490" cy="62"  r="4" fill="#49B7A4"/>
+            <circle cx="490" cy="246" r="4" fill="#C96A7B"/>
+            <text x="300" y="96" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="#49B7A4">chi verifica ciò che accetta</text>
+            <text x="300" y="234" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="#C96A7B">chi accetta e va avanti</text>
+            <circle cx="60" cy="185" r="4" fill="#76849A"/>
+            <text x="76" y="163" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#76849A">stesso punto di partenza</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 -->
+    <section class="slide" id="s3">
+      <div>
+        <div class="eyebrow up">Perché succede anche a chi è sveglio</div>
+        <h2 class="up">Non è pigrizia.<br>È come funziona la nostra testa.</h2>
+        <div class="cards up">
+          <div class="card">
+            <div class="tag">Bias di automazione</div>
+            <h3>Se esce da una macchina, sembra già verificato</h3>
+            <p>Ci fidiamo di più di un output solo perché la fonte sembra competente. La fluidità con cui arriva non è una prova di correttezza.</p>
+            <div class="us">Noi: quando l'AI risponde in due secondi, tendiamo a saltare la domanda “ma è vero?”.</div>
+          </div>
+          <div class="card">
+            <div class="tag">Illusione di comprensione</div>
+            <h3>Leggere qualcosa di chiaro dà la sensazione di averlo capito</h3>
+            <p>Scrivere il codice a mano ci costringeva a capirlo. Quell'attrito era il lavoro, non l'ostacolo. Toglierlo toglie anche la verifica.</p>
+            <div class="us">Noi: sappiamo <em>che</em> funziona. Molto più raramente sappiamo <em>perché</em>.</div>
+          </div>
+          <div class="card">
+            <div class="tag">Costo differito</div>
+            <h3>La velocità si vede oggi, il conto arriva tra sei settimane</h3>
+            <p>Le demo riuscite circolano. I rollback e i bug notturni no. Vediamo sistematicamente più segnale positivo di quello che c'è.</p>
+            <div class="us">Noi: misuriamo quanto shippiamo, quasi mai quanto ci torna indietro.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 -->
+    <section class="slide" id="s4">
+      <div class="rule">
+        <div class="eyebrow up">Una sola regola, se ne dovessimo tenere una</div>
+        <div class="big up">Chiediamo all'AI solo cose che sapremmo scrivere da soli.</div>
+        <p class="lede up">Non perché scriverle a mano sia meglio — è più lento e lo sappiamo. Ma perché è l'unico modo di <em>accorgerci</em> quando la risposta è sbagliata. Se non sappiamo com'è fatta una risposta giusta, non abbiamo un metro per riconoscere quella sbagliata: la prendiamo e basta.</p>
+        <p class="lede dim up" style="margin-top:18px">Corollario, per i prototipi: se è una demo, va benissimo qualunque cosa. Il confine non è “AI sì / AI no”. Il confine è <em>produzione</em>.</p>
+      </div>
+    </section>
+
+    <!-- 06 -->
+    <section class="slide" id="s5">
+      <div>
+        <div class="eyebrow up">Trenta secondi, per noi stessi</div>
+        <h2 class="up">Questa settimana,<br>quante di queste ci somigliano?</h2>
+        <div class="checks up" id="checks">
+          <button class="chk"><span class="box"></span><span>Ho accettato un suggerimento senza rileggerlo riga per riga.</span></button>
+          <button class="chk"><span class="box"></span><span>Ho consegnato codice che non saprei rispiegare a voce fra un mese.</span></button>
+          <button class="chk"><span class="box"></span><span>Ho chiesto all'AI di risolvere un bug prima di capire cosa lo causava.</span></button>
+          <button class="chk"><span class="box"></span><span>Ho pensato “funziona, basta così” senza cercare i casi limite.</span></button>
+          <button class="chk"><span class="box"></span><span>Ho approvato una PR di cui non ho letto davvero la logica.</span></button>
+          <button class="chk"><span class="box"></span><span>Ho stimato un lavoro come “veloce” perché tanto l'avrebbe scritto l'AI.</span></button>
+        </div>
+        <div class="verdict" id="verdict"></div>
+      </div>
+    </section>
+
+    <!-- 07 -->
+    <section class="slide" id="s6">
+      <div>
+        <div class="eyebrow up">Tre abitudini, zero burocrazia</div>
+        <h2 class="up">Cosa proviamo a fare<br>dal prossimo sprint.</h2>
+        <div class="steps up">
+          <div class="step">
+            <div class="when">Prima di chiedere</div>
+            <h3>Dieci righe a mano</h3>
+            <p>Una bozza sporca della logica che pensiamo serva. Anche brutta. Serve solo ad avere un'opinione <em>prima</em> di sentire quella dell'AI.</p>
+          </div>
+          <div class="step">
+            <div class="when">Nella PR</div>
+            <h3>Due righe di “perché”</h3>
+            <p>Non cosa fa il codice — quello si legge. Perché questa soluzione, e cosa non copre. Scritte da noi, non generate.</p>
+          </div>
+          <div class="step">
+            <div class="when">In review</div>
+            <h3>Raccontacelo a voce</h3>
+            <p>Flusso dei dati e casi limite, in un minuto. Se non riusciamo a spiegarlo, non è pronto — e vale per tutti, non solo per i junior.</p>
+          </div>
+        </div>
+        <p class="note up" style="margin-top:28px">Nessuna di queste rallenta chi ha già capito il codice. Rallentano solo chi non l'ha capito — che è esattamente il punto.</p>
+      </div>
+    </section>
+
+    <!-- 08 -->
+    <section class="slide" id="s7">
+      <div>
+        <div class="eyebrow up">Non per controllarci. Per sapere se funziona.</div>
+        <h2 class="up">Tre numeri che dicono<br>la verità sul mese scorso.</h2>
+        <div class="metrics up">
+          <div class="metric">
+            <div class="m">Rollback e hotfix</div>
+            <p>Quante volte abbiamo dovuto tornare indietro. Se sale mentre la velocity sale, non stiamo andando più veloci: stiamo prendendo in prestito.</p>
+          </div>
+          <div class="metric">
+            <div class="m">Tempo per capire un bug</div>
+            <p>Non per risolverlo — per <em>capirlo</em>. È qui che si vede il codice che nessuno possiede davvero.</p>
+          </div>
+          <div class="metric">
+            <div class="m">PR passate senza spiegazione</div>
+            <p>La percentuale di codice entrato in produzione che nessuno ha saputo (o dovuto) raccontare.</p>
+          </div>
+        </div>
+        <p class="note up">Oggi guardiamo solo metà del ciclo: quanto esce. Questi tre numeri guardano l'altra metà: quanto torna indietro. Se dopo due sprint non peggiorano, abbiamo la prova che stiamo usando bene l'AI — e possiamo spingere di più.</p>
+      </div>
+    </section>
+
+    <!-- 09 -->
+    <section class="slide" id="s8">
+      <div class="close">
+        <div class="eyebrow up">Da portarsi a casa</div>
+        <h1 class="up" style="max-width:20ch">Il rischio non è l'AI.<br>È consegnare qualcosa che <span class="amber">nessuno di noi capisce</span>.</h1>
+        <div class="q up">
+          <div class="qt">La domanda, alla prossima PR</div>
+          <p>“Se domani questo si rompesse in produzione alle 23, e l'AI non rispondesse — saprei da dove partire?”</p>
+        </div>
+        <p class="lede dim up" style="margin-top:26px">Se la risposta è sì: usiamola quanto vogliamo, davvero. Se è no, non è un problema di strumenti. È un pezzo che ci manca — e vale la pena andarselo a prendere adesso, mentre costa poco.</p>
+        <p class="sign up">Teksistemi · Numero 001 — 11 luglio 2026 · scritto da <b>orlodax</b></p>
+      </div>
+    </section>
+
+    <div class="hint"><a href="index.html">← Archivio</a> · <b>IT</b> · <a href="en/001-what-ai-does-to-our-heads.html">EN</a> · ← → per navigare</div>
+    <div class="nav">
+      <button id="prev" aria-label="Slide precedente">←</button>
+      <span class="count" id="count">01 / 09</span>
+      <button id="next" aria-label="Slide successiva">→</button>
+    </div>
+  </main>
+</div>
+
+<style>
+  /* animazioni sguardo + linee grafico (definite qui per tenerle vicine al JS) */
+  .fx{opacity:0; stroke-width:1.2; animation:pop .45s ease-out both; animation-delay:var(--d)}
+  @keyframes pop{0%{opacity:0; transform:scale(.4)} 60%{opacity:1} 100%{opacity:.95; transform:scale(1)}}
+  #gazeA polyline, #gazeB polyline{stroke-dasharray:1400; stroke-dashoffset:1400; animation:draw 1.6s ease-out .1s both}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .slide.active .gline{stroke-dasharray:600; stroke-dashoffset:600; animation:draw 1.3s ease-out .3s both; animation-delay:var(--d,.3s)}
+  circle.fx{transform-box:fill-box; transform-origin:center}
+
+  /* guscio: navigazione archivio, lingua e firma */
+  .hint{opacity:.8}
+  .hint a{color:inherit; text-decoration:none; border-bottom:1px solid rgba(255,255,255,.2)}
+  .hint a:hover{color:var(--bright); border-bottom-color:var(--amber)}
+  .hint b{color:var(--amber); font-weight:500}
+  .sign{
+    margin-top:30px; font-family:var(--mono); font-size:10px;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--dim);
+  }
+  .sign b{color:var(--amber); font-weight:500}
+</style>
+
+<script>
+(function(){
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const railBtns = Array.from(document.querySelectorAll('.rail button'));
+  const count = document.getElementById('count');
+  let i = 0;
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  function show(n){
+    i = Math.max(0, Math.min(slides.length-1, n));
+    slides.forEach((s,k)=> s.classList.toggle('active', k===i));
+    railBtns.forEach((b,k)=> b.setAttribute('aria-current', k===i ? 'true':'false'));
+    count.textContent = pad(i+1) + ' / ' + pad(slides.length);
+    if(i===1) playGaze(currentGaze);
+  }
+
+  document.getElementById('next').onclick = ()=> show(i+1);
+  document.getElementById('prev').onclick = ()=> show(i-1);
+  railBtns.forEach(b => b.onclick = ()=> show(parseInt(b.dataset.go,10)));
+
+  document.addEventListener('keydown', e=>{
+    if(e.key === 'ArrowRight' || e.key === 'PageDown'){ show(i+1); }
+    if(e.key === 'ArrowLeft'  || e.key === 'PageUp'){ show(i-1); }
+    if(e.key === 'Home'){ show(0); }
+    if(e.key === 'End'){ show(slides.length-1); }
+  });
+
+  /* ---------- sguardi ---------- */
+  const COPY = {
+    a: {
+      t: 'Sguardo A — accetta e va avanti',
+      p: 'Tre fissazioni in totale. Un\'occhiata al problema, una al blocco suggerito, poi Tab. Il codice passa i test. In testa non resta niente.',
+      s: [['3','fissazioni'],['0','ritorni indietro'],['~2s','prima di accettare']]
+    },
+    b: {
+      t: 'Sguardo B — verifica e mantiene il controllo',
+      p: 'Rilegge il proprio piano, confronta col suggerimento, torna indietro, scarta due pezzi irrilevanti. Stesso codice finale. Ma sa dov\'è fragile.',
+      s: [['12','fissazioni'],['5','ritorni indietro'],['~40s','prima di accettare']]
+    }
+  };
+  let currentGaze = 'a';
+  const readout = document.getElementById('readout');
+  const statEl  = document.getElementById('stat');
+
+  function playGaze(g){
+    currentGaze = g;
+    document.querySelectorAll('.toggle button').forEach(b=> b.classList.toggle('on', b.dataset.g===g));
+    ['a','b'].forEach(k=>{
+      const grp = document.getElementById('gaze' + k.toUpperCase());
+      if(!grp) return;
+      if(k===g){
+        const clone = grp.cloneNode(true);   // forza il restart delle animazioni
+        clone.setAttribute('opacity','1');
+        grp.parentNode.replaceChild(clone, grp);
+      } else {
+        grp.setAttribute('opacity','0');
+      }
+    });
+    const c = COPY[g];
+    readout.querySelector('.rt').textContent = c.t;
+    readout.querySelector('p').textContent  = c.p;
+    statEl.innerHTML = c.s.map(([v,l])=> '<div><b>'+v+'</b>'+l+'</div>').join('');
+  }
+  document.querySelectorAll('.toggle button').forEach(b=> b.onclick = ()=> playGaze(b.dataset.g));
+  playGaze('a');
+
+  /* ---------- self-check ---------- */
+  const chks = Array.from(document.querySelectorAll('#checks .chk'));
+  const verdict = document.getElementById('verdict');
+  function updateVerdict(){
+    const n = chks.filter(c=>c.classList.contains('on')).length;
+    let t = '', s = '';
+    if(n===0){ t = 'Nessuna spuntata (ancora).';
+               s = 'Rileggile con calma. Il punto di queste sei frasi è che sembrano tutte ragionevoli mentre le facciamo — è per questo che sono difficili da notare.'; }
+    else if(n<=2){ t = n + ' su 6. Normale, e onesto.';
+               s = 'Nessuno lavora al 100% di attenzione. Il segnale da tenere d\'occhio non è il numero: è se cresce di sprint in sprint senza che ce ne accorgiamo.'; }
+    else if(n<=4){ t = n + ' su 6. Qui il debito comincia a comporsi.';
+               s = 'Non c\'è niente di grave in nessuna singola volta. Il problema è che ognuna di queste ci toglie l\'occasione di costruire il modello mentale che servirà la volta dopo.'; }
+    else { t = n + ' su 6 — e va bene averlo ammesso.';
+               s = 'Questa è esattamente la traiettoria dello Sguardo A. La buona notizia: è reversibile, e le tre abitudini della prossima slide costano insieme meno di dieci minuti al giorno.'; }
+    verdict.innerHTML = t + '<span>' + s + '</span>';
+  }
+  chks.forEach(c => c.onclick = ()=>{ c.classList.toggle('on'); updateVerdict(); });
+  updateVerdict();
+
+  show(0);
+})();
+</script>
+</body>
+</html>

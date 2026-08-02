@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentic development yield — Q ≈ k · qC · qP · qV</title>
+<style>
+  :root{
+    --ink:#151C21;
+    --ink-2:#1B252B;
+    --line:rgba(146,178,183,.14);
+    --paper:#DEE7E6;
+    --paper-dim:#93A5A8;
+    --signal:#E2A33C;
+    --gauge:#63A79C;
+    --alarm:#C4614B;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "IBM Plex Mono", Menlo, Consolas, monospace;
+    --sans: "Archivo", "Helvetica Neue", Inter, system-ui, -apple-system, sans-serif;
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    padding:clamp(28px,5vw,64px) clamp(20px,5vw,48px) 72px;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 100% 28px,
+      linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 28px 100%,
+      var(--ink);
+    color:var(--paper);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .wrap{max-width:760px;margin:0 auto}
+
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--paper-dim);
+    margin:0 0 22px;
+  }
+
+  .formula{
+    font-family:var(--mono);
+    font-size:clamp(26px,6.4vw,46px);
+    font-weight:500;
+    letter-spacing:-.01em;
+    margin:0 0 6px;
+    line-height:1.15;
+  }
+  .formula .op{color:var(--signal)}
+  .formula .approx{color:var(--paper-dim)}
+
+  .lede{
+    font-size:17px;
+    max-width:62ch;
+    margin:22px 0 0;
+    color:var(--paper);
+  }
+  .lede strong{color:var(--signal);font-weight:600}
+
+  h2{
+    font-family:var(--mono);
+    font-size:11px;
+    font-weight:500;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--paper-dim);
+    margin:52px 0 18px;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--line);
+  }
+
+  /* ---- fattori ---- */
+  .factor{
+    display:grid;
+    grid-template-columns:64px 1fr;
+    gap:0 18px;
+    padding:16px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .factor dt{
+    font-family:var(--mono);
+    font-size:19px;
+    color:var(--signal);
+    line-height:1.35;
+  }
+  .factor dd{margin:0}
+  .factor .name{
+    display:block;
+    font-weight:600;
+    font-size:15px;
+    margin-bottom:3px;
+  }
+  .factor .desc{
+    font-size:15px;
+    color:var(--paper-dim);
+    margin:0;
+  }
+
+  /* ---- pannello interattivo ---- */
+  .panel{
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:clamp(18px,4vw,28px);
+  }
+
+  .slider-row{
+    display:grid;
+    grid-template-columns:52px 1fr 58px;
+    align-items:center;
+    gap:14px;
+    margin-bottom:14px;
+  }
+  .slider-row label{
+    font-family:var(--mono);
+    font-size:15px;
+    color:var(--paper);
+  }
+  .slider-row output{
+    font-family:var(--mono);
+    font-size:14px;
+    text-align:right;
+    color:var(--paper-dim);
+    font-variant-numeric:tabular-nums;
+  }
+
+  input[type=range]{
+    -webkit-appearance:none;
+    appearance:none;
+    width:100%;
+    height:22px;
+    background:transparent;
+    margin:0;
+    cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track{
+    height:2px;background:rgba(146,178,183,.25);
+  }
+  input[type=range]::-moz-range-track{
+    height:2px;background:rgba(146,178,183,.25);
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;
+    width:13px;height:13px;margin-top:-5.5px;
+    background:var(--gauge);border:0;border-radius:50%;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:13px;height:13px;
+    background:var(--gauge);border:0;border-radius:50%;
+  }
+  input[type=range]:focus-visible{outline:2px solid var(--signal);outline-offset:4px}
+
+  .result{
+    margin-top:26px;
+    padding-top:22px;
+    border-top:1px solid var(--line);
+  }
+  .result-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:16px;
+    font-family:var(--mono);
+  }
+  .result-head .q{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--paper-dim)}
+  #qOut{
+    font-size:clamp(28px,7vw,40px);
+    color:var(--signal);
+    font-variant-numeric:tabular-nums;
+  }
+  .bar{
+    margin-top:12px;
+    height:6px;
+    background:rgba(146,178,183,.16);
+    overflow:hidden;
+  }
+  #qBar{
+    height:100%;
+    width:100%;
+    background:var(--gauge);
+    transition:width .18s ease, background-color .18s ease;
+  }
+  #verdict{
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--paper-dim);
+    margin:12px 0 0;
+    min-height:1.6em;
+  }
+
+  /* ---- limiti ---- */
+  .caveat{
+    padding:14px 0;
+    border-bottom:1px solid var(--line);
+    font-size:15px;
+    color:var(--paper-dim);
+    max-width:64ch;
+  }
+  .caveat b{color:var(--paper);font-weight:600}
+
+  .status{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.06em;
+    color:var(--paper-dim);
+    margin-top:34px;
+  }
+  .status span{color:var(--signal)}
+
+  @media (max-width:520px){
+    .factor{grid-template-columns:1fr;gap:6px}
+    .slider-row{grid-template-columns:44px 1fr 50px;gap:10px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    #qBar{transition:none}
+  }
+
+  /* ---- guscio: navigazione e firma ---- */
+  .topbar{
+    display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    padding-bottom:14px;margin-bottom:32px;border-bottom:1px solid var(--line);
+  }
+  .topbar a{color:var(--paper-dim);text-decoration:none}
+  .topbar a:hover{color:var(--signal)}
+  .topbar .langs{display:flex;gap:12px;flex:none}
+  .topbar .langs b{color:var(--signal);font-weight:500}
+  .colophon{
+    font-family:var(--mono);font-size:11px;line-height:2;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--paper-dim);
+    margin-top:46px;padding-top:18px;border-top:1px solid var(--line);
+  }
+  .colophon .sig{color:var(--signal)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="topbar">
+    <a href="index.html">← Archive</a>
+    <span class="langs"><a href="../002-resa-sviluppo-agentico.html">IT</a><b>EN</b></span>
+  </nav>
+
+  <p class="eyebrow">Agentic development yield — a heuristic model</p>
+
+  <p class="formula">Q <span class="approx">≈</span> k <span class="op">·</span> qC <span class="op">·</span> qP <span class="op">·</span> qV</p>
+
+  <p class="lede">This isn't a law, it's a rule of thumb. The model's value isn't in the numbers, it's in the <strong>multiplicative structure</strong>: the four factors don't substitute for one another, they behave like an AND gate. If one tends to zero, the result tends to zero — however high the others are.</p>
+
+  <h2>The four terms</h2>
+
+  <dl style="margin:0">
+    <div class="factor">
+      <dt>k</dt>
+      <dd>
+        <span class="name">Model capability</span>
+        <p class="desc">How strong the LLM in play is. It isn't really an independent scalar: a more capable model degrades more gracefully when the context is poor — it infers the conventions, notices the contradictions, asks for clarification. It modulates the slope of the other terms more than it scales the result.</p>
+      </dd>
+    </div>
+    <div class="factor">
+      <dt>qC</dt>
+      <dd>
+        <span class="name">Context quality</span>
+        <p class="desc">What state the codebase is in: architectural coherence, explicit conventions, documentation, AGENTS.md. In large part it is qP settled into place — today's conventions are yesterday's instruction work.</p>
+      </dd>
+    </div>
+    <div class="factor">
+      <dt>qP</dt>
+      <dd>
+        <span class="name">Instruction quality</span>
+        <p class="desc">How well the goal and the route to it are communicated. Not only in the first prompt: a mid-run course correction often weighs more than the opening brief.</p>
+      </dd>
+    </div>
+    <div class="factor">
+      <dt>qV</dt>
+      <dd>
+        <span class="name">Verification quality</span>
+        <p class="desc">Tests, type system, CI, lint. This is the error-correction term, and it is largely independent of the others: it catches the mistake before it reaches main. It is also the cheapest lever, and the one a team controls most directly.</p>
+      </dd>
+    </div>
+  </dl>
+
+  <h2>Multiplicative collapse</h2>
+
+  <div class="panel">
+    <div class="slider-row">
+      <label for="k">k</label>
+      <input type="range" id="k" min="0" max="100" value="90">
+      <output for="k" id="kOut">0.90</output>
+    </div>
+    <div class="slider-row">
+      <label for="qc">qC</label>
+      <input type="range" id="qc" min="0" max="100" value="80">
+      <output for="qc" id="qcOut">0.80</output>
+    </div>
+    <div class="slider-row">
+      <label for="qp">qP</label>
+      <input type="range" id="qp" min="0" max="100" value="80">
+      <output for="qp" id="qpOut">0.80</output>
+    </div>
+    <div class="slider-row">
+      <label for="qv">qV</label>
+      <input type="range" id="qv" min="0" max="100" value="80">
+      <output for="qv" id="qvOut">0.80</output>
+    </div>
+
+    <div class="result">
+      <div class="result-head">
+        <span class="q">Q — yield</span>
+        <span id="qOut">0.46</span>
+      </div>
+      <div class="bar"><div id="qBar"></div></div>
+      <p id="verdict"></p>
+    </div>
+  </div>
+
+  <h2>What the model doesn't say</h2>
+
+  <p class="caveat"><b>The 0–1 scale implies linear degradation.</b> In practice it looks more like a threshold: below a certain level of qC the agent doesn't get gradually worse — it hallucinates confidently. Which is qualitatively worse, because before you can correct the mistake you have to notice it's there.</p>
+
+  <p class="caveat"><b>The terms are not independent.</b> qC is partly qP on a delay; k changes how much the others matter. Treating them as separate variables is a deliberate simplification, not a fact.</p>
+
+  <p class="caveat"><b>Q is not measurable as written.</b> "Quality of the software produced" has no unit. The formula is for reasoning about where to invest, not for producing a number to put in a report.</p>
+
+  <p class="status">Epistemic status: structure <span>plausible</span> · coefficients <span>unmeasured</span> · thresholds <span>untested</span></p>
+
+  <p class="colophon">
+    Teksistemi · Technical newsletter · Issue 002 — July 23, 2026<br>
+    Written by <span class="sig">orlodax</span>
+  </p>
+
+</div>
+
+<script>
+(function(){
+  var ids = ['k','qc','qp','qv'];
+  var inputs = {}, outs = {};
+  ids.forEach(function(id){
+    inputs[id] = document.getElementById(id);
+    outs[id] = document.getElementById(id + 'Out');
+  });
+  var qOut = document.getElementById('qOut');
+  var qBar = document.getElementById('qBar');
+  var verdict = document.getElementById('verdict');
+
+  var labels = {k:'model capability', qc:'the context',qp:'the instruction', qv:'the verification'};
+
+  function update(){
+    var vals = {}, q = 1, weakest = 'k';
+    ids.forEach(function(id){
+      var v = inputs[id].value / 100;
+      vals[id] = v;
+      outs[id].textContent = v.toFixed(2);
+      q *= v;
+      if (v < vals[weakest]) weakest = id;
+    });
+
+    qOut.textContent = q.toFixed(2);
+    qBar.style.width = (q * 100) + '%';
+    qBar.style.backgroundColor = q < 0.25
+      ? 'var(--alarm)'
+      : (q < 0.5 ? 'var(--signal)' : 'var(--gauge)');
+
+    if (vals[weakest] < 0.35) {
+      verdict.textContent = 'The bottleneck is ' + labels[weakest] + '. Raising the other factors will not help.';
+    } else if (q < 0.5) {
+      verdict.textContent = 'No single factor is critical, but the product erodes anyway.';
+    } else {
+      verdict.textContent = 'All factors hold.';
+    }
+  }
+
+  ids.forEach(function(id){ inputs[id].addEventListener('input', update); });
+  update();
+})();
+</script>
+</body>
+</html>

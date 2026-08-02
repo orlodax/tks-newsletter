@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La finestra rotta — Newsletter tecnica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Newsreader:ital,opsz,wght@1,6..72,300..400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --notte:#151A21;--cemento:#1E242C;--cemento-alto:#272F39;
+  --vetro:#9AAAB7;--luce:#F3E7CE;--ambra:#E5B25D;--verde:#6BA88F;
+  --bordo:rgba(154,170,183,.18);--crepa:rgba(255,255,255,.7);
+  --sp:clamp(20px,4vw,64px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--notte);color:var(--luce);
+  font-family:"Instrument Sans",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;overflow:hidden;
+}
+
+/* shell */
+.deck{position:relative;height:100dvh;width:100%}
+.slide{
+  position:absolute;inset:0;
+  padding:clamp(24px,4vh,50px) var(--sp) clamp(94px,13vh,124px);
+  overflow-y:auto;overflow-x:hidden;
+  opacity:0;visibility:hidden;transform:translateY(12px);
+  transition:opacity .45s ease,transform .45s ease,visibility .45s;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.slide.on{opacity:1;visibility:visible;transform:none}
+.wrap{width:100%;max-width:1060px;margin:0 auto}
+
+/* type */
+.eyebrow{
+  font-family:"JetBrains Mono",monospace;font-size:clamp(9.5px,1.05vw,11.5px);
+  letter-spacing:.22em;text-transform:uppercase;color:var(--verde);
+  margin-bottom:clamp(12px,1.8vh,20px);
+}
+h1{
+  font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 118,"wght" 800;
+  font-size:clamp(46px,10.5vw,130px);line-height:.88;letter-spacing:-.025em;text-transform:uppercase;
+}
+h2{
+  font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 106,"wght" 700;
+  font-size:clamp(23px,3.2vw,42px);line-height:1.08;letter-spacing:-.015em;max-width:24ch;
+}
+.lead{font-size:clamp(15px,1.75vw,20px);line-height:1.5;color:var(--luce);max-width:62ch;margin-top:clamp(12px,1.8vh,18px)}
+p{font-size:clamp(13.5px,1.38vw,15.5px);line-height:1.58;color:var(--vetro)}
+p+p{margin-top:.75em}
+strong{color:var(--luce);font-weight:600}
+em{color:var(--ambra);font-style:normal;font-weight:500}
+.serif{font-family:"Newsreader",Georgia,serif;font-style:italic}
+.rule{height:1px;background:var(--bordo);margin:clamp(16px,2.4vh,26px) 0}
+.cols{display:grid;grid-template-columns:1.08fr .92fr;gap:clamp(20px,3vw,44px);align-items:start;margin-top:clamp(13px,1.9vh,22px)}
+.cols.even{grid-template-columns:1fr 1fr}
+
+/* hero */
+.hero{align-items:center;text-align:center}
+.hero .wrap{display:flex;flex-direction:column;align-items:center}
+.hero .lead{max-width:44ch;color:var(--vetro)}
+.hero-facade{margin:clamp(22px,4vh,42px) 0 clamp(16px,2.6vh,26px)}
+
+/* panes */
+.facade{display:grid;gap:clamp(4px,.7vw,9px)}
+.pane{
+  position:relative;aspect-ratio:5/7;border-radius:1px;background:var(--cemento-alto);
+  box-shadow:inset 0 0 0 1px rgba(154,170,183,.09);
+  transition:background .5s ease,box-shadow .5s ease;
+}
+.pane.lit{
+  background:linear-gradient(168deg,var(--ambra),#B8813B);
+  box-shadow:inset 0 0 0 1px rgba(243,231,206,.28),0 0 13px -3px rgba(229,178,93,.4);
+}
+.pane svg{position:absolute;inset:0;width:100%;height:100%;opacity:0}
+.pane.rotta svg{opacity:1}
+.pane.rotta{background:#11151A;box-shadow:inset 0 0 0 1px rgba(154,170,183,.14)}
+.pane svg path{stroke:var(--crepa);stroke-width:2.2;fill:none;vector-effect:non-scaling-stroke;stroke-dasharray:140;stroke-dashoffset:140}
+.pane.rotta svg path{animation:draw .45s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.facade.mini{gap:3px}
+.facade.mini .pane{aspect-ratio:1}
+.facade.mini .pane.lit{box-shadow:inset 0 0 0 1px rgba(243,231,206,.25)}
+.facade.mini .pane svg path{stroke-width:1.6;stroke-dashoffset:0}
+
+/* visuals */
+.vis{margin:clamp(10px,1.4vh,15px) 0 0}
+.vis-cap{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--vetro);opacity:.75;margin-top:7px}
+.vis-row{display:flex;align-items:center;gap:10px}
+.arrowchar{color:var(--vetro);font-size:15px;opacity:.6}
+.pane-single{width:32px}
+.noise{display:flex;gap:2px;align-items:flex-end;height:42px}
+.noise i{flex:1;background:var(--cemento-alto);border-radius:1px;display:block}
+.noise i.real{background:var(--ambra)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.duo .vis-cap{margin-top:6px}
+
+/* chain */
+.chain{display:flex;align-items:stretch;flex-wrap:wrap;margin-top:clamp(12px,1.8vh,18px)}
+.chain .step{flex:1 1 150px;background:var(--cemento);border:1px solid var(--bordo);border-top:2px solid var(--ambra);border-radius:2px;padding:11px 12px}
+.chain .step:last-child{border-top-color:#C4634A}
+.chain .step b{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--ambra);display:block;margin-bottom:.55em;font-weight:600}
+.chain .step:last-child b{color:#D97A5F}
+.chain .step p{font-size:clamp(11.5px,1.14vw,13.5px);line-height:1.42}
+.chain .link{display:flex;align-items:center;color:var(--vetro);opacity:.5;padding:0 9px;font-size:15px}
+@media(max-width:880px){.chain .link{transform:rotate(90deg);padding:6px 0;width:100%;justify-content:center}}
+
+/* ratio */
+.ratio{margin-top:clamp(13px,1.9vh,18px)}
+.ratio-row{display:flex;align-items:center;gap:12px;margin-bottom:9px}
+.ratio-lab{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.1em;color:var(--vetro);width:104px;flex:none;text-transform:uppercase}
+.ratio-bar{height:11px;border-radius:1px;background:var(--verde)}
+.ratio-bar.big{background:linear-gradient(90deg,var(--ambra),#8A6128)}
+.ratio-num{font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--luce)}
+
+/* study bars */
+.study{display:grid;gap:10px;margin-top:clamp(12px,1.8vh,18px)}
+.sbar{display:flex;align-items:center;gap:11px}
+.sbar .lab{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--vetro);width:118px;flex:none;line-height:1.3}
+.sbar .bar{height:22px;border-radius:1px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--notte);font-weight:600}
+.sbar .bar.win{background:var(--verde)}
+.sbar .bar.flat{background:var(--cemento-alto);color:var(--vetro);justify-content:flex-start;padding-left:8px}
+
+/* cards */
+.grid{display:grid;gap:clamp(11px,1.5vw,18px);margin-top:clamp(13px,2vh,22px)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--cemento);border:1px solid var(--bordo);border-top:2px solid var(--ambra);border-radius:2px;padding:clamp(13px,1.6vw,20px);display:flex;flex-direction:column}
+.card.repair{border-top-color:var(--verde)}
+.card h3{font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 100,"wght" 700;font-size:clamp(13.5px,1.4vw,17px);line-height:1.2;margin-bottom:.55em}
+.card p{font-size:clamp(12.5px,1.2vw,14.5px);line-height:1.52}
+.tag{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.17em;text-transform:uppercase;color:var(--verde);display:block;margin-bottom:.85em}
+.card .move{display:block;margin-top:auto;padding-top:.9em;border-top:1px dashed var(--bordo);font-size:clamp(12.5px,1.2vw,14.5px);line-height:1.48;color:var(--luce)}
+.card .move b{color:var(--verde);font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.15em;display:block;margin-bottom:.4em;text-transform:uppercase;font-weight:600}
+.card .vis{margin-bottom:clamp(10px,1.4vh,14px)}
+
+/* boxes */
+.inset,.caveat{padding:clamp(13px,1.5vw,18px);border-radius:0 2px 2px 0}
+.inset{background:rgba(107,168,143,.07);border-left:2px solid var(--verde)}
+.caveat{background:rgba(229,178,93,.06);border-left:2px solid var(--ambra)}
+.caveat .tag{color:var(--ambra)}
+.inset p,.caveat p{font-size:clamp(12.5px,1.22vw,14.5px);line-height:1.52}
+
+.pull{font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 110,"wght" 700;font-size:clamp(19px,2.5vw,32px);line-height:1.12;letter-spacing:-.015em;color:var(--verde);max-width:26ch}
+
+.pillars{width:100%;height:auto;margin-top:clamp(12px,1.8vh,17px)}
+.triad{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(10px,1.4vw,18px);margin-top:clamp(12px,1.8vh,19px)}
+.triad div{border-top:1px solid var(--bordo);padding-top:11px}
+.triad b{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.17em;text-transform:uppercase;color:var(--ambra);display:block;margin-bottom:.55em;font-weight:600}
+.triad p{font-size:clamp(12.5px,1.26vw,15px)}
+
+/* signals */
+.sig{list-style:none}
+.sig li{font-size:clamp(13px,1.3vw,15.5px);line-height:1.42;color:var(--vetro);padding:10px 0 10px 24px;border-bottom:1px solid var(--bordo);position:relative}
+.sig li::before{position:absolute;left:0;top:10px;font-family:"JetBrains Mono",monospace;font-size:13px}
+.sig.good li::before{content:"+";color:var(--verde)}
+.sig.bad li::before{content:"–";color:var(--ambra)}
+.sig .worst{color:var(--luce);font-weight:500}
+.colhead{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:5px}
+.colhead.good{color:var(--verde)}
+.colhead.bad{color:var(--ambra)}
+
+/* questions */
+.qs{display:grid;margin-top:clamp(13px,2vh,20px)}
+.q{display:grid;grid-template-columns:auto 1fr;gap:clamp(12px,1.6vw,22px);align-items:baseline;padding:clamp(10px,1.3vw,15px) 0;border-top:1px solid var(--bordo)}
+.q .k{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--verde);white-space:nowrap;font-weight:600}
+.q h4{font-family:"Archivo",sans-serif;font-variation-settings:"wght" 700;font-size:clamp(14px,1.42vw,17px);margin-bottom:.28em;color:var(--luce)}
+.q p{font-size:clamp(12.5px,1.26vw,14.5px)}
+
+.src{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.08em;color:var(--vetro);opacity:.55;margin-top:1.1em;line-height:1.6}
+.hint{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--vetro);opacity:.5;margin-top:8px}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:14px var(--sp) 18px;display:flex;align-items:center;gap:16px;background:linear-gradient(to top,var(--notte) 55%,transparent)}
+.track{display:flex;gap:5px;flex:1}
+.tick{flex:1;max-width:32px;height:13px;border:none;padding:0;cursor:pointer;background:var(--cemento-alto);border-radius:1px;box-shadow:inset 0 0 0 1px rgba(154,170,183,.12);transition:background .3s ease,box-shadow .3s ease}
+.tick.seen{background:rgba(229,178,93,.28)}
+.tick.now{background:linear-gradient(168deg,var(--ambra),#B8813B);box-shadow:0 0 12px -2px rgba(229,178,93,.55)}
+.tick:focus-visible,.arrow:focus-visible{outline:2px solid var(--verde);outline-offset:3px}
+.arrows{display:flex;gap:7px}
+.arrow{width:38px;height:34px;border:1px solid var(--bordo);background:transparent;color:var(--luce);border-radius:2px;cursor:pointer;font-size:15px;line-height:1;transition:border-color .2s,color .2s}
+.arrow:hover:not(:disabled){border-color:var(--verde);color:var(--verde)}
+.arrow:disabled{opacity:.28;cursor:default}
+.count{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--vetro);letter-spacing:.1em}
+
+/* guscio: archivio, lingua, firma */
+.shell{display:flex;gap:12px;align-items:baseline;flex:none;font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase}
+.shell a{color:var(--vetro);text-decoration:none;opacity:.8}
+.shell a:hover{color:var(--verde);opacity:1}
+.shell b{color:var(--ambra);font-weight:400}
+.colophon{
+  font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--vetro);opacity:.65;
+  margin-top:clamp(14px,2vh,20px);padding-top:14px;border-top:1px solid var(--bordo);
+}
+.colophon b{color:var(--ambra);font-weight:400}
+@media(max-width:640px){.shell{gap:8px;letter-spacing:.06em}}
+
+@media(max-width:880px){
+  .g3,.g4,.g2,.cols,.cols.even,.triad{grid-template-columns:1fr}
+  h2{max-width:none}
+  .slide{justify-content:flex-start}
+  .hero{justify-content:center}
+  .q{grid-template-columns:1fr;gap:5px}
+  .ratio-lab,.sbar .lab{width:88px}
+}
+@media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+<main class="deck">
+
+  <!-- 1 -->
+  <section class="slide hero on">
+    <div class="wrap">
+      <div class="eyebrow">Teksistemi · Newsletter tecnica</div>
+      <h1>La finestra<br>rotta</h1>
+      <div class="hero-facade" id="heroFacade"></div>
+      <p class="lead">Il degrado non produce solo altro degrado.<br>Sposta il confine di quello che sembra normale fare.</p>
+      <div class="hint">Frecce ← → per navigare</div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="eyebrow">1969 · L'esperimento</div>
+      <h2>Comincia con due auto abbandonate, e non finisce come si racconta di solito</h2>
+      <div class="cols">
+        <div>
+          <p>Nel 1969 lo psicologo Philip Zimbardo lasciò due automobili identiche, senza targa e col cofano alzato: una in un quartiere del Bronx, l'altra a Palo Alto, in California.</p>
+          <p>Quella del Bronx fu assalita nel giro di pochi minuti. I primi ad arrivare furono un padre, una madre e un bambino, che smontarono radiatore e batteria. In ventiquattr'ore non era rimasto niente di utile; poi i vetri, i sedili, e dei ragazzini che ci giocavano dentro.</p>
+          <p>Quella di Palo Alto restò intatta per più di una settimana. Poi fu Zimbardo stesso ad andare lì e colpirla con una mazza. A quel punto si unirono anche gli altri. Va detto per onestà che nel frattempo l'auto era stata spostata nel campus di Stanford, e i primi a partecipare furono i suoi studenti.</p>
+          <p>Il dettaglio che colpisce di più è un altro: in entrambi i casi la maggior parte dei distruttori adulti erano <strong>persone ben vestite e dall'aria rispettabile</strong>. Non era gente cattiva capitata lì per caso. Era gente normale, in un posto dove sembrava che non importasse a nessuno.</p>
+          <p class="src">Zimbardo 1969 · Wilson &amp; Kelling, The Atlantic 1982 · Bench Ansfield</p>
+        </div>
+        <div>
+          <div class="caveat">
+            <span class="tag">Come è diventata una teoria</span>
+            <p>Nel 1982 Wilson e Kelling costruirono la loro tesi su questo esperimento — che era anche <strong>l'unica prova che citavano</strong>. E lo semplificarono parecchio. Zimbardo parlava di disuguaglianza e di anonimato; loro ne ricavarono la formula per cui una finestra rotta ne genera mille.</p>
+            <p style="margin-top:.75em">È la versione che tutti ricordano, ed è la meno interessante delle due. La tesi vera era un'altra: che il disordine visibile faccia salire i <em>reati gravi</em>. È quella che è stata messa alla prova, ed è quella su cui si discute da quarant'anni.</p>
+          </div>
+        </div>
+      </div>
+      <div class="rule"></div>
+      <div class="eyebrow" style="margin-bottom:0">La catena, per come la descriveva la teoria</div>
+      <div class="chain">
+        <div class="step"><b>1 · Segnale</b><p>Qualcosa di rotto resta lì. Dice che nessuno se ne occupa.</p></div>
+        <div class="link">→</div>
+        <div class="step"><b>2 · Paura</b><p>Chi ci vive si sente meno sicuro e sta meno in strada.</p></div>
+        <div class="link">→</div>
+        <div class="step"><b>3 · Nessuno guarda</b><p>Sparisce l'occhio informale, quello che non è di nessuno ma c'è.</p></div>
+        <div class="link">→</div>
+        <div class="step"><b>4 · Sale il livello</b><p>Non arrivano altre finestre rotte. Arrivano cose peggiori.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="eyebrow">Cosa è rimasto in piedi</div>
+      <h2>Non erano le finestre. Era se qualcuno guarda.</h2>
+      <div class="cols">
+        <div>
+          <p>Lowell, Massachusetts, 2005. Dei ricercatori individuano 34 zone critiche e ne trattano solo la metà: raccolgono l'immondizia, riparano i lampioni, fanno rispettare i regolamenti edilizi, aggiungono servizi per i senzatetto. E fanno anche più arresti per reati minori.</p>
+          <p>Nelle zone trattate le chiamate alla polizia calano del 20%. Ma la conclusione dello studio è la parte che ci riguarda: <strong>a fare la differenza era stato sistemare l'ambiente, non gli arresti</strong>.</p>
+          <p>Una rassegna del 2015 su tutti gli studi disponibili dice la stessa cosa in modo più netto. Intervenire sui luoghi funziona. Colpire una per una le persone che si comportano male non produce risultati significativi.</p>
+          <div class="study">
+            <div class="sbar">
+              <span class="lab">Sistemare i luoghi</span>
+              <span class="bar win" style="width:72%">funziona</span>
+            </div>
+            <div class="sbar">
+              <span class="lab">Colpire le persone</span>
+              <span class="bar flat" style="width:14%">non funziona</span>
+            </div>
+          </div>
+          <p class="src">Lowell / Harvard &amp; Suffolk 2005 · Meta-analisi 2015 · Sampson &amp; Raudenbush · Harcourt &amp; Ludwig 2006</p>
+        </div>
+        <div>
+          <div class="inset">
+            <span class="tag">Il nome della cosa</span>
+            <p>Sampson e Raudenbush hanno mostrato che il legame diretto fra disordine visibile e criminalità è debole. Quello che li spiega entrambi è un terzo elemento, che chiamano <strong>efficacia collettiva</strong>: quanto le persone di un posto sono legate tra loro, e quanto danno per scontato che dello spazio comune ci si occupi.</p>
+            <p style="margin-top:.75em">Una conferma quasi crudele: quando un programma pubblico ha trasferito delle famiglie da quartieri degradati a quartieri ordinati, quelle famiglie hanno continuato a commettere reati allo stesso ritmo di prima. Cambiare le finestre intorno a una persona non cambia la persona.</p>
+          </div>
+          <div class="pull" style="margin-top:clamp(16px,2.4vh,24px)">Le finestre non erano la causa. Erano il modo in cui si vedeva che non c'era più nessuno a occuparsene.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="eyebrow">Nel codice</div>
+      <h2>Nei quartieri il legame è debole. Nel codice è forte.</h2>
+      <p class="lead">Nei quartieri il passaggio dal disordine ai guai grossi è incerto, perché deve attraversare la testa delle persone. Nel codice non deve: passa dal modo stesso in cui il codice viene scritto. Succede in quattro modi molto concreti.</p>
+      <div class="grid g4">
+        <div class="card">
+          <div class="vis">
+            <div class="facade mini" id="v-todo" style="grid-template-columns:repeat(8,1fr)"></div>
+            <div class="vis-cap">Da sistemare, 2019</div>
+          </div>
+          <h3>Il codice conta più delle regole scritte</h3>
+          <p>Un commento «da sistemare» del 2019 ancora lì non sta chiedendo aiuto. Sta raccontando come vanno le cose qui. E il codice si legge molto più del documento delle linee guida.</p>
+        </div>
+        <div class="card">
+          <div class="vis">
+            <div class="vis-row">
+              <div class="pane-single" id="v-copy1"></div><span class="arrowchar">→</span>
+              <div class="pane-single" id="v-copy2"></div><span class="arrowchar">→</span>
+              <div class="pane-single" id="v-copy3"></div>
+            </div>
+            <div class="vis-cap">Ogni file guarda il vicino</div>
+          </div>
+          <h3>Il codice nuovo si scrive copiando quello vecchio</h3>
+          <p>Quando si aggiunge una funzionalità si guarda com'è fatta quella accanto e le si va dietro. È copia-incolla, non è una questione di buona volontà.</p>
+        </div>
+        <div class="card">
+          <div class="vis">
+            <div class="duo">
+              <div><div class="facade mini" id="v-pulito" style="grid-template-columns:repeat(3,1fr)"></div><div class="vis-cap">Si vede</div></div>
+              <div><div class="facade mini" id="v-sporco" style="grid-template-columns:repeat(3,1fr)"></div><div class="vis-cap">Non si vede</div></div>
+            </div>
+          </div>
+          <h3>In un file già disordinato, un pasticcio in più non si nota</h3>
+          <p>In un file pulito il tuo pasticcio è l'unico. In un file già pieno è uno dei tanti — e per sistemarlo davvero dovresti sistemare tutto.</p>
+        </div>
+        <div class="card">
+          <div class="vis">
+            <div class="noise" id="v-noise"></div>
+            <div class="vis-cap">Quale di questi è il guasto vero?</div>
+          </div>
+          <h3>Gli allarmi smettono di funzionare</h3>
+          <p>Con 400 avvisi nessuno legge il 401°. Se un test fallisce a caso, il rosso non vuol più dire «è rotto». Qui il salto di livello è evidente: <em>perdi la capacità di vedere il guasto serio</em>.</p>
+        </div>
+      </div>
+      <div class="grid g2" style="margin-top:clamp(10px,1.5vh,15px)">
+        <div class="inset">
+          <span class="tag">Il caso Challenger</span>
+          <p>La sociologa Diane Vaughan ha ricostruito cosa era successo alla NASA prima del disastro. Ogni volta che un difetto noto non causava un incidente, quel difetto diventava un po' più normale. Nessuno ha mai deciso di essere imprudente: si spostava solo, un pezzetto alla volta, il confine di ciò che sembrava accettabile. Lei lo chiama <strong>normalizzazione della devianza</strong>.</p>
+        </div>
+        <div class="caveat">
+          <span class="tag">Attenzione a non esagerare</span>
+          <p>«Finestra rotta» fa pensare a cose che si vedono: nomi, indentazione, formattazione. Ma i problemi seri di solito non si vedono. E c'è un dato che vale la pena conoscere: dove la polizia ha stretto sui reati minori, i residenti si sono sentiti <em>meno</em> sicuri, non più. Una review che diventa un controllo a tappeto fa esattamente lo stesso effetto. Qualche pezzo sporco, poi, va benissimo che resti sporco: prototipi, moduli che stiamo per buttare.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="eyebrow">Cosa sembra funzionare</div>
+      <h2>Tre modi per fermarlo. Nessuno dei tre chiede alle persone di stare più attente.</h2>
+      <div class="grid g3">
+        <div class="card repair">
+          <span class="tag">Proprietà</span>
+          <div class="vis">
+            <div class="facade mini" id="v-owned" style="grid-template-columns:repeat(8,1fr)"></div>
+            <div class="vis-cap">A sinistra c'è un nome. A destra no.</div>
+          </div>
+          <h3>Le cose di tutti non sono di nessuno</h3>
+          <p>Nel 1972 l'urbanista Oscar Newman aveva già messo giù il punto: le persone si prendono cura degli spazi in cui si sentono coinvolte. Un'area diventa più sicura quando chi la abita sente che è anche sua — non quando viene sorvegliata meglio.</p>
+          <p style="margin-top:.65em">Nel codice succede uguale. Il marcio quasi mai sta nel modulo con un responsabile chiaro: sta nelle utility condivise, nella configurazione, nella build, nei test di integrazione. Zone dove passano tutti e non abita nessuno.</p>
+          <span class="move"><b>Lo spunto</b>Le cartelle di cui nessuno saprebbe dire «è mia» sono quasi sempre le stesse in cui il degrado comincia. Vale la pena sapere quali sono, ancora prima di decidere cosa farne.</span>
+        </div>
+        <div class="card repair">
+          <span class="tag">Confini</span>
+          <div class="vis">
+            <div class="duo">
+              <div><div class="facade mini" id="v-sparso" style="grid-template-columns:repeat(6,1fr)"></div><div class="vis-cap">Sparso ovunque</div></div>
+              <div><div class="facade mini" id="v-concentrato" style="grid-template-columns:repeat(6,1fr)"></div><div class="vis-cap">Concentrato</div></div>
+            </div>
+          </div>
+          <h3>Il disordine non si elimina, si concentra</h3>
+          <p>Nessuna città è mai riuscita a far sparire del tutto il disordine. Quelle che se la cavano meglio lo tengono in zone precise, così tutto il resto resta leggibile.</p>
+          <p style="margin-top:.65em">Quattrocento file mediocri sono peggio di un file orribile e trecentonovantanove puliti. Nel secondo caso sai sempre dove ti trovi; nel primo non lo sai mai.</p>
+          <span class="move"><b>Lo spunto</b>Forse il pezzo peggiore che tutti conosciamo non va sistemato: va solo recintato, e dichiarato tale. Vale anche per i test instabili — metterli da parte è una cosa diversa dal cancellarli o dall'ignorarli.</span>
+        </div>
+        <div class="card repair">
+          <span class="tag">Sguardo</span>
+          <div class="vis">
+            <svg viewBox="0 0 200 62" style="width:100%;height:auto" aria-hidden="true">
+              <line x1="0" y1="58" x2="200" y2="58" stroke="rgba(154,170,183,.25)" stroke-width="1"/>
+              <path d="M2 8 C40 12, 70 34, 110 46 S170 56, 198 57" fill="none" stroke="#6BA88F" stroke-width="2"/>
+              <circle cx="2" cy="8" r="3" fill="#6BA88F"/>
+              <line x1="110" y1="0" x2="110" y2="58" stroke="rgba(229,178,93,.5)" stroke-width="1" stroke-dasharray="3 3"/>
+              <text x="114" y="14" fill="#E5B25D" font-size="8" letter-spacing="1" font-family="JetBrains Mono, monospace">30 GIORNI</text>
+            </svg>
+            <div class="vis-cap">Quanto vedi, da quando sei arrivato</div>
+          </div>
+          <h3>Chi è qui da tanto non vede più niente</h3>
+          <p>Non è pigrizia, è abitudine: dopo qualche mese certe cose smettono proprio di arrivare all'occhio. Chi arriva da fuori invece le vede tutte, ma per poco tempo.</p>
+          <p style="margin-top:.65em">In più c'è un problema di riconoscimento: consegnare una funzionalità nuova si nota, cancellare codice morto non si nota.</p>
+          <span class="move"><b>Lo spunto</b>Le prime settimane di chi arriva sono l'unico momento in cui qualcuno vede il progetto per com'è davvero. È un'informazione che scade in fretta, e di solito la lasciamo scadere.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="eyebrow">Il punto</div>
+      <h2>«Ci tengono» non è una qualità delle persone. È l'efficacia collettiva, vista da vicino.</h2>
+      <div class="cols">
+        <div>
+          <p class="lead" style="margin-top:0">Nessuna delle tre proposte chiede a qualcuno di impegnarsi di più. Non è un caso.</p>
+          <p style="margin-top:1em">Lo stesso identico sviluppatore lavora con cura su un progetto e in fretta e male su un altro. Se fosse una questione di carattere non succederebbe.</p>
+          <p>Jane Jacobs lo chiamava <strong>«occhi sulla strada»</strong>: l'ordine di un quartiere non lo tiene la polizia, lo tengono i negozianti che stanno sulla porta e la gente che si affaccia. Nel codice sono gli occhi che si posano su un file che non è tuo — e che a un certo punto smettono di posarsi.</p>
+          <p>Nei quartieri chi tiene in ordine non è chi è più civile: è chi ci abita da tempo e ci resterà. Se prendi una scorciatoia oggi, il problema te lo ritrovi tu domani.</p>
+          <svg class="pillars" viewBox="0 0 340 96" aria-hidden="true">
+            <rect x="6" y="8" width="328" height="9" rx="1" fill="#6BA88F" opacity=".85"/>
+            <rect x="24" y="17" width="16" height="62" fill="#6BA88F" opacity=".55"/>
+            <rect x="162" y="17" width="16" height="62" fill="#6BA88F" opacity=".55"/>
+            <rect x="300" y="17" width="16" height="62" fill="#6BA88F" opacity=".55"/>
+            <rect x="6" y="79" width="328" height="6" rx="1" fill="rgba(154,170,183,.25)"/>
+            <text x="32" y="94" fill="#9AAAB7" font-size="8" letter-spacing="1.4" text-anchor="middle" font-family="JetBrains Mono, monospace">RESTI</text>
+            <text x="170" y="94" fill="#9AAAB7" font-size="8" letter-spacing="1.4" text-anchor="middle" font-family="JetBrains Mono, monospace">PUOI AGIRE</text>
+            <text x="308" y="94" fill="#9AAAB7" font-size="8" letter-spacing="1.4" text-anchor="middle" font-family="JetBrains Mono, monospace">CAPISCI</text>
+          </svg>
+        </div>
+        <div>
+          <div class="caveat">
+            <span class="tag">Come si rompe</span>
+            <p>Se togli una delle tre, la cura non sparisce e basta: si trasforma in frustrazione. Chi tiene molto ma non può intervenire vede tutti i problemi e non può toccarne nessuno. Prima o poi se ne va — e restano quelli che hanno smesso di notarli.</p>
+            <p style="margin-top:.7em">Col tempo la squadra peggiora da sola. E sembra un problema di persone, mentre è un problema di come è organizzato il lavoro.</p>
+          </div>
+          <div class="triad" style="grid-template-columns:1fr">
+            <div><b>Permanenza</b><p>Su questo servizio, fra due anni, ci sarai ancora tu.</p></div>
+            <div><b>Possibilità di agire</b><p>Puoi sistemarlo subito, senza aprire un ticket e aspettare tre approvazioni.</p></div>
+            <div><b>Chiarezza</b><p>Capisci abbastanza di come è fatto da sentirti responsabile.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="eyebrow">Come capire come si è messi</div>
+      <h2>Sono cose che si osservano, non giudizi sulle persone</h2>
+      <div class="cols even">
+        <div>
+          <div class="colhead good">Gli occhi sulla strada ci sono</div>
+          <ul class="sig good">
+            <li>Qualcuno sistema una cosa fuori tema dentro una pull request che parlava d'altro</li>
+            <li>Qualcuno dice «il nostro servizio» parlando di codice che non ha scritto lui</li>
+            <li>Le segnalazioni di bug arrivano da chi quel codice l'ha scritto</li>
+            <li>Ogni tanto si cancella della roba</li>
+          </ul>
+        </div>
+        <div>
+          <div class="colhead bad">Le finestre si stanno chiudendo</div>
+          <ul class="sig bad">
+            <li>«Non è roba mia», detto come se fosse una risposta completa</li>
+            <li>Commenti in review così morbidi da non dire niente</li>
+            <li class="worst">Un problema segnalato dal cliente che tre persone avevano già visto e aggirato in silenzio</li>
+          </ul>
+        </div>
+      </div>
+      <div class="rule"></div>
+      <p class="lead" style="margin-top:0">E il modo in cui la gente lo dice suggerisce anche quale delle tre condizioni manca.</p>
+      <div class="triad">
+        <div><b>Se il turnover è alto</b><p>Manca la permanenza: nessuno resta abbastanza da ritrovarsi i propri problemi.</p></div>
+        <div><b>Se senti «dovrei aprire un ticket»</b><p>Manca la possibilità di agire.</p></div>
+        <div><b>Se senti «non so cosa tocco»</b><p>Manca la chiarezza.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="eyebrow">2026 · Cosa cambia adesso</div>
+      <h2>Gli agenti AI leggono il nostro codice e lo imitano. Alla velocità di una macchina.</h2>
+      <div class="cols">
+        <div>
+          <p>Di tutti i meccanismi visti prima, quello del copiare era il più lento: andava alla velocità di quanto codice riesce a scrivere una persona in una giornata.</p>
+          <p>Un agente non ha gusto, non sa perché quella riga sta lì e non prova imbarazzo. Guarda il codice intorno, capisce «qui si fa così» e ne produce altro uguale. Su decine di file, in parallelo, più in fretta di quanto riusciamo a rileggerlo.</p>
+          <p>E torna l'escalation, non la ripetizione: se il codice intorno dice che i test si possono saltare, l'agente non aggiunge un po' di bruttezza. <em>Salta i test</em>, con la stessa naturalezza con cui sceglie il nome di una variabile.</p>
+          <p>C'è anche un secondo effetto, più silenzioso: un agente aggiunge case al quartiere, <strong>ma non aggiunge nessuno che si affacci dalla finestra</strong>. Il codice cresce, gli occhi che lo guardano no.</p>
+          <p>Scrivere le regole in un file <strong>AGENTS.md</strong> serve, ma è un tentativo di contraddire quello che il codice sta già dicendo da solo. E il codice è molto più grande.</p>
+          <div class="ratio">
+            <div class="ratio-row">
+              <span class="ratio-lab">AGENTS.md</span>
+              <span class="ratio-bar" style="width:3%"></span>
+              <span class="ratio-num">~200 righe di regole</span>
+            </div>
+            <div class="ratio-row">
+              <span class="ratio-lab">Il codice</span>
+              <span class="ratio-bar big" style="width:64%"></span>
+              <span class="ratio-num">~400.000 righe di esempi</span>
+            </div>
+          </div>
+          <p class="serif" style="font-size:clamp(17px,2vw,24px);color:var(--verde);line-height:1.35;margin-top:1.2em">Non stiamo scrivendo le istruzioni per gli agenti. Stiamo scrivendo il posto in cui vivranno.</p>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <div id="agentFacade" style="width:100%;max-width:290px"></div>
+          <div class="vis-cap" style="text-align:center">Stessa propagazione. Tutta insieme.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="eyebrow">Spunti</div>
+      <h2>Quattro domande da portarsi dietro, non quattro obiettivi</h2>
+      <p class="lead">Nessuna di queste ha una risposta giusta. Servono a guardare il proprio progetto con l'occhio di chi è appena arrivato.</p>
+      <div class="qs">
+        <div class="q">
+          <span class="k">Proprietà</span>
+          <div>
+            <h4>Se apro una cartella a caso, so chi se ne occupa?</h4>
+            <p>Le zone senza un nome accanto sono quasi sempre quelle dove il degrado si accumula per primo. Sapere quali sono è già un risultato.</p>
+          </div>
+        </div>
+        <div class="q">
+          <span class="k">Confini</span>
+          <div>
+            <h4>Il pezzo brutto che tutti conosciamo ha un confine, o si è sciolto nel resto?</h4>
+            <p>Un pezzo brutto ma circoscritto costa molto meno di un po' di bruttezza distribuita ovunque. Non è detto che vada sistemato: forse va solo delimitato.</p>
+          </div>
+        </div>
+        <div class="q">
+          <span class="k">Sguardo</span>
+          <div>
+            <h4>Cosa aveva notato l'ultima persona arrivata?</h4>
+            <p>Probabilmente aveva ragione, e probabilmente adesso non lo nota più nemmeno lei. È un'informazione che scade in fretta e che quasi nessuno raccoglie in tempo.</p>
+          </div>
+        </div>
+        <div class="q">
+          <span class="k">Visibilità</span>
+          <div>
+            <h4>Da noi si vede, quando qualcuno ripara qualcosa?</h4>
+            <p>Se la risposta è no, il resto viene da sé — non perché manchi la buona volontà, ma perché il lavoro invisibile perde sempre contro quello visibile.</p>
+          </div>
+        </div>
+      </div>
+      <div class="caveat" style="margin-top:clamp(14px,2vh,20px)">
+        <span class="tag">Una cautela, se si decide di misurare</span>
+        <p>Ogni numero, appena lo si guarda, diventa un obiettivo — e da lì in poi misura sempre meno. Un conteggio può servire a rendere visibile il lavoro di manutenzione; nel momento in cui finisce in una valutazione individuale, smette di dire qualcosa di utile.</p>
+      </div>
+      <p class="colophon">Teksistemi · Newsletter tecnica · Numero 004 — 2 agosto 2026 · scritto da <b>orlodax</b></p>
+    </div>
+  </section>
+
+</main>
+
+<nav class="nav" aria-label="Navigazione slide">
+  <span class="shell"><a href="index.html">← Archivio</a><b>IT</b><a href="en/004-the-broken-window.html">EN</a></span>
+  <div class="track" id="track"></div>
+  <span class="count" id="count">01</span>
+  <div class="arrows">
+    <button class="arrow" id="prev" aria-label="Slide precedente">←</button>
+    <button class="arrow" id="next" aria-label="Slide successiva">→</button>
+  </div>
+</nav>
+
+<script>
+(function(){
+  const CRACKS=[
+    "M50 50L10 6M50 50L94 20M50 50L72 97M50 50L4 66M27 28L64 32M62 70L24 60",
+    "M50 50L18 2M50 50L98 44M50 50L38 98M50 50L2 34M32 24L70 62M20 70L58 84",
+    "M50 50L6 22M50 50L88 4M50 50L96 76M50 50L22 96M30 36L74 40M40 74L80 62",
+    "M50 50L46 2M50 50L96 34M50 50L84 92M50 50L8 82M50 50L2 18M26 40L72 70"
+  ];
+  const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const S=(n,f)=>Array.from({length:n},f);
+
+  function pane(state,i){
+    const p=document.createElement("div");
+    p.className="pane"+(state==="l"?" lit":state==="x"?" rotta":"");
+    p.innerHTML='<svg viewBox="0 0 100 100" aria-hidden="true"><path d="'+CRACKS[i%4]+'"/></svg>';
+    return p;
+  }
+  function build(el,cols,states,mini){
+    el.className="facade"+(mini?" mini":"");
+    el.style.gridTemplateColumns="repeat("+cols+",1fr)";
+    el.innerHTML="";
+    states.forEach((s,i)=>el.appendChild(pane(s,i)));
+    return [...el.children];
+  }
+
+  /* hero */
+  const heroEl=document.getElementById("heroFacade");
+  const wide=window.innerWidth>760,cols=wide?10:6,rows=4;
+  heroEl.style.width=wide?"min(560px,74vw)":"min(300px,80vw)";
+  const hp=build(heroEl,cols,S(cols*rows,(_,i)=>((i*7919)%100)/100<.55?"l":"d"),false);
+  function nb(i){
+    const row=Math.floor(i/cols),col=i%cols,o=[];
+    [[-1,0],[1,0],[0,-1],[0,1]].forEach(([dr,dc])=>{
+      const nr=row+dr,nc=col+dc;
+      if(nr>=0&&nr<rows&&nc>=0&&nc<cols)o.push(nr*cols+nc);
+    });
+    return o;
+  }
+  function breakP(i){
+    const p=hp[i];
+    if(!p||p.classList.contains("rotta"))return false;
+    p.classList.remove("lit");p.classList.add("rotta");return true;
+  }
+  let front=[Math.floor(hp.length/2)-3];
+  breakP(front[0]);
+  if(!reduce)setInterval(()=>{
+    const next=[];
+    front.forEach(i=>nb(i).forEach(n=>{if(Math.random()<.45&&breakP(n))next.push(n)}));
+    front=next.length?next:[Math.floor(Math.random()*hp.length)];
+  },1400);
+
+  /* mini visuals */
+  build(document.getElementById("v-todo"),8,S(8,(_,i)=>i===5?"x":"l"),true);
+  ["v-copy1","v-copy2","v-copy3"].forEach(id=>build(document.getElementById(id),1,["x"],false));
+  build(document.getElementById("v-pulito"),3,S(9,(_,i)=>i===4?"x":"l"),true);
+  build(document.getElementById("v-sporco"),3,S(9,(_,i)=>i%3===0?"d":"x"),true);
+  build(document.getElementById("v-owned"),8,S(24,(_,i)=>(i%8)<5?"l":"x"),true);
+  build(document.getElementById("v-sparso"),6,S(24,(_,i)=>[2,5,7,11,14,17,20,22].includes(i)?"x":"l"),true);
+  build(document.getElementById("v-concentrato"),6,S(24,(_,i)=>[3,4,5,9,10,11,15,16,17].includes(i)?"x":"l"),true);
+
+  const noise=document.getElementById("v-noise");
+  for(let i=0;i<44;i++){
+    const b=document.createElement("i");
+    b.style.height=(28+((i*37)%16))+"%";
+    if(i===29){b.className="real";b.style.height="72%"}
+    noise.appendChild(b);
+  }
+
+  /* agent facade */
+  const ap=build(document.getElementById("agentFacade"),7,S(49,(_,i)=>((i*7919)%100)/100<.6?"l":"d"),false);
+  let ran=false;
+  function runAgent(){
+    if(ran)return;ran=true;
+    ap.forEach((p,i)=>{
+      const go=()=>{p.classList.remove("lit");p.classList.add("rotta")};
+      reduce?go():setTimeout(go,i*20);
+    });
+  }
+
+  /* deck */
+  const slides=[...document.querySelectorAll(".slide")];
+  const AGENT_SLIDE=7;
+  const track=document.getElementById("track"),count=document.getElementById("count");
+  const prev=document.getElementById("prev"),next=document.getElementById("next");
+  let cur=0;
+  slides.forEach((_,i)=>{
+    const b=document.createElement("button");
+    b.className="tick";b.type="button";
+    b.setAttribute("aria-label","Vai alla slide "+(i+1));
+    b.addEventListener("click",()=>go(i));
+    track.appendChild(b);
+  });
+  const ticks=[...track.children];
+  function go(i){
+    cur=Math.max(0,Math.min(slides.length-1,i));
+    slides.forEach((s,n)=>s.classList.toggle("on",n===cur));
+    ticks.forEach((t,n)=>{t.classList.toggle("now",n===cur);t.classList.toggle("seen",n<cur)});
+    count.textContent=String(cur+1).padStart(2,"0");
+    prev.disabled=cur===0;next.disabled=cur===slides.length-1;
+    slides[cur].scrollTop=0;
+    if(cur===AGENT_SLIDE)runAgent();
+  }
+  prev.addEventListener("click",()=>go(cur-1));
+  next.addEventListener("click",()=>go(cur+1));
+  document.addEventListener("keydown",e=>{
+    if(e.key==="ArrowRight"||e.key==="PageDown"){e.preventDefault();go(cur+1)}
+    if(e.key==="ArrowLeft"||e.key==="PageUp"){e.preventDefault();go(cur-1)}
+    if(e.key==="Home")go(0);
+    if(e.key==="End")go(slides.length-1);
+  });
+  let x0=null;
+  document.addEventListener("touchstart",e=>{x0=e.changedTouches[0].clientX},{passive:true});
+  document.addEventListener("touchend",e=>{
+    if(x0===null)return;
+    const dx=e.changedTouches[0].clientX-x0;
+    if(Math.abs(dx)>60)go(cur+(dx<0?1:-1));
+    x0=null;
+  },{passive:true});
+  go(0);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What AI does to our heads</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E131C;
+    --panel:#151C28;
+    --panel-2:#1B2432;
+    --line:#2A3546;
+    --text:#C7D1DE;
+    --bright:#F2F6FB;
+    --dim:#76849A;
+    --amber:#E8B33E;   /* attenzione / sguardo */
+    --teal:#49B7A4;    /* comprensione */
+    --rose:#C96A7B;    /* rischio */
+    --serif:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    --sans:"IBM Plex Sans", system-ui, sans-serif;
+    --mono:"IBM Plex Mono", ui-monospace, monospace;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0}
+  html,body{height:100%}
+  body{
+    background:
+      radial-gradient(1200px 700px at 78% -10%, #1A2436 0%, transparent 60%),
+      radial-gradient(900px 600px at 0% 100%, #16202C 0%, transparent 55%),
+      var(--ink);
+    color:var(--text);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+
+  /* ---------- shell ---------- */
+  .deck{position:relative; height:100dvh; display:flex}
+
+  .rail{
+    width:210px; flex:0 0 210px;
+    border-right:1px solid var(--line);
+    padding:28px 20px;
+    display:flex; flex-direction:column; gap:2px;
+    background:rgba(10,14,21,.4);
+  }
+  .rail .brand{
+    font-family:var(--mono); font-size:10px; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--dim); margin-bottom:22px; line-height:1.6;
+  }
+  .rail button{
+    all:unset; cursor:pointer;
+    display:flex; gap:10px; align-items:baseline;
+    padding:7px 8px; border-radius:5px;
+    font-size:12.5px; color:var(--dim); line-height:1.3;
+  }
+  .rail button:hover{background:var(--panel); color:var(--text)}
+  .rail button:focus-visible{outline:2px solid var(--amber); outline-offset:1px}
+  .rail button .n{font-family:var(--mono); font-size:10px; opacity:.6; width:14px}
+  .rail button[aria-current="true"]{color:var(--bright); background:var(--panel)}
+  .rail button[aria-current="true"] .n{color:var(--amber); opacity:1}
+
+  .stage{flex:1; position:relative; overflow:hidden}
+
+  .slide{
+    position:absolute; inset:0;
+    padding:clamp(28px,4.5vw,72px);
+    display:none;
+    align-content:center;
+    overflow-y:auto;
+  }
+  .slide.active{display:grid}
+  .slide.active .up{animation:up .55s cubic-bezier(.2,.7,.2,1) both}
+  .slide.active .up:nth-child(2){animation-delay:.07s}
+  .slide.active .up:nth-child(3){animation-delay:.14s}
+  .slide.active .up:nth-child(4){animation-delay:.21s}
+  .slide.active .up:nth-child(5){animation-delay:.28s}
+  @keyframes up{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none}}
+
+  .eyebrow{
+    font-family:var(--mono); font-size:11px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--amber); margin-bottom:18px;
+  }
+  h1{
+    font-family:var(--serif); font-weight:800;
+    font-size:clamp(34px,5.2vw,68px); line-height:1.02;
+    letter-spacing:-.02em; color:var(--bright); max-width:16ch;
+  }
+  h2{
+    font-family:var(--serif); font-weight:800;
+    font-size:clamp(26px,3.4vw,44px); line-height:1.08;
+    letter-spacing:-.015em; color:var(--bright); max-width:20ch;
+  }
+  .lede{font-size:clamp(15px,1.35vw,19px); line-height:1.6; max-width:56ch; color:var(--text)}
+  .dim{color:var(--dim)}
+  .amber{color:var(--amber)}
+  .teal{color:var(--teal)}
+  .rose{color:var(--rose)}
+  em{font-style:normal; color:var(--bright); font-weight:600}
+
+  /* ---------- 1 cover ---------- */
+  .cover{max-width:900px}
+  .cover .sub{margin-top:26px; font-size:17px; color:var(--dim); max-width:48ch; line-height:1.6}
+  .pill{
+    display:inline-block; margin-top:34px;
+    font-family:var(--mono); font-size:11.5px; color:var(--text);
+    border:1px solid var(--line); border-radius:999px; padding:8px 14px;
+  }
+
+  /* ---------- 2 gaze ---------- */
+  .two{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:clamp(24px,3.5vw,56px); align-items:center}
+  .code{
+    background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:16px; position:relative;
+  }
+  .code svg{width:100%; height:auto; display:block}
+  .toggle{display:flex; gap:8px; margin-top:16px; flex-wrap:wrap}
+  .toggle button{
+    all:unset; cursor:pointer; font-family:var(--mono); font-size:11.5px;
+    padding:9px 13px; border-radius:6px; border:1px solid var(--line); color:var(--dim);
+  }
+  .toggle button:hover{color:var(--text); border-color:var(--dim)}
+  .toggle button:focus-visible{outline:2px solid var(--amber); outline-offset:2px}
+  .toggle button.on[data-g="a"]{color:var(--ink); background:var(--rose); border-color:var(--rose); font-weight:500}
+  .toggle button.on[data-g="b"]{color:var(--ink); background:var(--teal); border-color:var(--teal); font-weight:500}
+  .readout{margin-top:20px; min-height:120px}
+  .readout .rt{font-family:var(--serif); font-size:23px; font-weight:600; color:var(--bright); line-height:1.2; margin-bottom:10px}
+  .readout p{font-size:15px; line-height:1.6; color:var(--dim); max-width:40ch}
+  .stat{display:flex; gap:24px; margin-top:18px; font-family:var(--mono); font-size:11px; color:var(--dim)}
+  .stat b{display:block; font-family:var(--serif); font-size:26px; color:var(--bright); font-weight:800; margin-bottom:2px}
+
+  /* ---------- 3 gap ---------- */
+  .gapwrap{display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); gap:48px; align-items:center}
+  .gapwrap svg{width:100%; height:auto}
+
+  /* ---------- 4 bias cards ---------- */
+  .cards{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:34px}
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-top:2px solid var(--amber);
+    border-radius:8px; padding:20px;
+  }
+  .card:nth-child(2){border-top-color:var(--rose)}
+  .card:nth-child(3){border-top-color:var(--teal)}
+  .card .tag{font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); margin-bottom:12px}
+  .card h3{font-family:var(--serif); font-size:20px; font-weight:600; color:var(--bright); line-height:1.18; margin-bottom:10px}
+  .card p{font-size:14px; line-height:1.55; color:var(--dim)}
+  .card .us{margin-top:14px; padding-top:12px; border-top:1px dashed var(--line); font-size:13.5px; color:var(--text); line-height:1.5}
+
+  /* ---------- 5 rule ---------- */
+  .rule{max-width:900px}
+  .rule .big{
+    font-family:var(--serif); font-weight:800; letter-spacing:-.02em;
+    font-size:clamp(30px,4.4vw,58px); line-height:1.08; color:var(--bright);
+    border-left:3px solid var(--amber); padding-left:26px; margin:6px 0 30px;
+  }
+
+  /* ---------- 6 check ---------- */
+  .checks{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:26px; max-width:900px}
+  .chk{
+    all:unset; cursor:pointer; display:flex; gap:12px; align-items:flex-start;
+    background:var(--panel); border:1px solid var(--line); border-radius:8px;
+    padding:14px 16px; font-size:14.5px; line-height:1.45; color:var(--dim);
+  }
+  .chk:hover{border-color:var(--dim)}
+  .chk:focus-visible{outline:2px solid var(--amber); outline-offset:2px}
+  .chk .box{
+    flex:0 0 16px; width:16px; height:16px; margin-top:2px;
+    border:1px solid var(--dim); border-radius:3px; position:relative;
+  }
+  .chk.on{color:var(--bright); border-color:var(--amber); background:var(--panel-2)}
+  .chk.on .box{background:var(--amber); border-color:var(--amber)}
+  .chk.on .box::after{
+    content:""; position:absolute; left:5px; top:1px; width:4px; height:9px;
+    border:solid var(--ink); border-width:0 2px 2px 0; transform:rotate(42deg);
+  }
+  .verdict{
+    margin-top:24px; font-family:var(--serif); font-size:20px; color:var(--bright);
+    min-height:56px; max-width:60ch; line-height:1.35; font-weight:600;
+  }
+  .verdict span{color:var(--dim); font-family:var(--sans); font-size:15px; font-weight:400; display:block; margin-top:8px; line-height:1.55}
+
+  /* ---------- 7 rules of three ---------- */
+  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin-top:36px; border:1px solid var(--line); border-radius:10px; overflow:hidden}
+  .step{padding:24px; border-right:1px solid var(--line); background:var(--panel)}
+  .step:last-child{border-right:none}
+  .step .when{font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--amber); margin-bottom:14px}
+  .step h3{font-family:var(--serif); font-size:21px; font-weight:600; color:var(--bright); margin-bottom:10px; line-height:1.2}
+  .step p{font-size:14px; line-height:1.55; color:var(--dim)}
+
+  /* ---------- 8 metrics ---------- */
+  .metrics{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:32px}
+  .metric{border:1px solid var(--line); border-radius:8px; padding:22px; background:var(--panel)}
+  .metric .m{font-family:var(--serif); font-size:17px; color:var(--bright); font-weight:600; margin-bottom:8px; line-height:1.25}
+  .metric p{font-size:13.5px; color:var(--dim); line-height:1.55}
+  .note{margin-top:26px; font-size:14.5px; color:var(--dim); max-width:60ch; line-height:1.6; border-left:2px solid var(--teal); padding-left:16px}
+
+  /* ---------- 9 close ---------- */
+  .close{max-width:900px}
+  .q{
+    margin-top:34px; padding:24px 26px; border:1px solid var(--line);
+    border-radius:10px; background:var(--panel); max-width:62ch;
+  }
+  .q .qt{font-family:var(--mono); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--amber); margin-bottom:12px}
+  .q p{font-family:var(--serif); font-size:22px; line-height:1.35; color:var(--bright); font-weight:600}
+
+  /* ---------- nav ---------- */
+  .nav{
+    position:absolute; right:clamp(20px,3vw,44px); bottom:clamp(18px,2.6vw,32px);
+    display:flex; align-items:center; gap:12px; z-index:5;
+  }
+  .nav button{
+    all:unset; cursor:pointer; width:34px; height:34px; display:grid; place-items:center;
+    border:1px solid var(--line); border-radius:6px; color:var(--dim); font-size:14px;
+    background:rgba(14,19,28,.7);
+  }
+  .nav button:hover{color:var(--bright); border-color:var(--dim)}
+  .nav button:focus-visible{outline:2px solid var(--amber); outline-offset:2px}
+  .nav .count{font-family:var(--mono); font-size:11px; color:var(--dim); letter-spacing:.08em}
+
+  .hint{
+    position:absolute; left:clamp(20px,3vw,44px); bottom:clamp(18px,2.6vw,32px);
+    font-family:var(--mono); font-size:10.5px; color:var(--dim); opacity:.55; letter-spacing:.06em;
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:1000px){
+    .rail{display:none}
+    .two,.gapwrap{grid-template-columns:1fr; gap:28px}
+    .cards,.steps,.metrics,.checks{grid-template-columns:1fr}
+    .step{border-right:none; border-bottom:1px solid var(--line)}
+    .step:last-child{border-bottom:none}
+    .slide{align-content:start; padding-top:36px; padding-bottom:90px}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none !important; transition:none !important}
+  }
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <nav class="rail" aria-label="Contents">
+    <div class="brand">Teksistemi<br>internal note · 9 slides</div>
+    <button data-go="0"><span class="n">01</span><span>What this is about</span></button>
+    <button data-go="1"><span class="n">02</span><span>Two gazes, same code</span></button>
+    <button data-go="2"><span class="n">03</span><span>The gap widens</span></button>
+    <button data-go="3"><span class="n">04</span><span>Why it fools us</span></button>
+    <button data-go="4"><span class="n">05</span><span>The honest test</span></button>
+    <button data-go="5"><span class="n">06</span><span>This week, us</span></button>
+    <button data-go="6"><span class="n">07</span><span>What we will try</span></button>
+    <button data-go="7"><span class="n">08</span><span>How we will know</span></button>
+    <button data-go="8"><span class="n">09</span><span>The question</span></button>
+  </nav>
+
+  <main class="stage">
+
+    <!-- 01 -->
+    <section class="slide active" id="s0">
+      <div class="cover">
+        <div class="eyebrow up">From an eye-tracking experiment</div>
+        <h1 class="up">AI doesn't make us<br>any dumber.<br>It makes us <span class="amber">more confident</span>.</h1>
+        <p class="sub up">Which is a different problem, and a harder one to see from the inside. Nine slides, five minutes. Then we talk it over together — not to decide whether to use AI, but <em>how</em>.</p>
+        <div class="pill up">→ / ← to move · or click the index on the left</div>
+      </div>
+    </section>
+
+    <!-- 02 -->
+    <section class="slide" id="s1">
+      <div class="two">
+        <div class="up">
+          <div class="eyebrow">The study · where the eyes land</div>
+          <h2>Two students, same exercise,<br>same working code.</h2>
+          <p class="lede" style="margin-top:18px">An eye-tracker recorded where they looked while the assistant made its suggestion. Try playing the two gazes.</p>
+
+          <div class="toggle">
+            <button data-g="a" class="on">▶ Gaze A · accepts</button>
+            <button data-g="b">▶ Gaze B · verifies</button>
+          </div>
+
+          <div class="readout" id="readout">
+            <div class="rt"></div>
+            <p></p>
+            <div class="stat" id="stat"></div>
+          </div>
+        </div>
+
+        <div class="code up">
+          <svg viewBox="0 0 520 380" role="img" aria-label="Gaze trace over a block of code">
+            <!-- fake code lines -->
+            <g fill="#2E3A4C">
+              <rect x="24" y="30"  width="180" height="7" rx="3.5"/>
+              <rect x="44" y="56"  width="240" height="7" rx="3.5"/>
+              <rect x="44" y="82"  width="150" height="7" rx="3.5"/>
+              <rect x="64" y="108" width="210" height="7" rx="3.5"/>
+              <rect x="64" y="134" width="130" height="7" rx="3.5"/>
+              <rect x="44" y="160" width="260" height="7" rx="3.5"/>
+              <rect x="24" y="186" width="110" height="7" rx="3.5"/>
+            </g>
+            <!-- block suggested by the AI -->
+            <rect x="16" y="206" width="380" height="118" rx="6" fill="#1F2A3A" stroke="#3A4759" stroke-dasharray="4 3"/>
+            <text x="28" y="226" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#76849A" letter-spacing="1.4">SUGGESTED BY AI</text>
+            <g fill="#43526A">
+              <rect x="28" y="240" width="300" height="7" rx="3.5"/>
+              <rect x="48" y="264" width="230" height="7" rx="3.5"/>
+              <rect x="48" y="288" width="290" height="7" rx="3.5"/>
+              <rect x="28" y="308" width="170" height="7" rx="3.5"/>
+            </g>
+            <rect x="300" y="336" width="96" height="26" rx="5" fill="#232F40" stroke="#3A4759"/>
+            <text x="348" y="353" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#9BA9BC">Tab ↹</text>
+
+            <!-- tracciati -->
+            <g id="gazeA" opacity="0">
+              <polyline id="pathA" fill="none" stroke="#C96A7B" stroke-width="1.6" stroke-linejoin="round" stroke-opacity=".75"
+                points="70,34 200,244 348,349"/>
+              <circle cx="70"  cy="34"  r="7"  fill="#C96A7B" fill-opacity=".22" stroke="#C96A7B" class="fx" style="--d:0s"/>
+              <circle cx="200" cy="244" r="12" fill="#C96A7B" fill-opacity=".22" stroke="#C96A7B" class="fx" style="--d:.35s"/>
+              <circle cx="348" cy="349" r="9"  fill="#C96A7B" fill-opacity=".22" stroke="#C96A7B" class="fx" style="--d:.7s"/>
+            </g>
+
+            <g id="gazeB" opacity="0">
+              <polyline id="pathB" fill="none" stroke="#49B7A4" stroke-width="1.6" stroke-linejoin="round" stroke-opacity=".75"
+                points="70,34 140,60 100,86 170,112 110,138 250,244 120,86 300,268 160,138 320,292 90,190 348,349"/>
+              <circle cx="70"  cy="34"  r="6"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:0s"/>
+              <circle cx="140" cy="60"  r="6"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:.12s"/>
+              <circle cx="100" cy="86"  r="7"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:.24s"/>
+              <circle cx="170" cy="112" r="6"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:.36s"/>
+              <circle cx="110" cy="138" r="7"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:.48s"/>
+              <circle cx="250" cy="244" r="9"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:.6s"/>
+              <circle cx="120" cy="86"  r="8"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:.72s"/>
+              <circle cx="300" cy="268" r="8"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:.84s"/>
+              <circle cx="160" cy="138" r="7"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:.96s"/>
+              <circle cx="320" cy="292" r="8"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:1.08s"/>
+              <circle cx="90"  cy="190" r="7"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:1.2s"/>
+              <circle cx="348" cy="349" r="8"  fill="#49B7A4" fill-opacity=".2" stroke="#49B7A4" class="fx" style="--d:1.32s"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 -->
+    <section class="slide" id="s2">
+      <div class="gapwrap">
+        <div class="up">
+          <div class="eyebrow">The scissor effect</div>
+          <h2>AI doesn't lift everyone.<br>It widens the distance.</h2>
+          <p class="lede" style="margin-top:18px">Those who already have the mental models use AI as an <span class="teal">accelerator</span>: they read, discard, correct. Those who haven't built them yet accumulate <span class="rose">code that works and nobody understands</span> — including whoever shipped it.</p>
+          <p class="lede dim" style="margin-top:16px">In some introductory courses, after the assistants arrived, failure rates went <em>up</em>, not down. The code handed in was better. The people were not.</p>
+        </div>
+        <div class="up">
+          <svg viewBox="0 0 520 320" role="img" aria-label="Chart: the distance between the two groups widens over time">
+            <line x1="60" y1="270" x2="490" y2="270" stroke="#2A3546"/>
+            <line x1="60" y1="30"  x2="60"  y2="270" stroke="#2A3546"/>
+            <text x="60" y="296" font-family="IBM Plex Mono, monospace" font-size="10" fill="#76849A">before AI</text>
+            <text x="490" y="296" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10" fill="#76849A">6 months later</text>
+            <text x="46" y="36" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10" fill="#76849A" transform="rotate(-90 46 36)">actual skill</text>
+
+            <path class="gline" d="M60,180 C180,168 300,120 490,62" fill="none" stroke="#49B7A4" stroke-width="2.2"/>
+            <path class="gline" style="--d:.25s" d="M60,190 C180,196 300,214 490,246" fill="none" stroke="#C96A7B" stroke-width="2.2"/>
+
+            <line x1="490" y1="62" x2="490" y2="246" stroke="#E8B33E" stroke-width="1" stroke-dasharray="3 3"/>
+            <text x="478" y="158" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10" fill="#E8B33E">the gap</text>
+
+            <circle cx="490" cy="62"  r="4" fill="#49B7A4"/>
+            <circle cx="490" cy="246" r="4" fill="#C96A7B"/>
+            <text x="300" y="96" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="#49B7A4">who verify what they accept</text>
+            <text x="300" y="234" font-family="IBM Plex Sans, sans-serif" font-size="12.5" fill="#C96A7B">who accept and move on</text>
+            <circle cx="60" cy="185" r="4" fill="#76849A"/>
+            <text x="76" y="163" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#76849A">same starting point</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 -->
+    <section class="slide" id="s3">
+      <div>
+        <div class="eyebrow up">Why it happens to sharp people too</div>
+        <h2 class="up">It isn't laziness.<br>It's how our heads work.</h2>
+        <div class="cards up">
+          <div class="card">
+            <div class="tag">Automation bias</div>
+            <h3>If it comes out of a machine, it looks already checked</h3>
+            <p>We trust an output more just because the source seems competent. The fluency it arrives with is not evidence of correctness.</p>
+            <div class="us">Us: when AI answers in two seconds, we tend to skip the question “but is it true?”.</div>
+          </div>
+          <div class="card">
+            <div class="tag">Illusion of understanding</div>
+            <h3>Reading something clear feels like having understood it</h3>
+            <p>Writing the code by hand forced us to understand it. That friction was the work, not the obstacle. Removing it removes the check as well.</p>
+            <div class="us">Us: we know <em>that</em> it works. Far more rarely do we know <em>why</em>.</div>
+          </div>
+          <div class="card">
+            <div class="tag">Deferred cost</div>
+            <h3>The speed shows today, the bill arrives in six weeks</h3>
+            <p>Successful demos circulate. Rollbacks and 2 a.m. bugs don't. We systematically see more positive signal than there is.</p>
+            <div class="us">Us: we measure how much we ship, almost never how much comes back.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 -->
+    <section class="slide" id="s4">
+      <div class="rule">
+        <div class="eyebrow up">One rule, if we had to keep only one</div>
+        <div class="big up">Ask AI only for things we could write ourselves.</div>
+        <p class="lede up">Not because writing them by hand is better — it's slower and we know it. But because it's the only way to <em>notice</em> when the answer is wrong. If we don't know what a right answer looks like, we have no yardstick for recognizing a wrong one: we just take it.</p>
+        <p class="lede dim up" style="margin-top:18px">Corollary, for prototypes: if it's a demo, anything goes. The line isn't “AI yes / AI no”. The line is <em>production</em>.</p>
+      </div>
+    </section>
+
+    <!-- 06 -->
+    <section class="slide" id="s5">
+      <div>
+        <div class="eyebrow up">Thirty seconds, just for ourselves</div>
+        <h2 class="up">This week,<br>how many of these sound like us?</h2>
+        <div class="checks up" id="checks">
+          <button class="chk"><span class="box"></span><span>I accepted a suggestion without rereading it line by line.</span></button>
+          <button class="chk"><span class="box"></span><span>I shipped code I couldn't explain out loud a month from now.</span></button>
+          <button class="chk"><span class="box"></span><span>I asked AI to fix a bug before understanding what was causing it.</span></button>
+          <button class="chk"><span class="box"></span><span>I thought “it works, that'll do” without looking for edge cases.</span></button>
+          <button class="chk"><span class="box"></span><span>I approved a PR whose logic I didn't really read.</span></button>
+          <button class="chk"><span class="box"></span><span>I estimated a job as “quick” because AI would write it anyway.</span></button>
+        </div>
+        <div class="verdict" id="verdict"></div>
+      </div>
+    </section>
+
+    <!-- 07 -->
+    <section class="slide" id="s6">
+      <div>
+        <div class="eyebrow up">Three habits, zero bureaucracy</div>
+        <h2 class="up">What we'll try<br>from the next sprint.</h2>
+        <div class="steps up">
+          <div class="step">
+            <div class="when">Before asking</div>
+            <h3>Ten lines by hand</h3>
+            <p>A rough draft of the logic we think is needed. Ugly is fine. Its only job is to give us an opinion <em>before</em> we hear the AI's.</p>
+          </div>
+          <div class="step">
+            <div class="when">In the PR</div>
+            <h3>Two lines of “why”</h3>
+            <p>Not what the code does — that part is readable. Why this solution, and what it doesn't cover. Written by us, not generated.</p>
+          </div>
+          <div class="step">
+            <div class="when">In review</div>
+            <h3>Talk us through it</h3>
+            <p>Data flow and edge cases, in one minute. If we can't explain it, it isn't ready — and that goes for everyone, not just the juniors.</p>
+          </div>
+        </div>
+        <p class="note up" style="margin-top:28px">None of these slow down anyone who has already understood the code. They only slow down whoever hasn't — which is exactly the point.</p>
+      </div>
+    </section>
+
+    <!-- 08 -->
+    <section class="slide" id="s7">
+      <div>
+        <div class="eyebrow up">Not to police us. To know whether it's working.</div>
+        <h2 class="up">Three numbers that tell<br>the truth about last month.</h2>
+        <div class="metrics up">
+          <div class="metric">
+            <div class="m">Rollbacks and hotfixes</div>
+            <p>How many times we had to go back. If it climbs while velocity climbs, we aren't going faster: we're borrowing.</p>
+          </div>
+          <div class="metric">
+            <div class="m">Time to understand a bug</div>
+            <p>Not to fix it — to <em>understand</em> it. This is where code nobody really owns shows itself.</p>
+          </div>
+          <div class="metric">
+            <div class="m">PRs merged without explanation</div>
+            <p>The share of code that reached production which nobody could (or had to) talk through.</p>
+          </div>
+        </div>
+        <p class="note up">Today we only watch half the cycle: how much goes out. These three numbers watch the other half: how much comes back. If they don't get worse after two sprints, we have proof we're using AI well — and we can push harder.</p>
+      </div>
+    </section>
+
+    <!-- 09 -->
+    <section class="slide" id="s8">
+      <div class="close">
+        <div class="eyebrow up">To take home</div>
+        <h1 class="up" style="max-width:20ch">The risk isn't AI.<br>It's shipping something <span class="amber">none of us understands</span>.</h1>
+        <div class="q up">
+          <div class="qt">The question, at the next PR</div>
+          <p>“If this broke in production at 11 p.m. tomorrow, and AI didn't answer — would I know where to start?”</p>
+        </div>
+        <p class="lede dim up" style="margin-top:26px">If the answer is yes: let's use it as much as we like, genuinely. If it's no, it isn't a tools problem. It's a missing piece — and it's worth going to get it now, while it's cheap.</p>
+        <p class="sign up">Teksistemi · Issue 001 — July 11, 2026 · written by <b>orlodax</b></p>
+      </div>
+    </section>
+
+    <div class="hint"><a href="index.html">← Archive</a> · <a href="../001-ai-e-la-nostra-testa.html">IT</a> · <b>EN</b> · ← → to navigate</div>
+    <div class="nav">
+      <button id="prev" aria-label="Previous slide">←</button>
+      <span class="count" id="count">01 / 09</span>
+      <button id="next" aria-label="Next slide">→</button>
+    </div>
+  </main>
+</div>
+
+<style>
+  /* animazioni sguardo + linee grafico (definite qui per tenerle vicine al JS) */
+  .fx{opacity:0; stroke-width:1.2; animation:pop .45s ease-out both; animation-delay:var(--d)}
+  @keyframes pop{0%{opacity:0; transform:scale(.4)} 60%{opacity:1} 100%{opacity:.95; transform:scale(1)}}
+  #gazeA polyline, #gazeB polyline{stroke-dasharray:1400; stroke-dashoffset:1400; animation:draw 1.6s ease-out .1s both}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .slide.active .gline{stroke-dasharray:600; stroke-dashoffset:600; animation:draw 1.3s ease-out .3s both; animation-delay:var(--d,.3s)}
+  circle.fx{transform-box:fill-box; transform-origin:center}
+
+  /* guscio: navigazione archivio, lingua e firma */
+  .hint{opacity:.8}
+  .hint a{color:inherit; text-decoration:none; border-bottom:1px solid rgba(255,255,255,.2)}
+  .hint a:hover{color:var(--bright); border-bottom-color:var(--amber)}
+  .hint b{color:var(--amber); font-weight:500}
+  .sign{
+    margin-top:30px; font-family:var(--mono); font-size:10px;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--dim);
+  }
+  .sign b{color:var(--amber); font-weight:500}
+</style>
+
+<script>
+(function(){
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const railBtns = Array.from(document.querySelectorAll('.rail button'));
+  const count = document.getElementById('count');
+  let i = 0;
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  function show(n){
+    i = Math.max(0, Math.min(slides.length-1, n));
+    slides.forEach((s,k)=> s.classList.toggle('active', k===i));
+    railBtns.forEach((b,k)=> b.setAttribute('aria-current', k===i ? 'true':'false'));
+    count.textContent = pad(i+1) + ' / ' + pad(slides.length);
+    if(i===1) playGaze(currentGaze);
+  }
+
+  document.getElementById('next').onclick = ()=> show(i+1);
+  document.getElementById('prev').onclick = ()=> show(i-1);
+  railBtns.forEach(b => b.onclick = ()=> show(parseInt(b.dataset.go,10)));
+
+  document.addEventListener('keydown', e=>{
+    if(e.key === 'ArrowRight' || e.key === 'PageDown'){ show(i+1); }
+    if(e.key === 'ArrowLeft'  || e.key === 'PageUp'){ show(i-1); }
+    if(e.key === 'Home'){ show(0); }
+    if(e.key === 'End'){ show(slides.length-1); }
+  });
+
+  /* ---------- sguardi ---------- */
+  const COPY = {
+    a: {
+      t: 'Gaze A — accepts and moves on',
+      p: 'Three fixations in total. A glance at the problem, one at the suggested block, then Tab. The code passes the tests. Nothing stays in their head.',
+      s: [['3','fixations'],['0','look-backs'],['~2s','before accepting']]
+    },
+    b: {
+      t: 'Gaze B — verifies and stays in control',
+      p: 'Rereads their own plan, compares it with the suggestion, goes back, discards two irrelevant pieces. Same final code. But they know where it is fragile.',
+      s: [['12','fixations'],['5','look-backs'],['~40s','before accepting']]
+    }
+  };
+  let currentGaze = 'a';
+  const readout = document.getElementById('readout');
+  const statEl  = document.getElementById('stat');
+
+  function playGaze(g){
+    currentGaze = g;
+    document.querySelectorAll('.toggle button').forEach(b=> b.classList.toggle('on', b.dataset.g===g));
+    ['a','b'].forEach(k=>{
+      const grp = document.getElementById('gaze' + k.toUpperCase());
+      if(!grp) return;
+      if(k===g){
+        const clone = grp.cloneNode(true);   // forces the animations to restart
+        clone.setAttribute('opacity','1');
+        grp.parentNode.replaceChild(clone, grp);
+      } else {
+        grp.setAttribute('opacity','0');
+      }
+    });
+    const c = COPY[g];
+    readout.querySelector('.rt').textContent = c.t;
+    readout.querySelector('p').textContent  = c.p;
+    statEl.innerHTML = c.s.map(([v,l])=> '<div><b>'+v+'</b>'+l+'</div>').join('');
+  }
+  document.querySelectorAll('.toggle button').forEach(b=> b.onclick = ()=> playGaze(b.dataset.g));
+  playGaze('a');
+
+  /* ---------- self-check ---------- */
+  const chks = Array.from(document.querySelectorAll('#checks .chk'));
+  const verdict = document.getElementById('verdict');
+  function updateVerdict(){
+    const n = chks.filter(c=>c.classList.contains('on')).length;
+    let t = '', s = '';
+    if(n===0){ t = 'None checked (yet).';
+               s = 'Read them again slowly. The point of these six sentences is that they all seem reasonable while we are doing them — that is exactly why they are hard to notice.'; }
+    else if(n<=2){ t = n + ' out of 6. Normal, and honest.';
+               s = 'Nobody works at 100% attention. The signal to keep an eye on is not the number: it is whether it grows sprint after sprint without us noticing.'; }
+    else if(n<=4){ t = n + ' out of 6. This is where the debt starts compounding.';
+               s = 'There is nothing serious about any single instance. The problem is that each one takes away the chance to build the mental model we will need the next time.'; }
+    else { t = n + ' out of 6 — and it is fine to have admitted it.';
+               s = 'This is exactly the trajectory of Gaze A. The good news: it is reversible, and the three habits on the next slide cost less than ten minutes a day put together.'; }
+    verdict.innerHTML = t + '<span>' + s + '</span>';
+  }
+  chks.forEach(c => c.onclick = ()=>{ c.classList.toggle('on'); updateVerdict(); });
+  updateVerdict();
+
+  show(0);
+})();
+</script>
+</body>
+</html>

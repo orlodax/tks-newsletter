@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teksistemi · Technical newsletter</title>
+<meta name="description" content="Archive of the Teksistemi internal technical newsletter.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --notte:#151A21;--cemento:#1E242C;--cemento-alto:#272F39;
+  --vetro:#9AAAB7;--luce:#F3E7CE;--ambra:#E5B25D;--verde:#6BA88F;
+  --bordo:rgba(154,170,183,.18);
+  --sp:clamp(20px,5vw,64px);
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:
+    linear-gradient(var(--bordo) 1px,transparent 1px) 0 0 / 100% 28px,
+    linear-gradient(90deg,var(--bordo) 1px,transparent 1px) 0 0 / 28px 100%,
+    var(--notte);
+  color:var(--luce);
+  font-family:"Instrument Sans",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  padding:0 var(--sp) clamp(56px,9vh,110px);
+}
+.wrap{max-width:940px;margin:0 auto}
+
+/* ---- topbar ---- */
+.topbar{
+  display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--vetro);padding:26px 0 0;
+}
+.topbar .langs{display:flex;gap:12px;flex:none}
+.topbar a{color:var(--vetro);text-decoration:none;opacity:.75}
+.topbar a:hover{color:var(--verde);opacity:1}
+.topbar b{color:var(--ambra);font-weight:400}
+
+/* ---- masthead ---- */
+header{padding:clamp(46px,11vh,110px) 0 clamp(26px,4.5vh,44px)}
+.eyebrow{
+  font-family:var(--mono);font-size:clamp(9.5px,1.05vw,11.5px);
+  letter-spacing:.22em;text-transform:uppercase;color:var(--verde);
+  margin-bottom:clamp(14px,2.4vh,22px);
+}
+h1{
+  font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 116,"wght" 800;
+  font-size:clamp(42px,9vw,104px);line-height:.9;letter-spacing:-.025em;text-transform:uppercase;
+}
+.lead{
+  font-size:clamp(15px,1.7vw,19px);line-height:1.5;color:var(--vetro);
+  max-width:56ch;margin-top:clamp(16px,2.6vh,26px);
+}
+.lead em{color:var(--ambra);font-style:normal;font-weight:500}
+
+/* ---- issue list ---- */
+.count-cap{
+  font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--vetro);opacity:.6;padding-bottom:12px;border-bottom:1px solid var(--bordo);
+}
+.issues{list-style:none;margin-top:2px}
+.issue a{
+  display:grid;grid-template-columns:78px 1fr;gap:0 clamp(16px,3vw,34px);
+  padding:clamp(20px,3.2vh,30px) 6px;
+  border-bottom:1px solid var(--bordo);
+  text-decoration:none;color:inherit;
+  transition:background .25s ease,padding-left .25s ease;
+}
+.issue a:hover,.issue a:focus-visible{background:rgba(154,170,183,.05);padding-left:14px;outline:none}
+.issue a:focus-visible{box-shadow:inset 2px 0 0 var(--verde)}
+.num{
+  font-family:var(--mono);font-size:clamp(20px,2.6vw,30px);
+  color:var(--cemento-alto);line-height:1;transition:color .25s ease;
+}
+.issue a:hover .num,.issue a:focus-visible .num{color:var(--ambra)}
+.meta{
+  font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--vetro);opacity:.7;display:flex;flex-wrap:wrap;gap:0 10px;margin-bottom:9px;
+}
+.meta .kind{color:var(--verde);opacity:1}
+h2{
+  font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 104,"wght" 700;
+  font-size:clamp(21px,2.9vw,33px);line-height:1.1;letter-spacing:-.015em;max-width:22ch;
+}
+.issue a:hover h2{color:#fff}
+.blurb{font-size:clamp(13.5px,1.35vw,15.5px);line-height:1.55;color:var(--vetro);max-width:60ch;margin-top:9px}
+.go{
+  font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ambra);margin-top:13px;opacity:0;transform:translateX(-6px);
+  transition:opacity .25s ease,transform .25s ease;
+}
+.issue a:hover .go,.issue a:focus-visible .go{opacity:1;transform:none}
+
+/* ---- colophon ---- */
+footer{
+  margin-top:clamp(38px,6vh,64px);padding-top:20px;border-top:1px solid var(--bordo);
+  font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--vetro);opacity:.7;line-height:2;
+}
+footer b{color:var(--ambra);font-weight:400}
+
+@media(max-width:620px){
+  .issue a{grid-template-columns:1fr;gap:10px}
+  .num{font-size:16px}
+  h2{max-width:none}
+}
+@media(prefers-reduced-motion:reduce){
+  *{transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="topbar">
+    <span>Teksistemi · archive</span>
+    <span class="langs"><a href="../index.html">IT</a><b>EN</b></span>
+  </nav>
+
+  <header>
+    <div class="eyebrow">Teksistemi · internal notes</div>
+    <h1>Technical<br>newsletter</h1>
+    <p class="lead">Notes on how we are working: what agents do to the code, what they do to the heads of the people writing it, and what is worth keeping an eye on. An issue every so often, <em>on no schedule</em>.</p>
+  </header>
+
+  <div class="count-cap" id="countCap"></div>
+  <ul class="issues" id="issues"></ul>
+
+  <footer>
+    Teksistemi · internal technical newsletter<br>
+    Written by <b>orlodax</b>
+  </footer>
+
+</div>
+
+<script>
+/* One issue per line. To add one: drop the file in this folder and add a line here. */
+var ISSUES = [
+  {n:'001', date:'July 11, 2026', kind:'Deck · 9 slides',   file:'001-what-ai-does-to-our-heads.html', title:'What AI does to our heads',  blurb:'An eye-tracker, two students, the same working code. AI does not make us dumber: it makes us more confident, and that is a different problem.'},
+  {n:'002', date:'July 23, 2026', kind:'Note · interactive', file:'002-agentic-development-yield.html', title:'Agentic development yield',  blurb:'Q ≈ k · qC · qP · qV. Why the four factors behave like an AND gate, with sliders to try it out.'},
+  {n:'003', date:'July 26, 2026', kind:'Note · ~8 min',      file:'003-the-map-that-isnt-there.html',   title:'The map that isn’t there',   blurb:'Why an agent’s explanation always convinces you, even when it has misread the project. With two hands-on tests.'},
+  {n:'004', date:'August 2, 2026', kind:'Deck · 9 slides',   file:'004-the-broken-window.html',         title:'The broken window',          blurb:'Zimbardo, Lowell and the normalization of deviance — and what changes now that agents read our code and imitate it.'}
+];
+
+(function(){
+  var list = document.getElementById('issues');
+  var esc = function(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+  ISSUES.slice().reverse().forEach(function(it){
+    var li = document.createElement('li');
+    li.className = 'issue';
+    li.innerHTML =
+      '<a href="' + esc(it.file) + '">' +
+        '<span class="num">' + esc(it.n) + '</span>' +
+        '<span>' +
+          '<span class="meta"><span class="kind">' + esc(it.kind) + '</span><span>' + esc(it.date) + '</span></span>' +
+          '<h2>' + esc(it.title) + '</h2>' +
+          '<p class="blurb">' + esc(it.blurb) + '</p>' +
+          '<span class="go">Read →</span>' +
+        '</span>' +
+      '</a>';
+    list.appendChild(li);
+  });
+  document.getElementById('countCap').textContent =
+    ISSUES.length + (ISSUES.length === 1 ? ' issue' : ' issues') + ' · newest first';
+})();
+</script>
+</body>
+</html>
