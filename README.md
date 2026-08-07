@@ -15,6 +15,7 @@ Written by **orlodax**. Italian is the source language; every issue has an en-US
 | 002 | [Resa dello sviluppo agentico](002-resa-sviluppo-agentico.html) · [Agentic development yield](en/002-agentic-development-yield.html) | Note, interactive | 23 Jul 2026 |
 | 003 | [La mappa che non c'è](003-la-mappa-che-non-ce.html) · [The map that isn't there](en/003-the-map-that-isnt-there.html) | Note, ~8 min | 26 Jul 2026 |
 | 004 | [La finestra rotta](004-finestra-rotta.html) · [The broken window](en/004-the-broken-window.html) | Deck, 9 slides | 2 Aug 2026 |
+| 005 | [Errori di fabbrica](005-errori-di-fabbrica.html) · [Factory settings](en/005-factory-settings.html) | Deck, 23 slides | 7 Aug 2026 |
 
 ## How this is built
 
@@ -24,11 +25,21 @@ folder deploys to static hosting unchanged. The only external request in the arc
 is Google Fonts.
 
 ```
-index.html                 Italian archive
+index.html                 Italian archive + language router
 NNN-slug-italiano.html     issues, oldest to newest
 en/index.html              English archive
 en/NNN-english-slug.html   translations (matching numbers, translated slugs)
 ```
+
+### Language routing
+
+GitHub Pages does no content negotiation, so the root `index.html` does it in the
+browser: Italian browsers stay on the Italian archive, everything else is sent to
+`en/` with `location.replace` (which keeps the back button clean). An explicit
+choice made with an IT/EN switcher is stored in `localStorage` as `tks-lang` and
+beats detection from then on. Append `?stay=1` to reach the Italian archive
+without being redirected. Without JavaScript there is no redirect at all — the
+Italian archive simply renders, with the EN link in the top bar.
 
 ### Adding an issue
 

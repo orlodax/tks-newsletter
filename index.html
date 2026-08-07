@@ -5,6 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Teksistemi · Newsletter tecnica</title>
 <meta name="description" content="Archivio della newsletter tecnica interna di Teksistemi.">
+<link rel="alternate" hreflang="it" href="https://orlodax.github.io/tks-newsletter/">
+<link rel="alternate" hreflang="en" href="https://orlodax.github.io/tks-newsletter/en/">
+<link rel="alternate" hreflang="x-default" href="https://orlodax.github.io/tks-newsletter/">
+<script>
+/* GitHub Pages non legge Accept-Language: il routing di lingua può avvenire
+   solo qui, nel browser. Regole:
+   - una scelta esplicita già fatta (localStorage tks-lang) vince sempre
+   - ?stay=1 disattiva il redirect, così questa pagina resta raggiungibile
+   - un browser italiano resta qui; tutto il resto va su en/
+   Su file:// una cartella non serve il suo index.html (il browser mostra
+   l'elenco dei file): in anteprima locale il redirect punta al file esplicito.
+   location.replace non sporca la cronologia del tasto indietro. */
+(function(){
+  if (/[?&]stay=1/.test(location.search)) return;
+  var saved = null;
+  try { saved = localStorage.getItem('tks-lang'); } catch (e) {}
+  if (saved === 'it') return;
+  var tags = (navigator.languages && navigator.languages.length)
+             ? navigator.languages : [navigator.language || ''];
+  var it = String(tags[0] || '').toLowerCase().indexOf('it') === 0;
+  if (saved === 'en' || !it) {
+    location.replace(location.protocol === 'file:' ? 'en/index.html' : 'en/');
+  }
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -118,7 +143,7 @@ footer b{color:var(--ambra);font-weight:400}
 
   <nav class="topbar">
     <span>Teksistemi · archivio</span>
-    <span class="langs"><b>IT</b><a href="en/index.html">EN</a></span>
+    <span class="langs"><b>IT</b><a href="en/index.html" data-lang="en">EN</a></span>
   </nav>
 
   <header>
@@ -143,7 +168,8 @@ var ISSUES = [
   {n:'001', date:'11 luglio 2026',  kind:'Deck · 9 slide',    file:'001-ai-e-la-nostra-testa.html',   title:'Cosa fa l’AI alla nostra testa', blurb:'Un eye-tracker, due studenti, lo stesso codice funzionante. L’AI non ci rende più stupidi: ci rende più sicuri, e quello è un problema diverso.'},
   {n:'002', date:'23 luglio 2026',  kind:'Nota · interattiva', file:'002-resa-sviluppo-agentico.html', title:'Resa dello sviluppo agentico',       blurb:'Q ≈ k · qC · qP · qV. Perché i quattro fattori si comportano come una porta AND, con i cursori per provarlo.'},
   {n:'003', date:'26 luglio 2026',  kind:'Nota · ~8 min',      file:'003-la-mappa-che-non-ce.html',    title:'La mappa che non c’è',      blurb:'Perché la spiegazione di un agente ti convince sempre, anche quando ha capito male il progetto. Con due prove pratiche.'},
-  {n:'004', date:'2 agosto 2026',   kind:'Deck · 9 slide',     file:'004-finestra-rotta.html',         title:'La finestra rotta',                  blurb:'Zimbardo, Lowell e la normalizzazione della devianza — e cosa cambia adesso che gli agenti leggono il nostro codice e lo imitano.'}
+  {n:'004', date:'2 agosto 2026',   kind:'Deck · 9 slide',     file:'004-finestra-rotta.html',         title:'La finestra rotta',                  blurb:'Zimbardo, Lowell e la normalizzazione della devianza — e cosa cambia adesso che gli agenti leggono il nostro codice e lo imitano.'},
+  {n:'005', date:'7 agosto 2026',   kind:'Deck · 23 slide',    file:'005-errori-di-fabbrica.html',     title:'Errori di fabbrica',                 blurb:'I bias cognitivi non sono difetti di carattere: sono il default del cervello. Le quattro famiglie, dove colpiscono nel ciclo di sviluppo, cosa cambia con gli agenti — e perché si cambia il processo, non le persone.'}
 ];
 
 (function(){
@@ -166,6 +192,13 @@ var ISSUES = [
   });
   document.getElementById('countCap').textContent =
     ISSUES.length + (ISSUES.length === 1 ? ' numero' : ' numeri') + ' · dal più recente';
+
+  /* una scelta esplicita di lingua vince sul rilevamento automatico (vedi <head>) */
+  [].slice.call(document.querySelectorAll('.langs a[data-lang]')).forEach(function(a){
+    a.addEventListener('click', function(){
+      try { localStorage.setItem('tks-lang', a.dataset.lang); } catch (e) {}
+    });
+  });
 })();
 </script>
 </body>

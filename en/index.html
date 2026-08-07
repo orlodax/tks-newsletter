@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Teksistemi · Technical newsletter</title>
 <meta name="description" content="Archive of the Teksistemi internal technical newsletter.">
+<link rel="alternate" hreflang="it" href="https://orlodax.github.io/tks-newsletter/">
+<link rel="alternate" hreflang="en" href="https://orlodax.github.io/tks-newsletter/en/">
+<link rel="alternate" hreflang="x-default" href="https://orlodax.github.io/tks-newsletter/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -118,7 +121,7 @@ footer b{color:var(--ambra);font-weight:400}
 
   <nav class="topbar">
     <span>Teksistemi · archive</span>
-    <span class="langs"><a href="../index.html">IT</a><b>EN</b></span>
+    <span class="langs"><a href="../index.html?stay=1" data-lang="it">IT</a><b>EN</b></span>
   </nav>
 
   <header>
@@ -143,7 +146,8 @@ var ISSUES = [
   {n:'001', date:'July 11, 2026', kind:'Deck · 9 slides',   file:'001-what-ai-does-to-our-heads.html', title:'What AI does to our heads',  blurb:'An eye-tracker, two students, the same working code. AI does not make us dumber: it makes us more confident, and that is a different problem.'},
   {n:'002', date:'July 23, 2026', kind:'Note · interactive', file:'002-agentic-development-yield.html', title:'Agentic development yield',  blurb:'Q ≈ k · qC · qP · qV. Why the four factors behave like an AND gate, with sliders to try it out.'},
   {n:'003', date:'July 26, 2026', kind:'Note · ~8 min',      file:'003-the-map-that-isnt-there.html',   title:'The map that isn’t there',   blurb:'Why an agent’s explanation always convinces you, even when it has misread the project. With two hands-on tests.'},
-  {n:'004', date:'August 2, 2026', kind:'Deck · 9 slides',   file:'004-the-broken-window.html',         title:'The broken window',          blurb:'Zimbardo, Lowell and the normalization of deviance — and what changes now that agents read our code and imitate it.'}
+  {n:'004', date:'August 2, 2026', kind:'Deck · 9 slides',   file:'004-the-broken-window.html',         title:'The broken window',          blurb:'Zimbardo, Lowell and the normalization of deviance — and what changes now that agents read our code and imitate it.'},
+  {n:'005', date:'August 7, 2026', kind:'Deck · 23 slides',  file:'005-factory-settings.html',          title:'Factory settings',           blurb:'Cognitive biases aren’t character flaws: they’re the brain’s default configuration. The four families, where they strike in the development cycle, what changes with agents — and why you fix the process, not the people.'}
 ];
 
 (function(){
@@ -166,6 +170,13 @@ var ISSUES = [
   });
   document.getElementById('countCap').textContent =
     ISSUES.length + (ISSUES.length === 1 ? ' issue' : ' issues') + ' · newest first';
+
+  /* an explicit language choice beats the automatic detection on the root page */
+  [].slice.call(document.querySelectorAll('.langs a[data-lang]')).forEach(function(a){
+    a.addEventListener('click', function(){
+      try { localStorage.setItem('tks-lang', a.dataset.lang); } catch (e) {}
+    });
+  });
 })();
 </script>
 </body>

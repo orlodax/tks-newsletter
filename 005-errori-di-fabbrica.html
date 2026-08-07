@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ERRORI DI FABBRICA — Newsletter tecnica</title>
+<link rel="alternate" hreflang="it" href="https://orlodax.github.io/tks-newsletter/005-errori-di-fabbrica.html">
+<link rel="alternate" hreflang="en" href="https://orlodax.github.io/tks-newsletter/en/005-factory-settings.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Newsreader:ital,opsz,wght@1,6..72,300..400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --notte:#11151B; --strato:#1A2029; --strato-alto:#232B36;
+  --vetro:#93A4B2; --luce:#F5E9D0;
+  --ambra:#E9B65C; --viola:#A98CE0; --verde:#63B295; --allarme:#FF5340;
+  --bordo:rgba(147,164,178,.22);
+  --sp:clamp(16px,3.4vw,64px);
+  --top:clamp(30px,1.6*var(--u),46px); --rail:0px; --railw:clamp(286px,17vw,380px);
+  --acc:var(--ambra);
+  /* Unita' fluida di base. Cresce con la larghezza ma e' limitata dall'altezza,
+     cosi' su schermi larghi e bassi (ultrawide) il deck non deborda.
+     Tutte le misure sotto derivano da qui: niente si ferma piu' al 1080p. */
+  --u:min(1vw,1.62vh);
+  --f-nano:clamp(8.6px,.32*var(--u) + 5.4px,12.6px);
+  --f-micro:clamp(9.4px,.4*var(--u) + 5.4px,14px);
+  --f-mono:clamp(10.2px,.45*var(--u) + 5.4px,15.5px);
+  --f-mono-l:clamp(11.6px,.55*var(--u) + 6.2px,18px);
+  --f-xs:clamp(12px,.46*var(--u) + 7.3px,17.5px);
+  --f-sm:clamp(13px,.5*var(--u) + 7.8px,19px);
+  --f-base:clamp(14px,.51*var(--u) + 9.2px,21px);
+  --f-md:clamp(14.5px,.51*var(--u) + 9.7px,21.5px);
+  --f-lead:clamp(17px,.69*var(--u) + 11.4px,27.5px);
+  --f-q:clamp(15px,.55*var(--u) + 9.1px,22px);
+  --f-h2:clamp(22px,1.1*var(--u) + 20.3px,46px);
+  --f-h3:clamp(19px,1.29*var(--u) + 3.9px,34px);
+  --f-snum:clamp(26px,1.15*var(--u) + 21.7px,48px);
+  --f-num:clamp(28px,1.84*var(--u) + 11.1px,54px);
+}
+*{box-sizing:border-box;margin:0;padding:0;border-radius:0}
+html,body{height:100%}
+body{background:var(--notte);color:var(--luce);font-family:"Instrument Sans",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;overflow:hidden}
+.sprite{position:absolute;width:0;height:0;overflow:hidden}
+
+/* ═══ overlay CRT ═══ */
+.scan{position:fixed;inset:0;z-index:95;pointer-events:none;
+  background:repeating-linear-gradient(to bottom,rgba(0,0,0,.15) 0 1px,transparent 1px 3px)}
+
+/* ═══ barra di stato ═══ */
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--top);z-index:75;
+  background:#0C1015;border-bottom:1px solid var(--bordo);
+  display:flex;align-items:center;gap:clamp(14px,var(--u),24px);padding:0 clamp(12px,.85*var(--u),22px);
+  font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);letter-spacing:.16em;
+  text-transform:uppercase;color:var(--vetro)}
+.topbar .tb-doc{color:var(--ambra);font-weight:600}
+.topbar .tb-arch{color:var(--vetro);text-decoration:none;flex:none;transition:color .15s}
+.topbar .tb-arch:hover{color:var(--luce)}
+.topbar .tb-sp{flex:1}
+.topbar .tb-live{display:flex;align-items:center;gap:6px;color:var(--verde)}
+.topbar .tb-live i{width:clamp(6px,.45*var(--u),9px);height:clamp(6px,.45*var(--u),9px);background:var(--verde);display:block;animation:blip 1.6s steps(1) infinite}
+@keyframes blip{0%,60%{opacity:1}61%,100%{opacity:.15}}
+.topbar .tb-hz{width:clamp(64px,4.8*var(--u),104px);height:clamp(8px,.55*var(--u),12px);flex:none;
+  background:repeating-linear-gradient(-45deg,rgba(233,182,92,.6) 0 5px,transparent 5px 10px)}
+.tb-lang{display:flex;flex:none}
+.tb-lang a{display:block;padding:clamp(3px,.25*var(--u),6px) clamp(8px,.6*var(--u),14px);border:1px solid var(--bordo);border-right:none;
+  color:var(--vetro);text-decoration:none;font-weight:700;letter-spacing:.14em;
+  transition:color .15s,background .15s}
+.tb-lang a:last-child{border-right:1px solid var(--bordo)}
+.tb-lang a:hover{color:var(--luce);background:rgba(255,255,255,.07)}
+.tb-lang a.on{background:var(--ambra);color:#0C1015;border-color:var(--ambra)}
+@media(max-width:700px){.topbar .tb-part,.topbar .tb-hz,.topbar .tb-live{display:none}}
+
+/* ═══ shell ═══ */
+.deck{position:relative;height:100dvh;width:100%}
+.slide{position:absolute;inset:0;
+  padding:calc(var(--top) + clamp(14px,2.6vh,34px)) var(--sp) clamp(88px,11vh,138px) calc(var(--rail) + var(--sp));
+  overflow-y:auto;overflow-x:hidden;opacity:0;visibility:hidden;
+  transition:opacity .34s ease,visibility .34s;
+  display:flex;flex-direction:column;justify-content:center}
+.slide.on{opacity:1;visibility:visible}
+.wrap{width:100%;max-width:clamp(1060px,80vw,1680px);margin:0 auto}
+.wrap>p,.wrap>.kicker,.wrap>.chk,.wrap>.note,.wrap>.src{max-width:78ch}
+.slide[data-act="a"]{--acc:var(--ambra)}
+.slide[data-act="v"]{--acc:var(--viola)}
+.slide[data-act="g"]{--acc:var(--verde)}
+.slide[data-act="v"],.slide[data-act="g"]{
+  background-image:linear-gradient(rgba(147,164,178,.05) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(147,164,178,.05) 1px,transparent 1px);
+  background-size:26px 26px}
+.slide[data-act="v"] .card,.slide[data-act="g"] .card{border-style:dashed}
+
+/* ═══ bracket / hazard ═══ */
+.brk{position:relative}
+.brk::before,.brk::after{content:"";position:absolute;width:clamp(9px,.65*var(--u),14px);height:clamp(9px,.65*var(--u),14px);border:1px solid var(--acc);pointer-events:none}
+.brk::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
+.brk::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+.hazard{height:clamp(9px,.65*var(--u),14px);background:repeating-linear-gradient(-45deg,var(--acc) 0 7px,transparent 7px 14px);opacity:.5;margin:clamp(10px,1.8vh,26px) 0}
+
+/* ═══ intestazione sezione ═══ */
+.shead{margin-bottom:clamp(12px,2.4vh,34px)}
+.stop{display:flex;align-items:center;gap:clamp(10px,.8*var(--u),18px)}
+.spart{font-family:"JetBrains Mono",monospace;font-size:var(--f-mono);letter-spacing:.24em;
+  text-transform:uppercase;color:var(--acc);white-space:nowrap;font-weight:600}
+.spart::before{content:"▍";margin-right:6px}
+.sline{flex:1;height:1px;background:repeating-linear-gradient(90deg,var(--bordo) 0 4px,transparent 4px 8px)}
+.sid{display:flex;align-items:center;gap:clamp(10px,1.4*var(--u),24px);margin-top:clamp(9px,.7*var(--u),16px)}
+.snumbox{border:1px solid var(--acc);padding:clamp(4px,.35*var(--u),8px) clamp(11px,.85*var(--u),19px);position:relative}
+.snum{font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 78,"wght" 800;
+  font-size:var(--f-snum);line-height:.9;letter-spacing:-.03em;color:var(--acc);display:block}
+.slide[data-act="v"] .snum,.slide[data-act="g"] .snum{color:transparent;-webkit-text-stroke:clamp(1.3px,.1*var(--u),2.2px) var(--acc)}
+.stit{font-family:"JetBrains Mono",monospace;font-size:var(--f-mono-l);letter-spacing:.2em;
+  text-transform:uppercase;color:var(--luce)}
+
+/* ═══ tipografia ═══ */
+h1{font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 80,"wght" 900;
+  font-size:clamp(42px,9.2*var(--u),164px);line-height:.88;letter-spacing:-.025em;
+  text-transform:uppercase;margin-bottom:.28em}
+h2{font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 88,"wght" 700;
+  font-size:var(--f-h2);line-height:1.08;letter-spacing:-.012em;margin-bottom:.6em;max-width:23ch}
+h2.wide{max-width:29ch} h2.full{max-width:none}
+p{font-size:var(--f-base);line-height:1.56;color:#DFD5C0;margin-bottom:.85em}
+p:last-child{margin-bottom:0}
+p.lead{font-size:var(--f-lead);line-height:1.48;color:var(--luce);max-width:35ch}
+strong{color:var(--luce);font-weight:600}
+code{font-family:"JetBrains Mono",monospace;font-size:.87em;background:rgba(147,164,178,.14);
+  padding:1px 5px;color:var(--luce);white-space:nowrap}
+.kicker{border-left:clamp(3px,.22*var(--u),5px) solid var(--acc);padding:3px 0 3px clamp(15px,1.1*var(--u),26px);margin-top:1.15em;
+  font-size:var(--f-md);line-height:1.46;color:var(--luce)}
+.kicker.al{border-left-color:var(--allarme)}
+.q{font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 92,"wght" 600;
+  font-size:var(--f-q);line-height:1.32;color:var(--acc);margin-top:1.25em;max-width:64ch}
+.note{font-family:"JetBrains Mono",monospace;font-size:var(--f-mono);letter-spacing:.03em;color:var(--vetro);
+  line-height:1.7;margin-top:1.25em}
+.src{font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);letter-spacing:.04em;color:var(--vetro);
+  opacity:.8;line-height:1.6;margin-top:.5em}
+.tags{display:flex;flex-wrap:wrap;gap:clamp(6px,.5*var(--u),11px);margin-top:1.15em}
+.tag{font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);letter-spacing:.14em;text-transform:uppercase;
+  padding:clamp(4px,.32*var(--u),7px) clamp(9px,.7*var(--u),15px);border:1px solid}
+.tag.est{color:var(--verde);border-color:rgba(99,178,149,.45)}
+.tag.inf{color:var(--ambra);border-color:rgba(233,182,92,.45)}
+.tag.nt{color:var(--viola);border-color:rgba(169,140,224,.45)}
+
+/* ═══ cliccabili ═══ */
+.btn{display:inline-flex;align-items:stretch;gap:0;border:1px solid var(--acc);background:var(--strato-alto);
+  color:var(--luce);cursor:pointer;font-family:"Archivo",sans-serif;
+  font-variation-settings:"wdth" 90,"wght" 650;font-size:var(--f-xs);letter-spacing:.06em;text-transform:uppercase;
+  transition:background .15s,transform .15s;padding:0}
+.btn:hover{background:#2C3742;transform:translate(1px,-1px)}
+.btn .cg{background:var(--acc);color:#0C1015;display:grid;place-items:center;width:clamp(24px,1.8*var(--u),36px);flex:none;
+  font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);font-weight:700}
+.btn .cl{padding:clamp(8px,.6*var(--u),14px) clamp(13px,var(--u),22px);display:flex;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--bordo);background:var(--strato-alto)}
+.seg button{font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 90,"wght" 650;font-size:var(--f-xs);
+  letter-spacing:.06em;text-transform:uppercase;padding:clamp(9px,.7*var(--u),16px) clamp(15px,1.15*var(--u),26px);border:none;background:transparent;
+  color:var(--vetro);cursor:pointer;transition:background .15s,color .15s;border-right:1px solid var(--bordo)}
+.seg button:last-child{border-right:none}
+.seg button:hover{color:var(--luce);background:rgba(255,255,255,.05)}
+.seg button.on{background:rgba(233,182,92,.2);color:var(--ambra);box-shadow:inset 0 -2px 0 var(--ambra)}
+.seg button.on[data-p="good"]{background:rgba(99,178,149,.2);color:var(--verde);box-shadow:inset 0 -2px 0 var(--verde)}
+.clickhint{display:flex;align-items:center;gap:clamp(7px,.55*var(--u),12px);margin-top:9px;font-family:"JetBrains Mono",monospace;
+  font-size:var(--f-micro);letter-spacing:.14em;text-transform:uppercase;color:var(--vetro)}
+.clickhint::before{content:"▶";color:var(--acc);font-size:.8em}
+:focus-visible{outline:2px solid var(--verde);outline-offset:2px}
+
+/* ═══ icone ═══ */
+.ic{width:clamp(26px,1.9*var(--u),42px);height:clamp(26px,1.9*var(--u),42px);display:block;color:var(--acc);flex:none}
+.ic svg{width:100%;height:100%;display:block}
+.icbig{width:clamp(38px,2.75*var(--u),60px);height:clamp(38px,2.75*var(--u),60px)} .icsm{width:clamp(18px,1.3*var(--u),29px);height:clamp(18px,1.3*var(--u),29px)}
+.echo{position:relative}
+.echo .gh{position:absolute;left:4px;top:3px;opacity:.42;color:var(--viola)}
+
+/* ═══ griglie ═══ */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,1.15*var(--u),26px)}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,1.15*var(--u),26px)}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(10px,.95*var(--u),22px)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:clamp(18px,2.5*var(--u),58px)}
+.card{background:var(--strato);border:1px solid var(--bordo);padding:clamp(14px,1.3*var(--u),28px);
+  display:flex;flex-direction:column}
+.cardhd{display:flex;align-items:flex-start;gap:clamp(10px,.85*var(--u),18px);margin-bottom:.5em}
+.card h3{font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 92,"wght" 650;
+  font-size:var(--f-md);line-height:1.16;color:var(--luce)}
+.card p{font-size:var(--f-sm);line-height:1.5;margin-bottom:.55em}
+.lab{font-family:"JetBrains Mono",monospace;font-size:var(--f-mono);letter-spacing:.16em;text-transform:uppercase;
+  color:var(--acc);display:block;margin-bottom:.3em;font-weight:600}
+.lab::before{content:"▸ "}
+.card .push{margin-top:auto;padding-top:clamp(12px,.95*var(--u),20px)}
+
+/* ═══ bersagli / distribuzione / latenza / ruoli ═══ */
+.targets{display:grid;grid-template-columns:1fr 1fr;gap:clamp(14px,2.2*var(--u),48px)}
+.tgt{text-align:center}.tgt svg{width:100%;max-width:clamp(184px,15*var(--u),300px);height:auto}
+.tgt .nm{font-family:"JetBrains Mono",monospace;font-size:var(--f-mono);letter-spacing:.18em;text-transform:uppercase;margin-top:8px}
+.tgt .ds{font-size:var(--f-sm);color:var(--vetro);line-height:1.48;margin-top:5px}
+.ring{fill:none;stroke:var(--bordo);stroke-width:1}
+.dist{position:relative;height:clamp(118px,9.5*var(--u),190px);margin-bottom:6px;border-bottom:1px solid var(--bordo)}
+.dist .bar{position:absolute;bottom:0;width:5.6%;background:var(--strato-alto);border:1px solid var(--bordo);border-bottom:none}
+.dist .bar.me{background:rgba(233,182,92,.3);border-color:rgba(233,182,92,.6)}
+.dist .med{position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--verde)}
+.dist .medlab{position:absolute;top:-2px;left:calc(50% + 7px);font-family:"JetBrains Mono",monospace;
+  font-size:var(--f-micro);letter-spacing:.14em;text-transform:uppercase;color:var(--verde)}
+.axis{display:flex;justify-content:space-between;font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);
+  letter-spacing:.12em;text-transform:uppercase;color:var(--vetro);margin-top:6px}
+.latrow{display:grid;grid-template-columns:repeat(6,1fr);gap:clamp(5px,.45*var(--u),10px);align-items:end;height:clamp(96px,16vh,215px)}
+.latcol{display:flex;flex-direction:column;justify-content:flex-end;height:100%}
+.latbar{width:100%}
+.latline{height:1px;background:var(--bordo)}
+.latlabs{display:grid;grid-template-columns:repeat(6,1fr);gap:clamp(5px,.45*var(--u),10px);margin-top:8px}
+.latlab .t{font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--vetro);line-height:1.42}
+.latlab .n{font-size:var(--f-xs);line-height:1.22;color:var(--luce);margin-top:3px;font-weight:500}
+.latleg{display:flex;gap:clamp(16px,1.3*var(--u),28px);flex-wrap:wrap;margin-top:11px;font-family:"JetBrains Mono",monospace;
+  font-size:var(--f-micro);letter-spacing:.14em;text-transform:uppercase;color:var(--vetro)}
+.latleg i{display:inline-block;width:clamp(9px,.7*var(--u),14px);height:clamp(9px,.7*var(--u),14px);margin-right:6px}
+.lad{display:flex;flex-direction:column;gap:clamp(6px,.5*var(--u),11px)}
+.ladrow{display:grid;grid-template-columns:clamp(84px,9.5*var(--u),182px) 1fr clamp(76px,8.4*var(--u),160px);
+  gap:clamp(10px,1.3*var(--u),26px);align-items:center;background:var(--strato);border:1px solid var(--bordo);
+  padding:clamp(11px,1.05*var(--u),20px) clamp(12px,1.2*var(--u),24px)}
+.ladrow .r{font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 88,"wght" 700;
+  font-size:var(--f-md);line-height:1.12;text-transform:uppercase;letter-spacing:.02em}
+.ladrow .d{font-size:var(--f-sm);line-height:1.44;color:#DFD5C0}
+.ladrow .d b{color:var(--luce);font-weight:600}
+.fb{text-align:right}
+.fb .fbar{height:clamp(6px,.5*var(--u),10px);background:var(--ambra);margin:0 0 5px auto;opacity:.8}
+.fb .fnum{font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);letter-spacing:.12em;text-transform:uppercase;color:var(--vetro)}
+
+/* ═══ pivot ═══ */
+.confine{display:flex;align-items:center;gap:clamp(12px,var(--u),21px)}
+.confine .l{flex:1;height:0;border-top:1px dashed rgba(169,140,224,.55)}
+.confine .m{font-family:"JetBrains Mono",monospace;font-size:var(--f-mono);letter-spacing:.24em;text-transform:uppercase;
+  color:var(--viola);white-space:nowrap}
+.beforeafter{display:grid;grid-template-columns:1fr 1fr;gap:clamp(13px,1.6*var(--u),36px);align-items:start}
+.ba{padding:clamp(14px,1.3*var(--u),28px)}
+.ba.solid{background:var(--strato);border:1px solid var(--bordo)}
+.ba.dash{background:rgba(26,32,41,.5);border:1px dashed rgba(169,140,224,.45)}
+.ba .h{font-family:"JetBrains Mono",monospace;font-size:var(--f-mono);letter-spacing:.18em;text-transform:uppercase;margin-bottom:8px;font-weight:600}
+.ba.solid .h{color:var(--ambra)} .ba.dash .h{color:var(--viola)}
+.ba p{font-size:var(--f-sm);margin-bottom:0}
+
+/* ═══ canali ═══ */
+.lane{background:var(--strato);border:1px solid var(--bordo);padding:clamp(13px,1.3*var(--u),28px);
+  margin-bottom:clamp(9px,1.6vh,22px)}
+.lane:last-child{margin-bottom:0}
+.lane.m{border-style:dashed;border-color:rgba(169,140,224,.4)}
+.lane .lt{font-family:"JetBrains Mono",monospace;font-size:var(--f-mono);letter-spacing:.18em;text-transform:uppercase;
+  margin-bottom:clamp(10px,.8*var(--u),18px);font-weight:600}
+.lane.h .lt{color:var(--ambra)} .lane.m .lt{color:var(--viola)}
+.flow{display:flex;align-items:center;gap:clamp(7px,var(--u),20px);flex-wrap:wrap}
+.node{border:1px solid var(--bordo);padding:clamp(8px,.65*var(--u),15px) clamp(11px,.9*var(--u),20px);font-size:var(--f-xs);line-height:1.28}
+.node.pr{border-color:rgba(233,182,92,.55);color:var(--ambra)}
+.node.out{border-style:dashed}
+.arw{color:var(--vetro);font-size:clamp(14px,1.1*var(--u),21px)}
+.back{display:flex;gap:clamp(6px,.5*var(--u),11px);flex-wrap:wrap;margin-top:9px;font-family:"JetBrains Mono",monospace;
+  font-size:var(--f-micro);letter-spacing:.05em;color:var(--verde)}
+.back span{border:1px dashed rgba(99,178,149,.45);padding:clamp(3px,.28*var(--u),6px) clamp(8px,.62*var(--u),14px)}
+.nofric{margin-top:9px;font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);letter-spacing:.05em;color:var(--viola)}
+
+/* ═══ blocco fonti ═══ */
+.evid{background:rgba(169,140,224,.08);border:1px solid rgba(169,140,224,.38);
+  padding:clamp(14px,1.3*var(--u),28px);margin-top:clamp(9px,1.6vh,22px)}
+.evid .eh{font-family:"JetBrains Mono",monospace;font-size:var(--f-mono);letter-spacing:.18em;text-transform:uppercase;
+  color:var(--viola);margin-bottom:9px;font-weight:600}
+.evid p{font-size:var(--f-sm);margin-bottom:.6em}
+.reflist{display:flex;flex-wrap:wrap;gap:clamp(6px,.5*var(--u),11px);margin-top:10px}
+.ref{display:inline-flex;align-items:center;gap:clamp(7px,.55*var(--u),12px);font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);
+  letter-spacing:.07em;text-decoration:none;color:var(--luce);border:1px solid rgba(147,164,178,.34);
+  background:var(--strato-alto);padding:clamp(6px,.5*var(--u),11px) clamp(11px,.85*var(--u),19px);transition:border-color .15s,transform .15s,background .15s}
+.ref:hover{border-color:var(--viola);transform:translate(1px,-1px);background:#2C3742}
+.ref::after{content:"↗";color:var(--viola);font-size:1.05em}
+.ref.big{font-size:var(--f-mono);padding:clamp(9px,.7*var(--u),15px) clamp(14px,1.05*var(--u),24px);border-color:var(--viola)}
+
+/* ═══ METR / cifre ═══ */
+.nums{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(10px,1.15*var(--u),24px)}
+.num{background:var(--strato);border:1px dashed var(--bordo);padding:clamp(13px,1.3*var(--u),28px)}
+.num .v{font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 78,"wght" 900;
+  font-size:var(--f-num);line-height:.94;letter-spacing:-.025em}
+.num.a .v{color:var(--vetro)} .num.b .v{color:var(--ambra)} .num.c .v{color:var(--viola)}
+.num.al .v{color:var(--allarme)}
+.num .k{font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--vetro);margin-top:8px;line-height:1.5}
+
+/* ═══ prompt ═══ */
+.pbox{background:#0E1218;border:1px solid var(--bordo);padding:clamp(14px,1.3*var(--u),28px);
+  font-family:"JetBrains Mono",monospace;font-size:var(--f-xs);line-height:1.78;
+  color:#DFD5C0;min-height:clamp(150px,12*var(--u),240px);margin-top:clamp(11px,.9*var(--u),20px)}
+.pbox mark{background:rgba(233,182,92,.2);color:var(--ambra);padding:1px 3px}
+.pbox mark.ok{background:rgba(99,178,149,.18);color:var(--verde)}
+.pann{display:flex;flex-wrap:wrap;gap:clamp(5px,.45*var(--u),10px);margin-top:10px}
+.pann span{font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);letter-spacing:.12em;text-transform:uppercase;
+  padding:clamp(4px,.32*var(--u),7px) clamp(9px,.7*var(--u),15px);border:1px solid rgba(233,182,92,.45);color:var(--ambra)}
+.pann.ok span{border-color:rgba(99,178,149,.45);color:var(--verde)}
+.chk{list-style:none}
+.chk li{position:relative;padding-left:clamp(25px,2*var(--u),38px);margin-bottom:clamp(9px,.75*var(--u),16px);font-size:var(--f-sm);
+  line-height:1.46;color:#DFD5C0}
+.chk li:last-child{margin-bottom:0}
+.chk li::before{content:"";position:absolute;left:0;top:6px;width:clamp(10px,.75*var(--u),15px);height:clamp(10px,.75*var(--u),15px);border:1px solid var(--verde)}
+.chk li b{color:var(--luce);font-weight:600}
+
+/* ═══════════ METACONCERT ═══════════ */
+/* La parte METACONCERT e' la piu' fitta del mazzo: qui la scala scende di un
+   gradino, cosi' quelle slide restano intere dove le altre stanno gia' comode.
+   I --f-* sono ereditati, quindi basta ridefinirli sul contenitore. */
+.slide.proto{
+  --f-xs:clamp(11.6px,.4*var(--u) + 6.9px,16px);
+  --f-sm:clamp(12.4px,.44*var(--u) + 7.3px,17px);
+  --f-base:clamp(13.4px,.45*var(--u) + 8.6px,19px);
+  --f-md:clamp(13.6px,.45*var(--u) + 9px,19.5px);
+  --f-h2:clamp(21px,.95*var(--u) + 18.5px,42px);
+  background-image:linear-gradient(rgba(169,140,224,.07) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(169,140,224,.07) 1px,transparent 1px);
+  background-size:22px 22px}
+.slide.proto .wrap{position:relative;border:1px solid rgba(169,140,224,.4);
+  background:rgba(17,21,27,.93);padding:clamp(18px,1.8*var(--u),40px)}
+.slide.proto .wrap::before,.slide.proto .wrap::after{content:"";position:absolute;width:clamp(13px,.95*var(--u),20px);height:clamp(13px,.95*var(--u),20px);
+  border:1.5px solid var(--viola)}
+.slide.proto .wrap::before{left:-1px;top:-1px;border-right:0;border-bottom:0}
+.slide.proto .wrap::after{right:-1px;bottom:-1px;border-left:0;border-top:0}
+.protobadge{display:inline-flex;align-items:center;gap:clamp(8px,.65*var(--u),14px);margin-bottom:12px;
+  font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);letter-spacing:.2em;text-transform:uppercase;
+  color:var(--viola);border:1px solid rgba(169,140,224,.5);background:rgba(169,140,224,.11);
+  padding:clamp(6px,.5*var(--u),11px) clamp(11px,.85*var(--u),19px);font-weight:600}
+.protobadge::before{content:"◈"}
+.protobadge.al{color:var(--allarme);border-color:rgba(255,83,64,.5);background:rgba(255,83,64,.1)}
+
+.brand{display:flex;align-items:center;gap:clamp(16px,2.4*var(--u),50px);flex-wrap:wrap}
+.brandmark{width:clamp(104px,12*var(--u),230px);height:auto;flex:none}
+.wordmark{font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 76,"wght" 900;
+  font-size:clamp(32px,7.5*var(--u),120px);line-height:.84;letter-spacing:-.02em;color:var(--luce)}
+.wordmark .mc{color:var(--viola)}
+.brandsub{font-family:"JetBrains Mono",monospace;font-size:var(--f-mono);letter-spacing:.18em;
+  text-transform:uppercase;color:var(--vetro);margin-top:11px;line-height:1.85}
+.mine{display:inline-block;font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 92,"wght" 650;
+  font-size:var(--f-xs);letter-spacing:.04em;text-transform:uppercase;color:#0C1015;background:var(--viola);
+  padding:clamp(5px,.45*var(--u),10px) clamp(11px,.85*var(--u),19px);margin-top:10px}
+.facts{display:flex;flex-wrap:wrap;gap:clamp(6px,.5*var(--u),11px);margin-top:clamp(9px,1.6vh,16px)}
+.facts span{font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);letter-spacing:.12em;text-transform:uppercase;
+  border:1px solid var(--bordo);padding:clamp(5px,.4*var(--u),9px) clamp(10px,.8*var(--u),17px);color:var(--vetro)}
+.origin{border-left:3px solid var(--viola);padding-left:clamp(14px,1.1*var(--u),24px)}
+.origin .oh{font-family:"JetBrains Mono",monospace;font-size:var(--f-mono);letter-spacing:.18em;text-transform:uppercase;
+  color:var(--viola);margin-bottom:7px;font-weight:600}
+.origin p{font-size:var(--f-sm);margin-bottom:.55em}
+
+.pflow{display:flex;flex-wrap:wrap;gap:clamp(4px,.4*var(--u),9px);align-items:stretch}
+.ph{border:1px solid var(--bordo);padding:clamp(8px,.6*var(--u),14px) clamp(9px,.75*var(--u),17px);background:rgba(26,32,41,.7);
+  display:flex;flex-direction:column;gap:3px;min-width:0}
+.ph .pn{font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);letter-spacing:.12em;
+  text-transform:uppercase;color:var(--luce);font-weight:600}
+.ph .pa{font-family:"JetBrains Mono",monospace;font-size:var(--f-nano);letter-spacing:.03em;color:var(--vetro)}
+.gate{border:1px solid var(--verde);padding:clamp(8px,.6*var(--u),14px) clamp(10px,.8*var(--u),18px);background:rgba(99,178,149,.13);
+  display:flex;flex-direction:column;gap:3px}
+.gate .gn{font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);letter-spacing:.12em;
+  text-transform:uppercase;color:var(--verde);font-weight:700}
+.gate .gs{font-family:"JetBrains Mono",monospace;font-size:var(--f-nano);letter-spacing:.03em;color:var(--verde)}
+.pfa{align-self:center;color:var(--vetro);opacity:.45;font-size:var(--f-micro)}
+
+.memb{display:grid;grid-template-columns:1fr 1px 1fr;gap:clamp(13px,1.6*var(--u),36px);align-items:start;
+  margin-top:clamp(9px,1.6vh,16px)}
+.mline2{background:repeating-linear-gradient(to bottom,var(--viola) 0 5px,transparent 5px 11px);
+  opacity:.6;min-height:clamp(130px,10.5*var(--u),200px);align-self:stretch}
+.mcol .mh{font-family:"JetBrains Mono",monospace;font-size:var(--f-mono);letter-spacing:.18em;text-transform:uppercase;
+  margin-bottom:9px;font-weight:600}
+.mcol.pass .mh{color:var(--verde)} .mcol.block .mh{color:var(--ambra)}
+.chip{position:relative;padding:6px 0 6px clamp(22px,1.7*var(--u),34px);font-size:var(--f-sm);line-height:1.4;color:#DFD5C0}
+.chip::before{position:absolute;left:0;top:6px;font-family:"JetBrains Mono",monospace;font-size:var(--f-xs)}
+.chip.ok::before{content:"→";color:var(--verde)}
+.chip.no::before{content:"✕";color:var(--ambra)}
+.codeblk{background:#0E1218;border:1px solid rgba(169,140,224,.35);padding:clamp(14px,1.3*var(--u),28px);
+  font-family:"JetBrains Mono",monospace;font-size:var(--f-xs);line-height:1.75;
+  color:#DFD5C0;overflow-x:auto}
+.codeblk b{color:var(--viola);font-weight:400}
+.codeblk i{color:var(--ambra);font-style:normal}
+.codeblk u{color:var(--verde);text-decoration:none}
+.codeblk .cm{color:var(--vetro);opacity:.65}
+
+.roster{display:flex;flex-direction:column;gap:clamp(4px,.32*var(--u),8px)}
+.mem{display:grid;grid-template-columns:clamp(22px,1.7*var(--u),34px) 1fr clamp(126px,13.5*var(--u),264px);gap:clamp(10px,1.15*var(--u),24px);
+  align-items:start;background:rgba(26,32,41,.7);border:1px dashed var(--bordo);
+  padding:clamp(9px,.75*var(--u),16px) clamp(11px,1.1*var(--u),23px)}
+.mem.dir{border-style:solid;border-color:rgba(169,140,224,.45);background:rgba(169,140,224,.09)}
+.mname{font-family:"JetBrains Mono",monospace;font-size:var(--f-xs);letter-spacing:.03em;
+  color:var(--luce);font-weight:700}
+.mname em{font-style:normal;font-size:var(--f-nano);letter-spacing:.16em;text-transform:uppercase;
+  color:var(--viola);margin-left:8px}
+.mnew{font-style:normal;font-size:var(--f-nano);letter-spacing:.14em;text-transform:uppercase;
+  color:#0C1015;background:var(--verde);padding:2px 5px;margin-left:7px}
+.mdesc{font-size:var(--f-xs);line-height:1.43;color:#DFD5C0;margin-top:3px}
+.mdesc b{color:var(--luce);font-weight:600}
+.mmeta{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+.mno{font-family:"JetBrains Mono",monospace;font-size:var(--f-nano);letter-spacing:.05em;line-height:1.42;
+  color:var(--ambra);border:1px dashed rgba(233,182,92,.45);padding:clamp(3px,.28*var(--u),6px) clamp(6px,.5*var(--u),11px)}
+.mcost{font-family:"JetBrains Mono",monospace;font-size:var(--f-nano);letter-spacing:.1em;text-transform:uppercase;color:var(--vetro)}
+
+.rules{display:flex;flex-direction:column;gap:clamp(7px,.6*var(--u),13px)}
+.rule{display:grid;grid-template-columns:clamp(22px,1.7*var(--u),34px) 1fr;gap:clamp(12px,var(--u),21px);align-items:start}
+.rule .n{font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 78,"wght" 900;font-size:clamp(17px,1.35*var(--u),26px);
+  line-height:1.1;color:var(--viola)}
+.rule .x{font-size:var(--f-sm);line-height:1.45;color:#DFD5C0}
+.rule .x b{color:var(--luce);font-weight:600}
+
+.ceil{display:flex;flex-direction:column;gap:clamp(5px,.45*var(--u),10px)}
+.crow{display:grid;grid-template-columns:clamp(20px,1.55*var(--u),32px) 1fr;gap:clamp(11px,.9*var(--u),19px);align-items:start;
+  border-left:2px solid var(--allarme);padding:clamp(8px,.6*var(--u),14px) 0 clamp(8px,.6*var(--u),14px) clamp(11px,.9*var(--u),19px);background:rgba(255,83,64,.05)}
+.crow .cn{font-family:"JetBrains Mono",monospace;font-size:var(--f-xs);font-weight:700;color:var(--allarme)}
+.crow .ct{font-size:var(--f-sm);line-height:1.44;color:#DFD5C0}
+.crow .ct b{color:var(--luce);font-weight:600}
+.lev{display:inline-block;font-family:"JetBrains Mono",monospace;font-size:var(--f-nano);letter-spacing:.12em;
+  text-transform:uppercase;border:1px solid;padding:clamp(2px,.2*var(--u),5px) clamp(6px,.5*var(--u),11px);margin-top:5px}
+.lev.si{color:var(--verde);border-color:rgba(99,178,149,.5)}
+.lev.no{color:var(--allarme);border-color:rgba(255,83,64,.5)}
+
+.status{border:1px dashed var(--bordo)}
+.strow{display:grid;grid-template-columns:1fr auto;gap:clamp(12px,var(--u),21px);padding:clamp(11px,.85*var(--u),19px) clamp(11px,1.15*var(--u),23px);
+  border-bottom:1px dashed var(--bordo);align-items:center;background:rgba(26,32,41,.7)}
+.strow:last-child{border-bottom:none}
+.strow .l{font-size:var(--f-sm);line-height:1.28;color:#DFD5C0}
+.strow .v{font-family:"JetBrains Mono",monospace;font-size:var(--f-mono);letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;font-weight:600}
+.strow .v.est{color:var(--verde)} .strow .v.inf{color:var(--ambra)} .strow .v.nt{color:var(--viola)}
+
+/* ═══ hero / tessere / modale ═══ */
+.hero .wrap{max-width:clamp(900px,66vw,1360px)}
+.heroviz{display:flex;gap:clamp(4px,.4*var(--u),8px);margin:clamp(11px,2.4vh,34px) 0 clamp(13px,2.4vh,36px);flex-wrap:wrap}
+.heroviz i{display:block;width:clamp(14px,2.2*var(--u),38px);height:clamp(14px,2.2*var(--u),38px);border:1px solid var(--bordo)}
+.heroviz i.on{background:rgba(233,182,92,.55);border-color:rgba(233,182,92,.8)}
+.closing{font-family:"Newsreader",Georgia,serif;font-style:italic;font-weight:300;
+  font-size:clamp(19px,3.3*var(--u),50px);line-height:1.24;color:var(--ambra);margin-top:.6em;max-width:22ch}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(11px,1.15*var(--u),24px)}
+.tile{background:var(--strato);border:1px solid var(--bordo);padding:clamp(13px,1.2*var(--u),26px);
+  text-align:left;cursor:pointer;color:inherit;font-family:inherit;display:flex;flex-direction:column;gap:clamp(8px,.7*var(--u),15px);
+  transition:transform .15s,border-color .15s,background .15s}
+.tile:hover{transform:translate(1px,-3px);border-color:var(--ambra);background:#20272F}
+.tile .ill{width:100%;height:auto;display:block}
+.tile .tn{font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 90,"wght" 700;
+  font-size:var(--f-md);line-height:1.12;text-transform:uppercase;letter-spacing:.01em}
+.tile .tl{font-size:var(--f-sm);line-height:1.4;color:var(--vetro)}
+.tile .tcta{display:flex;align-items:center;gap:clamp(7px,.55*var(--u),12px);margin-top:auto;font-family:"JetBrains Mono",monospace;
+  font-size:var(--f-micro);letter-spacing:.14em;text-transform:uppercase;color:var(--ambra);font-weight:600}
+.tile .tcta i{width:clamp(15px,1.15*var(--u),23px);height:clamp(15px,1.15*var(--u),23px);background:var(--ambra);color:#0C1015;display:grid;place-items:center;
+  font-size:var(--f-nano);font-weight:700;font-style:normal}
+.ov{position:fixed;inset:0;z-index:88;background:rgba(8,10,14,.86);display:none;align-items:center;
+  justify-content:center;padding:var(--sp)}
+.ov.on{display:flex}
+.modal{background:var(--strato);border:1px solid rgba(233,182,92,.45);max-width:clamp(610px,46vw,900px);width:100%;
+  max-height:82dvh;overflow-y:auto;padding:clamp(20px,2*var(--u),44px);position:relative}
+.modal .mx{position:absolute;top:10px;right:10px;width:clamp(28px,2.1*var(--u),42px);height:clamp(28px,2.1*var(--u),42px);border:1px solid var(--bordo);
+  background:transparent;color:var(--luce);cursor:pointer;font-size:clamp(14px,1.05*var(--u),20px);line-height:1}
+.modal .mx:hover{border-color:var(--ambra);color:var(--ambra)}
+.modal .mcat{display:flex;align-items:center;gap:clamp(10px,.8*var(--u),18px);margin-bottom:13px}
+.modal .mcat span{font-family:"JetBrains Mono",monospace;font-size:var(--f-mono);letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ambra);font-weight:600}
+.modal .mill{width:100%;max-width:clamp(290px,23*var(--u),440px);height:auto;display:block;margin:0 auto 17px}
+.modal h3{font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 88,"wght" 750;
+  font-size:var(--f-h3);line-height:1.08;margin-bottom:.55em;text-transform:uppercase}
+.modal p{font-size:var(--f-sm);line-height:1.55}
+.modal .cav{border-left:3px solid var(--ambra);padding-left:clamp(13px,var(--u),22px);margin-top:1em}
+.modal .cav p{margin-bottom:0}
+
+/* ═══ indice / rail ═══ */
+.rail{position:fixed;left:0;top:var(--top);bottom:0;width:var(--railw);z-index:70;background:#0E1218;
+  border-right:1px solid var(--bordo);overflow-y:auto;padding:clamp(14px,1.1*var(--u),24px) 0 96px;
+  transform:translateX(-101%);transition:transform .26s ease}
+.rail.on{transform:none}
+.railhd{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 clamp(16px,1.25*var(--u),26px) clamp(12px,var(--u),20px);
+  font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);letter-spacing:.24em;text-transform:uppercase;
+  color:var(--vetro);font-weight:600}
+.railhd button{background:transparent;border:1px solid var(--bordo);color:var(--vetro);cursor:pointer;
+  font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);letter-spacing:.1em;padding:clamp(3px,.3*var(--u),6px) clamp(7px,.6*var(--u),13px);display:none}
+.railhd button:hover{border-color:var(--verde);color:var(--verde)}
+.mback{position:fixed;inset:0;z-index:69;background:rgba(8,10,14,.65);display:none}
+.mback.on{display:block}
+.mpart{margin-bottom:11px}
+.mpname{display:block;font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);letter-spacing:.18em;
+  text-transform:uppercase;padding:0 clamp(16px,1.25*var(--u),26px) clamp(6px,.5*var(--u),11px);color:var(--vetro);font-weight:600}
+.mpart[data-act="a"] .mpname{color:var(--ambra)}
+.mpart[data-act="v"] .mpname{color:var(--viola)}
+.mpart[data-act="g"] .mpname{color:var(--verde)}
+.mitem{display:flex;align-items:baseline;gap:clamp(10px,.8*var(--u),17px);width:100%;text-align:left;background:transparent;
+  border:none;border-left:3px solid transparent;padding:clamp(6px,.5*var(--u),11px) clamp(16px,1.25*var(--u),26px);cursor:pointer;font-family:inherit;
+  color:var(--vetro);font-size:var(--f-xs);line-height:1.28;transition:color .14s,background .14s}
+.mitem:hover{color:var(--luce);background:rgba(255,255,255,.05)}
+.mitem em{font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);font-style:normal;letter-spacing:.06em;
+  opacity:.7;flex:none;width:clamp(16px,1.3*var(--u),26px)}
+.mitem.here{color:var(--luce);background:rgba(255,255,255,.07);font-weight:600}
+.mitem.here em{opacity:1}
+.mpart[data-act="a"] .mitem.here{border-left-color:var(--ambra)}
+.mpart[data-act="v"] .mitem.here{border-left-color:var(--viola)}
+.mpart[data-act="g"] .mitem.here{border-left-color:var(--verde)}
+.msub{margin-left:clamp(26px,2*var(--u),38px);border-left:1px dotted var(--bordo)}
+.msublab{font-family:"JetBrains Mono",monospace;font-size:var(--f-nano);letter-spacing:.16em;text-transform:uppercase;
+  color:var(--vetro);opacity:.6;padding:4px 0 3px clamp(12px,.95*var(--u),20px)}
+.msub .mitem{padding-left:clamp(12px,.95*var(--u),20px)}
+
+/* ═══ nav ═══ */
+.nav{position:fixed;left:var(--rail);right:0;bottom:0;z-index:60;padding:clamp(10px,1.8vh,22px) var(--sp);
+  background:linear-gradient(to top,var(--notte) 64%,rgba(17,21,27,0));display:flex;align-items:center;gap:clamp(12px,var(--u),21px)}
+.mtoggle{display:inline-flex;align-items:center;gap:8px;font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);
+  letter-spacing:.16em;text-transform:uppercase;background:var(--strato-alto);border:1px solid var(--bordo);
+  color:var(--luce);padding:clamp(9px,.75*var(--u),16px) clamp(12px,var(--u),21px);cursor:pointer;white-space:nowrap;
+  transition:border-color .15s,transform .15s;font-weight:600}
+.mtoggle:hover{border-color:var(--verde);transform:translate(1px,-1px)}
+.mtoggle b{display:flex;flex-direction:column;gap:2.5px}
+.mtoggle b i{display:block;width:12px;height:1.5px;background:currentColor}
+.prog{display:flex;gap:2px;flex:1;min-width:50px}
+.prog b{flex:1;height:clamp(4px,.32*var(--u),7px);background:var(--strato-alto);cursor:pointer;transition:background .22s}
+.prog b.a{background:rgba(233,182,92,.32)} .prog b.v{background:rgba(169,140,224,.32)} .prog b.g{background:rgba(99,178,149,.32)}
+.prog b.done.a{background:var(--ambra)} .prog b.done.v{background:var(--viola)} .prog b.done.g{background:var(--verde)}
+.ctrl{display:flex;align-items:center;gap:clamp(8px,.65*var(--u),14px)}
+.count{font-family:"JetBrains Mono",monospace;font-size:var(--f-mono);color:var(--vetro);letter-spacing:.1em}
+.arrow{width:clamp(36px,2.9*var(--u),54px);height:clamp(32px,2.55*var(--u),48px);border:1px solid var(--bordo);background:transparent;color:var(--luce);
+  cursor:pointer;font-size:clamp(14px,1.1*var(--u),21px);line-height:1;transition:border-color .18s,color .18s}
+.arrow:hover:not(:disabled){border-color:var(--verde);color:var(--verde)}
+.arrow:disabled{opacity:.28;cursor:default}
+.hint{font-family:"JetBrains Mono",monospace;font-size:var(--f-micro);letter-spacing:.18em;text-transform:uppercase;
+  color:var(--vetro);opacity:.6;margin-top:8px}
+
+/* ═══ rail agganciato su schermi larghi ═══ */
+@media(min-width:1040px){
+  :root{--rail:var(--railw)}
+  .rail{transform:none}
+  .railhd button{display:block}
+  .mtoggle{display:none}
+  .mback{display:none!important}
+  body.railoff{--rail:0px}
+  body.railoff .rail{transform:translateX(-101%)}
+  body.railoff .mtoggle{display:inline-flex}
+}
+
+/* ═══ responsive ═══ */
+/* Finestre piu' alte del 16:9: li' avanza altezza, perche' --u la governa
+   e si ferma sulla larghezza. Invece di lasciare il blocco raggruppato in mezzo
+   al vuoto, si allarga il ritmo verticale e respirano i riquadri.
+   Sopra 1.4 di rapporto non entra: li' la slide e' gia' piena. */
+@media(min-width:1040px) and (max-aspect-ratio:7/5){
+  .shead{margin-bottom:clamp(12px,3.6vh,64px)}
+  h2{margin-bottom:.85em}
+  .g2,.g3,.g4,.cols,.tiles,.nums,.beforeafter,.targets{row-gap:clamp(12px,2.6vh,48px)}
+  .card,.ba{padding:clamp(14px,1.9*var(--u),40px)}
+  .lane,.evid{padding:clamp(13px,1.9*var(--u),40px)}
+  .lane{margin-bottom:clamp(9px,2vh,32px)}
+  .q{margin-top:1.9em}
+  .kicker{margin-top:1.6em}
+  .hazard{margin:clamp(10px,2.6vh,40px) 0}
+}
+@media(max-width:900px){
+  .g2,.g3,.g4,.cols,.targets,.nums,.beforeafter{grid-template-columns:1fr}
+  .g4.keep2,.tiles{grid-template-columns:1fr 1fr}
+  .slide{justify-content:flex-start}
+  .hero{justify-content:center}
+  h2{max-width:none}
+  .latrow,.latlabs{grid-template-columns:repeat(3,1fr)}
+  .latcol:nth-child(n+4),.latlab:nth-child(n+4){display:none}
+  .ladrow{grid-template-columns:1fr;gap:6px}
+  .fb{text-align:left}.fb .fbar{margin-left:0}
+  .memb{grid-template-columns:1fr}
+  .mline2{display:none}
+  .mem{grid-template-columns:clamp(22px,1.7*var(--u),34px) 1fr}
+  .mmeta{grid-column:1 / -1;flex-direction:row;flex-wrap:wrap;align-items:center;margin-top:4px}
+  .count{display:none}
+}
+@media(max-width:560px){.tiles{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="scan" aria-hidden="true"></div>
+
+<header class="topbar">
+  <span class="tb-doc">TEKSISTEMI // NEWSLETTER TECNICA</span>
+  <a class="tb-arch" href="index.html">← Archivio</a>
+  <span class="tb-hz"></span>
+  <span class="tb-part" id="tbpart">PARTE I · I BIAS</span>
+  <span class="tb-sp"></span>
+  <span class="tb-lang"><a href="005-errori-di-fabbrica.html" class="on" data-lang="it">IT</a><a href="en/005-factory-settings.html" data-lang="en">EN</a></span>
+  <span class="tb-live"><i></i>DOC: ERRORI-DI-FABBRICA</span>
+</header>
+
+<svg class="sprite" aria-hidden="true"><defs>
+  <symbol id="ic-filtro" viewBox="0 0 48 48">
+    <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M8 11h32L27 26v12l-6-4V26z"/></g>
+    <g fill="currentColor"><circle cx="11" cy="5.5" r="1.5"/><circle cx="18" cy="5.5" r="1.5"/><circle cx="25" cy="5.5" r="1.5"/><circle cx="32" cy="5.5" r="1.5"/><circle cx="39" cy="5.5" r="1.5"/><circle cx="24" cy="44" r="1.7"/></g>
+  </symbol>
+  <symbol id="ic-buchi" viewBox="0 0 48 48">
+    <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+      <path d="M10 36 24 11 38 36" stroke-dasharray="3 4"/><path d="M10 36h28"/></g>
+    <g fill="currentColor"><circle cx="10" cy="36" r="2.4"/><circle cx="24" cy="11" r="2.4"/><circle cx="38" cy="36" r="2.4"/></g>
+  </symbol>
+  <symbol id="ic-fretta" viewBox="0 0 48 48">
+    <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+      <path d="M4 35h13"/><path d="M31 35h13"/><path d="M12 33C15 16 33 16 36 31"/><path d="M31 27l5.4 5 3.6-6"/></g>
+    <g fill="currentColor" opacity=".5"><circle cx="21" cy="41" r="1.3"/><circle cx="24" cy="41" r="1.3"/><circle cx="27" cy="41" r="1.3"/></g>
+  </symbol>
+  <symbol id="ic-memoria" viewBox="0 0 48 48">
+    <g stroke="currentColor" stroke-width="1.7" stroke-linecap="round" fill="none">
+      <path d="M7 38V30" stroke-dasharray="2 3"/><path d="M14 38V22" stroke-dasharray="2 3"/><path d="M21 38V9"/>
+      <path d="M28 38V26" stroke-dasharray="2 3"/><path d="M35 38V32" stroke-dasharray="2 3"/><path d="M42 38V17"/>
+      <path d="M4 43h40" opacity=".45"/></g>
+  </symbol>
+  <symbol id="lg-mc" viewBox="0 0 200 200">
+    <g stroke="#A98CE0" stroke-width="1.2" fill="none" opacity=".55">
+      <path d="M4 4h22M4 4v22"/><path d="M196 4h-22M196 4v22"/><path d="M4 196h22M4 196v-22"/><path d="M196 196h-22M196 196v-22"/></g>
+    <circle cx="100" cy="100" r="26" fill="none" stroke="#A98CE0" stroke-width="1.6" stroke-dasharray="4 5"/>
+    <g stroke="#A98CE0" stroke-width="1.2" stroke-dasharray="3 4" opacity=".85">
+      <path d="M100 54v18"/><path d="M146 100h-18"/><path d="M100 146v-18"/><path d="M54 100h18"/></g>
+    <g style="color:#E9B65C">
+      <use href="#ic-filtro"  x="80"  y="14"  width="40" height="40"/>
+      <use href="#ic-buchi"   x="146" y="80"  width="40" height="40"/>
+      <use href="#ic-fretta"  x="80"  y="146" width="40" height="40"/>
+      <use href="#ic-memoria" x="14"  y="80"  width="40" height="40"/>
+    </g>
+  </symbol>
+  <symbol id="il-dado" viewBox="0 0 200 120">
+    <g fill="none" stroke="#93A4B2" stroke-width="1.4"><rect x="26" y="30" width="58" height="58"/></g>
+    <g fill="#E9B65C"><circle cx="42" cy="46" r="4"/><circle cx="68" cy="46" r="4"/><circle cx="55" cy="59" r="4"/><circle cx="42" cy="72" r="4"/><circle cx="68" cy="72" r="4"/></g>
+    <g stroke="#93A4B2" stroke-width="1.4" fill="none"><path d="M96 59h20" stroke-dasharray="3 3"/><path d="M112 55l5 4-5 4"/><path d="M128 78h50"/></g>
+    <g fill="none" stroke="#93A4B2" stroke-width="1.2" opacity=".5"><path d="M128 72v12"/><path d="M178 72v12"/></g>
+    <path d="M141 78v-24" stroke="#93A4B2" stroke-width="1.2" stroke-dasharray="3 3"/>
+    <circle cx="141" cy="52" r="3.4" fill="#93A4B2" opacity=".6"/>
+    <path d="M166 78v-24" stroke="#E9B65C" stroke-width="1.6"/><circle cx="166" cy="52" r="4.4" fill="#E9B65C"/>
+  </symbol>
+  <symbol id="il-bomber" viewBox="0 0 200 120">
+    <g fill="none" stroke="#93A4B2" stroke-width="1.4" stroke-linejoin="round">
+      <path d="M100 16c5 0 8 8 8 18v14l40 12v10l-40-6v18l12 10v6l-20-5-20 5v-6l12-10V64l-40 6V60l40-12V34c0-10 3-18 8-18z"/></g>
+    <g fill="#E9B65C"><circle cx="74" cy="55" r="2.6"/><circle cx="84" cy="58" r="2.6"/><circle cx="126" cy="55" r="2.6"/><circle cx="116" cy="59" r="2.6"/><circle cx="100" cy="74" r="2.6"/><circle cx="100" cy="88" r="2.6"/><circle cx="92" cy="96" r="2.6"/><circle cx="108" cy="96" r="2.6"/><circle cx="66" cy="52" r="2.6"/><circle cx="134" cy="52" r="2.6"/></g>
+    <g fill="none" stroke="#63B295" stroke-width="1.5" stroke-dasharray="3 3"><circle cx="82" cy="45" r="9"/><circle cx="118" cy="45" r="9"/></g>
+    <g stroke="#63B295" stroke-width="1.2" fill="none" opacity=".85"><path d="M82 62v14"/><path d="M118 62v14"/></g>
+  </symbol>
+  <symbol id="il-opera" viewBox="0 0 200 120">
+    <g fill="none" stroke="#93A4B2" stroke-width="1.4" stroke-linecap="round">
+      <path d="M18 84c0-26 14-44 30-44 8 0 12 10 12 22v22"/><path d="M40 84c0-30 16-52 34-52 9 0 14 12 14 26v26"/>
+      <path d="M66 84c0-24 13-40 27-40 7 0 11 9 11 19v21"/><path d="M10 84h104"/><path d="M10 84l-2 8h108l-2-8"/></g>
+    <g fill="none" stroke="#93A4B2" stroke-width="1.2" opacity=".55"><path d="M132 92h56"/></g>
+    <rect x="136" y="84" width="14" height="8" fill="#93A4B2" opacity=".55"/>
+    <rect x="164" y="26" width="14" height="66" fill="#E9B65C"/>
+    <g fill="#93A4B2" font-family="monospace" font-size="9"><text x="132" y="106">7M</text><text x="160" y="106">102M</text></g>
+  </symbol>
+  <symbol id="il-volo" viewBox="0 0 200 120">
+    <g fill="none" stroke="#93A4B2" stroke-width="1.4" stroke-linejoin="round" opacity=".5">
+      <path d="M42 24c3 0 5 5 5 11v8l22 7v6l-22-4v11l7 6v4l-12-3-12 3v-4l7-6V52l-22 4v-6l22-7v-8c0-6 2-11 5-11z"/></g>
+    <path d="M20 22 64 74" stroke="#FF5340" stroke-width="2" stroke-linecap="round"/>
+    <g fill="none" stroke="#93A4B2" stroke-width="1.4"><path d="M78 50h18" stroke-dasharray="3 3"/><path d="M92 46l5 4-5 4"/></g>
+    <g fill="none" stroke="#F5E9D0" stroke-width="1.4" stroke-linejoin="round">
+      <path d="M112 56h44l6 10v10h-56V66z"/><path d="M120 56l4-9h26l6 9"/><circle cx="124" cy="78" r="5"/><circle cx="150" cy="78" r="5"/></g>
+    <g fill="none" stroke="#93A4B2" stroke-width="1.2" opacity=".55"><path d="M32 100h136"/></g>
+    <rect x="36" y="94" width="30" height="6" fill="#93A4B2" opacity=".5"/>
+    <rect x="80" y="94" width="88" height="6" fill="#E9B65C"/>
+    <g fill="#93A4B2" font-family="monospace" font-size="8"><text x="36" y="114">rischio per km — aereo</text><text x="118" y="114">auto</text></g>
+  </symbol>
+</defs></svg>
+
+<main class="deck" id="deck">
+
+<!-- 1 HERO -->
+<section class="slide hero on" data-act="a" data-part="COPERTINA">
+  <div class="wrap">
+    <div class="spart" style="margin-bottom:16px">Teksistemi · Newsletter tecnica</div>
+    <h1>Errori<br>di fabbrica</h1>
+    <div class="heroviz" id="heroviz"></div>
+    <p class="lead">I bias cognitivi non sono difetti di carattere.<br>Sono il comportamento predefinito di qualunque cervello umano — incluso quello di chi scrive.</p>
+    <div class="hint">Frecce ← → per navigare · l'indice a sinistra è la mappa</div>
+  </div>
+</section>
+
+<!-- 2 · 01 -->
+<section class="slide" data-act="a" data-part="PARTE I · I BIAS">
+  <div class="wrap">
+    <div class="shead"><div class="stop"><span class="spart">Parte I · I bias</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk"><span class="snum">01</span></span><span class="stit">Che cosa sono</span></div></div>
+    <h2 class="wide">Non sono errori casuali. È esattamente lì il problema.</h2>
+    <div class="cols">
+      <div>
+        <p>Un bias non è una svista. È una scorciatoia che il cervello usa perché nella maggior parte dei casi funziona: è veloce, costa pochissimo, e sbaglia abbastanza di rado da essere sopravvissuta.</p>
+        <p>Il punto è che quando sbaglia, sbaglia <strong>sempre nella stessa direzione</strong>.</p>
+        <div class="kicker">Il rumore si compensa facendo la media di tanti tentativi. Il bias no: più dati raccogli, più diventi preciso nel posto sbagliato.</div>
+        <div class="tags"><span class="tag est">stabilito</span></div>
+      </div>
+      <div class="targets">
+        <div class="tgt">
+          <svg viewBox="0 0 120 120" aria-label="Colpi sparsi attorno al centro">
+            <circle class="ring" cx="60" cy="60" r="52"/><circle class="ring" cx="60" cy="60" r="34"/><circle class="ring" cx="60" cy="60" r="16"/>
+            <path d="M60 2v14M60 104v14M2 60h14M104 60h14" stroke="#93A4B2" stroke-width="1" opacity=".5"/>
+            <g fill="#93A4B2"><circle cx="42" cy="48" r="3.4"/><circle cx="78" cy="70" r="3.4"/><circle cx="66" cy="38" r="3.4"/><circle cx="50" cy="80" r="3.4"/><circle cx="84" cy="52" r="3.4"/><circle cx="38" cy="66" r="3.4"/></g>
+          </svg>
+          <div class="nm" style="color:var(--vetro)">Rumore</div>
+          <div class="ds">Ogni colpo impreciso, la media giusta. Più prove → più vicino al vero.</div>
+        </div>
+        <div class="tgt">
+          <svg viewBox="0 0 120 120" aria-label="Colpi raggruppati fuori centro">
+            <circle class="ring" cx="60" cy="60" r="52"/><circle class="ring" cx="60" cy="60" r="34"/><circle class="ring" cx="60" cy="60" r="16"/>
+            <path d="M60 2v14M60 104v14M2 60h14M104 60h14" stroke="#93A4B2" stroke-width="1" opacity=".5"/>
+            <g fill="#E9B65C"><circle cx="86" cy="36" r="3.4"/><circle cx="92" cy="42" r="3.4"/><circle cx="84" cy="44" r="3.4"/><circle cx="90" cy="32" r="3.4"/><circle cx="80" cy="38" r="3.4"/><circle cx="88" cy="48" r="3.4"/></g>
+          </svg>
+          <div class="nm" style="color:var(--ambra)">Bias</div>
+          <div class="ds">Ogni colpo preciso, tutti nello stesso punto sbagliato. Più prove → più sicurezza, stesso errore.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · 02 -->
+<section class="slide" data-act="a" data-part="PARTE I · I BIAS">
+  <div class="wrap">
+    <div class="shead"><div class="stop"><span class="spart">Parte I · I bias</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk"><span class="snum">02</span></span><span class="stit">Il punto cieco</span></div></div>
+    <h2 class="wide">Li riconosciamo benissimo negli altri. Su noi stessi il meccanismo non si accende.</h2>
+    <div class="cols">
+      <div>
+        <p>Pronin, Lin e Ross (2002) chiesero a delle persone quanto si ritenessero soggette a una lista di bias <em>rispetto alla media</em>. Quasi tutti si collocarono sotto la media. Anche dopo che ciascun bias era stato spiegato loro nel dettaglio.</p>
+        <p>Il fenomeno ha un nome — <strong>bias blind spot</strong> — ed è a sua volta un bias. È fra i risultati più replicati del campo.</p>
+        <div class="kicker">Conoscere un bias non lo disattiva. È un'informazione che riguarda ciò che sai, non ciò che fai.</div>
+        <div class="tags"><span class="tag est">stabilito</span></div>
+      </div>
+      <div>
+        <div class="dist" id="dist"></div>
+        <div class="axis"><span>meno soggetto della media</span><span>più soggetto</span></div>
+        <div class="src">Schema illustrativo della distribuzione delle autovalutazioni. Metà di noi, matematicamente, sta a destra della linea verde. Praticamente nessuno ci si mette.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · 03 -->
+<section class="slide" data-act="a" data-part="PARTE I · I BIAS">
+  <div class="wrap">
+    <div class="shead"><div class="stop"><span class="spart">Parte I · I bias</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk"><span class="snum">03</span></span><span class="stit">Le quattro famiglie</span></div></div>
+    <h2 class="full">Duecento nomi diversi, quattro problemi.</h2>
+    <p style="max-width:62ch;margin-bottom:1em">L'elenco dei bias documentati è lunghissimo e in buona parte ridondante. È più utile guardare i quattro problemi che il cervello sta cercando di risolvere quando li produce. <strong>Da qui in avanti ogni bias porta il simbolo della sua famiglia.</strong></p>
+    <div class="g4 keep2">
+      <div class="card brk">
+        <div class="cardhd"><span class="ic icbig"><svg><use href="#ic-filtro"/></svg></span>
+          <div><span class="lab">Troppa informazione</span><h3>Filtriamo</h3></div></div>
+        <p>Notiamo ciò che conferma quello che già pensiamo, ciò che è recente, ciò che è vivido. Il resto non arriva proprio.</p>
+        <div class="src">conferma · ancoraggio · disponibilità</div>
+        <div class="push"><button class="btn" data-case="dado"><span class="cg">▶</span><span class="cl">Il caso: giudici e dadi</span></button></div>
+      </div>
+      <div class="card brk">
+        <div class="cardhd"><span class="ic icbig"><svg><use href="#ic-buchi"/></svg></span>
+          <div><span class="lab">Poco significato</span><h3>Riempiamo i buchi</h3></div></div>
+        <p>Costruiamo storie coerenti da dati incompleti, e poi trattiamo la storia come se fosse il dato.</p>
+        <div class="src">narrazione · senno di poi · maledizione della conoscenza</div>
+        <div class="push"><button class="btn" data-case="bomber"><span class="cg">▶</span><span class="cl">Il caso: i bombardieri</span></button></div>
+      </div>
+      <div class="card brk">
+        <div class="cardhd"><span class="ic icbig"><svg><use href="#ic-fretta"/></svg></span>
+          <div><span class="lab">Decidere in fretta</span><h3>Ci diamo fiducia</h3></div></div>
+        <p>Sovrastimiamo controllo e velocità, e difendiamo ciò in cui abbiamo già investito. Serve a partire, non ad avere ragione.</p>
+        <div class="src">eccesso di fiducia · pianificazione · costi sommersi</div>
+        <div class="push"><button class="btn" data-case="opera"><span class="cg">▶</span><span class="cl">Il caso: Sydney Opera House</span></button></div>
+      </div>
+      <div class="card brk">
+        <div class="cardhd"><span class="ic icbig"><svg><use href="#ic-memoria"/></svg></span>
+          <div><span class="lab">Cosa ricordare</span><h3>Comprimiamo</h3></div></div>
+        <p>Restano i picchi, le conclusioni e i sopravvissuti. Il resto della base di dati sparisce senza avvisarci.</p>
+        <div class="src">picco-fine · sopravvivenza · disponibilità</div>
+        <div class="push"><button class="btn" data-case="volo"><span class="cg">▶</span><span class="cl">Il caso: dopo l'11 settembre</span></button></div>
+      </div>
+    </div>
+    <div class="clickhint">I quattro pulsanti aprono il caso documentato corrispondente</div>
+  </div>
+</section>
+
+<!-- 5 · 04 -->
+<section class="slide" data-act="a" data-part="PARTE I · I BIAS">
+  <div class="wrap">
+    <div class="shead"><div class="stop"><span class="spart">Parte I · I bias</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk"><span class="snum">04</span></span><span class="stit">Casi documentati</span></div></div>
+    <h2 class="full">Non sono aneddoti da conferenza.</h2>
+    <div class="tiles">
+      <button class="tile brk" data-case="dado">
+        <svg class="ill" viewBox="0 0 200 120"><use href="#il-dado"/></svg>
+        <div class="tn">Giudici e dadi</div>
+        <div class="tl">Un numero casuale sposta una condanna. L'esperienza non protegge.</div>
+        <div class="tcta"><i>▶</i>Apri il caso</div>
+      </button>
+      <button class="tile brk" data-case="bomber">
+        <svg class="ill" viewBox="0 0 200 120"><use href="#il-bomber"/></svg>
+        <div class="tn">I bombardieri di Wald</div>
+        <div class="tl">I fori che contano sono quelli che mancano dal campione.</div>
+        <div class="tcta"><i>▶</i>Apri il caso</div>
+      </button>
+      <button class="tile brk" data-case="opera">
+        <svg class="ill" viewBox="0 0 200 120"><use href="#il-opera"/></svg>
+        <div class="tn">Sydney Opera House</div>
+        <div class="tl">Stimati 7 milioni e sei anni. Ne sono serviti 102 e sedici.</div>
+        <div class="tcta"><i>▶</i>Apri il caso</div>
+      </button>
+      <button class="tile brk" data-case="volo">
+        <svg class="ill" viewBox="0 0 200 120"><use href="#il-volo"/></svg>
+        <div class="tn">Dopo l'11 settembre</div>
+        <div class="tl">Evitare il rischio vivido spostandosi su quello statisticamente peggiore.</div>
+        <div class="tcta"><i>▶</i>Apri il caso</div>
+      </button>
+    </div>
+    <div class="clickhint">Clicca una tessera per il caso completo, con fonti e riserve</div>
+    <div class="note">Parte della psicologia dei bias non ha superato la crisi di replicazione. Questi sono fra i casi più solidi, ma il livello di certezza non è uniforme: ogni scheda dice esplicitamente quanto regge.</div>
+  </div>
+</section>
+
+<!-- 6 · 05 -->
+<section class="slide" data-act="a" data-part="PARTE II · NEL SOFTWARE">
+  <div class="wrap">
+    <div class="shead"><div class="stop"><span class="spart">Parte II · Nel software</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk"><span class="snum">05</span></span><span class="stit">Dove l'intuito si calibra</span></div></div>
+    <h2 class="wide">L'intuito impara solo dove il feedback è rapido e non discutibile.</h2>
+    <p style="max-width:66ch">Kahneman e Klein, dopo anni passati a darsi torto a vicenda, si accordarono su una condizione (2009): l'intuito esperto è affidabile solo quando l'ambiente è regolare <strong>e</strong> il ritorno è rapido e inequivocabile. Se manca una delle due, l'esperienza produce fiducia, non accuratezza.</p>
+    <div style="margin:clamp(10px,2vh,20px) 0 0">
+      <div class="latrow" id="latrow"></div><div class="latline"></div><div class="latlabs" id="latlabs"></div>
+      <div class="latleg">
+        <span><i style="background:var(--verde)"></i>l'esperienza ti corregge</span>
+        <span><i style="background:var(--ambra)"></i>l'esperienza ti convince e basta</span>
+      </div>
+    </div>
+    <div class="kicker">Il debug ti toglie i bias di dosso in pochi secondi: hai un'ipotesi, la provi, il computer ti dice di no. L'architettura non ti corregge mai — quando una scelta si rivela sbagliata, il team è cambiato, il contesto è cambiato, e la colpa è attribuibile a qualsiasi cosa.</div>
+    <div class="tags"><span class="tag est">stabilito · la condizione</span><span class="tag inf">inferito · la mappatura sulle fasi</span></div>
+  </div>
+</section>
+
+<!-- 7 · 06 -->
+<section class="slide" data-act="a" data-part="PARTE II · FASI DEL CICLO">
+  <div class="wrap">
+    <div class="shead"><div class="stop"><span class="spart">Parte II · Fasi del ciclo</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk"><span class="snum">06</span></span><span class="stit">Progettazione</span></div></div>
+    <h2 class="wide">La prima proposta sul tavolo non viene valutata. Viene modificata.</h2>
+    <div class="g2">
+      <div class="card"><div class="cardhd"><span class="ic"><svg><use href="#ic-filtro"/></svg></span><div><span class="lab">Ancoraggio</span></div></div>
+        <p>La prima architettura proposta non finisce a confronto con le alternative: diventa il perimetro dentro cui nascono le alternative. Che infatti nascono già come «varianti di quella».</p></div>
+      <div class="card"><div class="cardhd"><span class="ic"><svg><use href="#ic-filtro"/></svg></span><div><span class="lab">Disponibilità</span></div></div>
+        <p>Si sceglie la tecnologia usata di recente, o quella su cui si è appena letto qualcosa di entusiasta. Non quella adatta: quella che era in cima alla pila mentale.</p></div>
+      <div class="card"><div class="cardhd"><span class="ic"><svg><use href="#ic-fretta"/></svg></span><div><span class="lab">Fallacia della pianificazione</span></div></div>
+        <p>Si stima scomponendo dall'interno, sommando i pezzi. Il risultato descrive con precisione lo scenario in cui non succede nulla di imprevisto — cioè nessuno scenario mai avvenuto.</p></div>
+      <div class="card"><div class="cardhd"><span class="ic"><svg><use href="#ic-buchi"/></svg></span><div><span class="lab">Narrazione</span></div></div>
+        <p>Una spiegazione ordinata sembra vera. I sistemi reali sono disordinati: se il diagramma è troppo pulito, il candidato più probabile non è che il sistema sia elegante, ma che manchi qualcosa.</p></div>
+    </div>
+    <div class="q">Quante volte la seconda opzione è nata prima che la prima fosse già sul tavolo?</div>
+  </div>
+</section>
+
+<!-- 8 · 07 -->
+<section class="slide" data-act="a" data-part="PARTE II · FASI DEL CICLO">
+  <div class="wrap">
+    <div class="shead"><div class="stop"><span class="spart">Parte II · Fasi del ciclo</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk"><span class="snum">07</span></span><span class="stit">Scrittura e debug</span></div></div>
+    <h2 class="wide">Il debug è cercare conferme a una teoria che ci siamo fatti in tre secondi.</h2>
+    <div class="g2">
+      <div class="card"><div class="cardhd"><span class="ic"><svg><use href="#ic-filtro"/></svg></span><div><span class="lab">Conferma</span></div></div>
+        <p>La prima ipotesi arriva subito, e da lì in poi si cercano i log che la sostengono. Il compito 2-4-6 di Wason mostra che è il comportamento di partenza: si provano casi che confermano la regola, non casi che la romperebbero.</p></div>
+      <div class="card"><div class="cardhd"><span class="ic"><svg><use href="#ic-buchi"/></svg></span><div><span class="lab">Maledizione della conoscenza</span></div></div>
+        <p>Nomi e commenti vengono scritti per qualcuno che ha già il contesto in testa. Quel qualcuno non esiste: sei tu fra sei mesi, e non ce l'avrai.</p></div>
+      <div class="card"><div class="cardhd"><span class="ic"><svg><use href="#ic-buchi"/></svg></span><div><span class="lab">Errore di attribuzione</span></div></div>
+        <p>«Sulla mia macchina funziona.» Quando il codice è nostro la causa sta nell'ambiente; quando è di altri sta nella persona. Lo stesso identico bug, due spiegazioni diverse.</p></div>
+      <div class="card"><div class="cardhd"><span class="ic"><svg><use href="#ic-filtro"/></svg></span><div><span class="lab">Ottimizzazione locale</span></div></div>
+        <p>Si migliora ciò che si sta guardando, perché è ciò che si sta guardando. Il collo di bottiglia vero raramente è nel file aperto.</p></div>
+    </div>
+    <div class="q">La domanda che rompe il ciclo è sempre la stessa: quale osservazione dimostrerebbe che la mia ipotesi è sbagliata, e quanto costa procurarmela?</div>
+  </div>
+</section>
+
+<!-- 9 · 08 -->
+<section class="slide" data-act="a" data-part="PARTE II · FASI DEL CICLO">
+  <div class="wrap">
+    <div class="shead"><div class="stop"><span class="spart">Parte II · Fasi del ciclo</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk"><span class="snum">08</span></span><span class="stit">Manutenzione ed evoluzione</span></div></div>
+    <h2 class="wide">Nessuno rimuove niente. Tutti aggiungono.</h2>
+    <div class="g2">
+      <div class="card"><div class="cardhd"><span class="ic"><svg><use href="#ic-fretta"/></svg></span><div><span class="lab">Status quo + avversione alla perdita</span></div></div>
+        <p>Aggiungere una funzione è un guadagno visibile, toglierla è una perdita visibile. Nessuno viene ringraziato per una rimozione. Il sistema può crescere in una sola direzione.</p></div>
+      <div class="card"><div class="cardhd"><span class="ic"><svg><use href="#ic-fretta"/></svg></span><div><span class="lab">Costi sommersi</span></div></div>
+        <p>Più ore ci sono dentro, più diventa difficile buttarlo. La domanda corretta ignora completamente il passato: <strong>da qui in avanti</strong>, riscrivere costa meno che continuare?</p></div>
+      <div class="card"><div class="cardhd"><span class="ic"><svg><use href="#ic-memoria"/></svg></span><div><span class="lab">Normalizzazione della devianza</span></div></div>
+        <p>Ogni eccezione tollerata sposta di pochissimo la linea del normale. Nessun singolo passo sembra sbagliato, e la somma è irriconoscibile. Ne abbiamo parlato con le finestre rotte.</p>
+        <div class="src">Diane Vaughan, sull'analisi del Challenger</div></div>
+      <div class="card"><div class="cardhd"><span class="ic"><svg><use href="#ic-buchi"/></svg></span><div><span class="lab">Senno di poi</span></div></div>
+        <p>Nel post-mortem la causa sembra ovvia. Sembrare ovvia <em>dopo</em> è esattamente ciò che rende inutile la lezione: si impara «stavolta era evidente», non «ecco cosa non eravamo in grado di vedere».</p></div>
+    </div>
+    <div class="q">Un post-mortem utile scrive la cronologia prima della conclusione. Se la conclusione arriva per prima, la cronologia si limita a confermarla.</div>
+  </div>
+</section>
+
+<!-- 10 · 09 -->
+<section class="slide" data-act="a" data-part="PARTE II · NEL SOFTWARE">
+  <div class="wrap">
+    <div class="shead"><div class="stop"><span class="spart">Parte II · Nel software</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk"><span class="snum">09</span></span><span class="stit">Ogni ruolo, il suo bias</span></div></div>
+    <h2 class="wide">Più si sale, più il ciclo di feedback si allunga.</h2>
+    <div class="lad">
+      <div class="ladrow"><div class="r">Junior</div>
+        <div class="d"><b>Illusione di fluidità.</b> Leggere codice chiaro dà la sensazione di averlo capito. La sensazione di comprensione e la comprensione sono due grandezze distinte, e solo una regge davanti a un incidente a mezzanotte.</div>
+        <div class="fb"><div class="fbar" style="width:14%"></div><div class="fnum">minuti</div></div></div>
+      <div class="ladrow"><div class="r">Senior</div>
+        <div class="d"><b>Maledizione della conoscenza.</b> Non si può tornare a non sapere. Ciò che per te è ovvio non viene detto — né in una code review, né in un prompt. È il bias più costoso perché è invisibile a chi ce l'ha.</div>
+        <div class="fb"><div class="fbar" style="width:34%"></div><div class="fnum">settimane</div></div></div>
+      <div class="ladrow"><div class="r">Lead / PM</div>
+        <div class="d"><b>Pianificazione, escalation dell'impegno, effetto alone.</b> Stime dall'interno, progetti difesi oltre il punto di non ritorno, valutazioni delle persone contaminate da un singolo tratto positivo.</div>
+        <div class="fb"><div class="fbar" style="width:62%"></div><div class="fnum">mesi</div></div></div>
+      <div class="ladrow"><div class="r">Owner / CEO</div>
+        <div class="d"><b>Sopravvivenza, prova sociale, conferma.</b> Le storie di successo le scrivono i sopravvissuti; i casi falliti non pubblicano post. E le metriche che dimostrano la bontà di una decisione vengono spesso scelte dopo averla presa.</div>
+        <div class="fb"><div class="fbar" style="width:100%"></div><div class="fnum">anni · o mai</div></div></div>
+    </div>
+    <div class="kicker">Non è che chi decide sia meno lucido. È che riceve meno correzioni, più tardi, e in forma più ambigua.</div>
+  </div>
+</section>
+
+<!-- 11 · 10 PIVOT -->
+<section class="slide" data-act="v" data-part="PARTE III · CON GLI AGENTI">
+  <div class="wrap">
+    <div class="shead"><div class="stop"><span class="spart">Parte III · Con gli agenti</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk"><span class="snum">10</span></span><span class="stit">Cambio di terreno</span></div></div>
+    <div class="beforeafter">
+      <div class="ba solid"><div class="h">Fin qui — consolidato</div>
+        <p>Un secolo di psicologia sperimentale e trent'anni di industria del software. Bordi pieni, numeri pieni.</p></div>
+      <div class="ba dash"><div class="h">Da qui — frontiera</div>
+        <p>Analisi su una tecnologia che ha tre anni. Bordi tratteggiati, numeri vuoti, fondo a griglia: il resto della presentazione userà questo stile per ricordarvelo.</p></div>
+    </div>
+    <div class="hazard"></div>
+    <div class="confine"><span class="l"></span><span class="m">confine dell'evidenza</span><span class="l"></span></div>
+    <div class="g3" style="margin-top:clamp(10px,1.8vh,18px)">
+      <div class="card" style="border-style:solid;border-color:rgba(99,178,149,.35)">
+        <span class="lab" style="color:var(--verde)">stabilito</span>
+        <p>Misurato, replicato, con un margine di errore noto. Ci si può appoggiare sopra il peso di una decisione.</p></div>
+      <div class="card" style="border-color:rgba(233,182,92,.35)">
+        <span class="lab" style="color:var(--ambra)">inferito</span>
+        <p>Deduzione da meccanismi noti, coerente ma non misurata. Ci si prende una decisione reversibile, non una irreversibile.</p></div>
+      <div class="card" style="border-color:rgba(169,140,224,.4)">
+        <span class="lab" style="color:var(--viola)">non testato</span>
+        <p>Plausibile, nessun dato. Vale come ipotesi di lavoro e come cosa da andare a misurare, non come argomento.</p></div>
+    </div>
+    <div class="q">Se in una presentazione sui bias non distinguessimo questi tre livelli, saremmo noi il caso di studio.</div>
+  </div>
+</section>
+
+<!-- 12 · 11 -->
+<section class="slide" data-act="v" data-part="PARTE III · CON GLI AGENTI">
+  <div class="wrap">
+    <div class="shead"><div class="stop"><span class="spart">Parte III · Con gli agenti</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk"><span class="snum">11</span></span><span class="stit">L'attrito è informazione</span></div></div>
+    <h2 class="wide">Un collega ti resiste. È così che scopri di aver sbagliato premessa.</h2>
+    <p style="max-width:66ch">Dai una premessa sbagliata a una persona e ottieni confusione, una domanda banale, un silenzio strano, una faccia. Non ti dicono la risposta giusta: ti dicono che c'è qualcosa che non torna nella <strong>tua</strong> impostazione. Gran parte della correzione in un team passa da lì.</p>
+    <div style="margin-top:clamp(8px,1.6vh,16px)">
+      <div class="lane h"><div class="lt">Collega umano — canale con attrito</div>
+        <div class="flow"><span class="node pr">premessa sbagliata</span><span class="arw">→</span><span class="node">persona</span><span class="arw">→</span><span class="node out">risposta parziale, tardi</span></div>
+        <div class="back"><span>↩ «in che senso?»</span><span>↩ domanda banale</span><span>↩ esitazione</span><span>↩ faccia perplessa</span></div></div>
+      <div class="lane m"><div class="lt">Modello — canale senza attrito</div>
+        <div class="flow"><span class="node pr">premessa sbagliata</span><span class="arw">→</span><span class="node">modello</span><span class="arw">→</span><span class="node out" style="border-color:rgba(169,140,224,.55);color:var(--viola)">stessa premessa, argomentata meglio</span></div>
+        <div class="nofric">nessun segnale di ritorno · la fiducia sale · il prompt successivo è più impegnato del precedente</div></div>
+    </div>
+    <div class="kicker">Non è che il modello erediti i nostri bias. È che li restituisce in una forma più convincente di quella in cui glieli abbiamo dati.</div>
+  </div>
+</section>
+
+<!-- 13 · 12 -->
+<section class="slide" data-act="v" data-part="PARTE III · CON GLI AGENTI">
+  <div class="wrap">
+    <div class="shead"><div class="stop"><span class="spart">Parte III · Con gli agenti</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk"><span class="snum">12</span></span><span class="stit">I quattro canali</span></div></div>
+    <h2 class="full">Le stesse quattro famiglie, adesso in uscita dalla tastiera.</h2>
+    <div class="g4 keep2">
+      <div class="card">
+        <div class="cardhd"><span class="ic echo"><svg><use href="#ic-filtro"/></svg><svg class="gh ic"><use href="#ic-filtro"/></svg></span>
+          <div><span class="lab">Filtriamo → Specifica</span></div></div>
+        <h3>Scriviamo la diagnosi, non il sintomo</h3>
+        <p>«Sistema la race condition nel pool» ha già deciso al posto dell'agente. Che una race condition ci sia oppure no, l'agente ne troverà una: gliel'abbiamo chiesto.</p></div>
+      <div class="card">
+        <div class="cardhd"><span class="ic echo"><svg><use href="#ic-buchi"/></svg><svg class="gh ic"><use href="#ic-buchi"/></svg></span>
+          <div><span class="lab">Riempiamo i buchi → Omissione</span></div></div>
+        <h3>Il vuoto si riempie da solo</h3>
+        <p>Ciò che per noi è ovvio non lo scriviamo, davanti a un destinatario che non può fare la faccia perplessa. Il buco viene riempito col pattern più comune. <strong>Fallisce in silenzio.</strong></p></div>
+      <div class="card">
+        <div class="cardhd"><span class="ic echo"><svg><use href="#ic-fretta"/></svg><svg class="gh ic"><use href="#ic-fretta"/></svg></span>
+          <div><span class="lab">Ci diamo fiducia → Valutazione</span></div></div>
+        <h3>Da operatori a controllori</h3>
+        <p>Il ruolo umano peggiore — sorvegliare un sistema che quasi sempre ha ragione — applicato all'input più convincente che esista: un artefatto scritto meglio di come l'avremmo scritto noi.</p></div>
+      <div class="card">
+        <div class="cardhd"><span class="ic echo"><svg><use href="#ic-memoria"/></svg><svg class="gh ic"><use href="#ic-memoria"/></svg></span>
+          <div><span class="lab">Comprimiamo → Persistenza</span></div></div>
+        <h3>La cornice non decade</h3>
+        <p>Noi dimentichiamo, ed è così che le impostazioni sbagliate muoiono. Una finestra di contesto rilegge la frase iniziale a ogni turno: qui la compressione non arriva mai.</p></div>
+    </div>
+    <div class="evid">
+      <div class="eh">La ricerca alle spalle del terzo canale — automation bias</div>
+      <p>Non è un'intuizione recente sull'AI: è un filone di ricerca sui fattori umani che va avanti dagli anni Novanta, nato in aviazione e proseguito in diagnostica medica. Definizione operativa: <strong>usare l'output automatico come sostituto della ricerca attiva di informazioni</strong>, con due tipi di errore — di commissione (si esegue un suggerimento sbagliato) e di omissione (non si nota il problema perché il sistema non lo ha segnalato).</p>
+      <p>Il risultato che conta di più per noi: in uno studio su equipaggi di volo, un addestramento specifico <em>sull'automation bias</em> ridusse gli errori di commissione ma <strong>non quelli di omissione</strong>. Anche qui, sapere non basta.</p>
+      <div class="reflist">
+        <a class="ref" href="https://pubmed.ncbi.nlm.nih.gov/11540946/" target="_blank" rel="noopener">Mosier et al. 1997 — cockpit</a>
+        <a class="ref" href="https://pubmed.ncbi.nlm.nih.gov/11543300/" target="_blank" rel="noopener">Skitka et al. 2000 — addestramento</a>
+        <a class="ref" href="https://journals.sagepub.com/doi/10.1518/001872097778543886" target="_blank" rel="noopener">Parasuraman &amp; Riley 1997</a>
+        <a class="ref" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5356416/" target="_blank" rel="noopener">Prescrizione elettronica 2017</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 14 · 13 METR -->
+<section class="slide" data-act="v" data-part="PARTE III · CON GLI AGENTI">
+  <div class="wrap">
+    <div class="shead"><div class="stop"><span class="spart">Parte III · Con gli agenti</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk"><span class="snum">13</span></span><span class="stit">L'unica misura seria che abbiamo</span></div></div>
+    <h2 class="wide">Quando qualcuno ha misurato invece di chiedere, il segno era opposto.</h2>
+    <div class="cols" style="align-items:start">
+      <div>
+        <p><strong>Che cos'è.</strong> METR è un istituto di ricerca no-profit che valuta i sistemi di AI. Nel luglio 2025 ha pubblicato uno studio randomizzato controllato — lo stesso disegno usato per i farmaci — sull'effetto degli strumenti di AI sul lavoro di sviluppo reale.</p>
+        <p><strong>Come funzionava.</strong> 16 sviluppatori esperti hanno portato 246 problemi veri dai <em>loro</em> repository, progetti su cui lavoravano da in media 5 anni. Per ogni singolo task un sorteggio decideva se l'AI era consentita o vietata. Gli sviluppatori registravano lo schermo e il tempo veniva misurato, non dichiarato.</p>
+        <p><strong>Le tre cifre.</strong> Quanto pensavano che l'AI li avrebbe accelerati <em>prima</em>; quanto pensavano di essere stati accelerati <em>dopo</em> aver finito; quanto è cambiato davvero il tempo sul cronometro.</p>
+      </div>
+      <div>
+        <div class="nums">
+          <div class="num a brk"><div class="v">−24%</div><div class="k">previsto<br>prima</div></div>
+          <div class="num b brk"><div class="v">−20%</div><div class="k">percepito<br>dopo</div></div>
+          <div class="num c brk"><div class="v">+19%</div><div class="k">misurato<br>davvero</div></div>
+        </div>
+        <div class="kicker">Il dato interessante non è il rallentamento. È che dopo aver fatto il lavoro, cronometrati, credevano ancora di essere andati più veloci: 39 punti di scarto, tutti nella direzione che fa comodo.</div>
+        <div class="reflist">
+          <a class="ref" href="https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/" target="_blank" rel="noopener">METR — sintesi</a>
+          <a class="ref" href="https://arxiv.org/abs/2507.09089" target="_blank" rel="noopener">arXiv 2507.09089</a>
+        </div>
+      </div>
+    </div>
+    <div class="note">Un solo studio, campione piccolo, strumenti di inizio 2025 su repository grandi e maturi. METR stessa lo etichetta ormai come storico. <strong style="color:var(--luce)">Non dimostra che l'AI rallenti</strong> — dimostra che la percezione della propria produttività non è una misura.</div>
+  </div>
+</section>
+
+<!-- 15 · 14 -->
+<section class="slide" data-act="g" data-part="PARTE IV · CONTROMISURE">
+  <div class="wrap">
+    <div class="shead"><div class="stop"><span class="spart">Parte IV · Contromisure</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk"><span class="snum">14</span></span><span class="stit">Cambiare il processo</span></div></div>
+    <h2 class="wide">Spiegare i bias alle persone funziona poco. Cambiare il processo funziona.</h2>
+    <p style="max-width:64ch">È la scoperta scomoda della letteratura sul debiasing, ed è anche il motivo per cui questa presentazione, da sola, non serve quasi a niente. Ciò che sposta i risultati è la struttura della decisione, non la consapevolezza di chi decide.</p>
+    <div class="g3" style="margin-top:1em">
+      <div class="card"><div class="cardhd"><span class="ic icsm"><svg><use href="#ic-filtro"/></svg></span><div><span class="lab">Contro l'ancoraggio</span></div></div>
+        <p><strong>Stime indipendenti prima della discussione.</strong> In riunione il primo numero pronunciato vince, sempre. Scritte separatamente, poi confrontate: la divergenza è l'informazione.</p></div>
+      <div class="card"><div class="cardhd"><span class="ic icsm"><svg><use href="#ic-fretta"/></svg></span><div><span class="lab">Contro l'eccesso di fiducia</span></div></div>
+        <p><strong>Pre-mortem.</strong> Non «cosa può andare storto», ma: siamo fra un anno, il progetto è fallito, scrivete perché. Immaginare un passato produce molte più cause che immaginare un futuro.</p></div>
+      <div class="card"><div class="cardhd"><span class="ic icsm"><svg><use href="#ic-fretta"/></svg></span><div><span class="lab">Contro la pianificazione</span></div></div>
+        <p><strong>Vista dall'esterno.</strong> Non scomporre la stima. Trovare cinque progetti simili già fatti e guardare quanto sono durati davvero, compresi quelli andati male.</p></div>
+      <div class="card"><div class="cardhd"><span class="ic icsm"><svg><use href="#ic-filtro"/></svg></span><div><span class="lab">Contro la conferma</span></div></div>
+        <p><strong>Falsificazione esplicita.</strong> Prima di partire: quale osservazione mi farebbe cambiare idea? Se non esiste una risposta, non è una diagnosi — è una preferenza.</p></div>
+      <div class="card"><div class="cardhd"><span class="ic icsm"><svg><use href="#ic-buchi"/></svg></span><div><span class="lab">Contro il senno di poi</span></div></div>
+        <p><strong>Cronologia prima della conclusione.</strong> Nei post-mortem si ricostruisce cosa era noto in ogni istante, e solo dopo si tira una riga.</p></div>
+      <div class="card"><div class="cardhd"><span class="ic icsm"><svg><use href="#ic-buchi"/></svg></span><div><span class="lab">Contro il contagio</span></div></div>
+        <p><strong>Occhi nuovi, senza accompagnamento.</strong> Chi rivede non deve ricevere prima la spiegazione dell'autore. La spiegazione <em>è</em> il contagio: trasferisce il punto cieco insieme al contesto.</p></div>
+    </div>
+    <div class="q">L'ultima riga è la stessa idea che, portata agli agenti, diventa lo strumento della Parte V.</div>
+  </div>
+</section>
+
+<!-- 16 · 15 PROMPT -->
+<section class="slide" data-act="g" data-part="PARTE IV · CONTROMISURE">
+  <div class="wrap">
+    <div class="shead"><div class="stop"><span class="spart">Parte IV · Contromisure</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk"><span class="snum">15</span></span><span class="stit">Sintomo, non diagnosi</span></div></div>
+    <div class="cols">
+      <div>
+        <div class="seg" role="tablist">
+          <button data-p="bad" class="on" role="tab">Come lo scriviamo</button>
+          <button data-p="good" role="tab">Come si decontamina</button>
+        </div>
+        <div class="clickhint">Due pulsanti — confronta le due versioni</div>
+        <div class="pbox" id="pbox"></div>
+        <div class="pann" id="pann"></div>
+        <div class="src">Stesso bug, stesso contesto, stesso modello. Cambia solo cosa gli è permesso sapere di quello che pensiamo noi.</div>
+      </div>
+      <div>
+        <ul class="chk">
+          <li>Descrivi <b>cosa osservi</b>, non cosa pensi che sia. Se l'ipotesi ti serve, mettila in un turno successivo e chiedi esplicitamente di smontarla.</li>
+          <li>Chiedi <b>almeno tre ipotesi</b>, ordinate per quanto costa escluderle, prima di qualunque modifica.</li>
+          <li>Chiedi <b>«cosa non ti ho specificato, e cosa hai assunto?»</b> — trasforma l'omissione silenziosa in una lista leggibile.</li>
+          <li>Non far revisionare il codice al contesto che l'ha scritto. <b>Contesto nuovo, senza il ragionamento:</b> solo l'artefatto e i criteri.</li>
+          <li><b>Criteri di accettazione scritti prima</b> dell'implementazione, da chi non la vedrà.</li>
+          <li>Il campanello d'allarme: se la risposta ti dà ragione e lo fa <b>meglio di come l'avresti argomentata tu</b>, è il momento di dubitare, non di procedere.</li>
+          <li><b>Rileggi il tuo primo messaggio al ventesimo turno.</b> È ancora nella stanza, e sta ancora decidendo.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 17 · 16 METACONCERT -->
+<section class="slide proto" data-act="g" data-part="PARTE V · METACONCERT">
+  <div class="wrap">
+    <div class="protobadge">Parte V · strumento · efficacia n = 0</div>
+    <div class="brand">
+      <svg class="brandmark" viewBox="0 0 200 200" aria-label="Marchio Metaconcert"><use href="#lg-mc"/></svg>
+      <div>
+        <div class="wordmark">META<span class="mc">CONCERT</span></div>
+        <div class="brandsub">Protocollo anti-bias per Claude Code<br>8 membri + 1 direttore · licenza MIT · efficacia non misurata</div>
+        <div class="mine">◆ Scritto da me — questa parte non è rassegna stampa</div>
+      </div>
+    </div>
+    <div class="cols" style="margin-top:clamp(12px,2.2vh,24px)">
+      <div>
+        <p>Non è un prompt migliore né un agente più bravo. È un <strong>protocollo</strong>: otto subagenti, ognuno privato di qualcosa di preciso, coordinati da un direttore a cui è <strong>vietato farsi un'opinione</strong>.</p>
+        <p>Serve a rimettere l'attrito che il modello ha tolto — per costruzione fra i membri, e per disciplina al direttore. Quella seconda garanzia è più debole della prima, ed è dichiarata invece che nascosta.</p>
+        <div class="facts">
+          <span>invocazione esplicita</span><span>/metaconcert</span><span>mai selezionato da solo</span><span>registro obbligatorio</span>
+        </div>
+        <div class="reflist" style="margin-top:14px">
+          <a class="ref big" href="https://github.com/orlodax/metaconcert" target="_blank" rel="noopener">github.com/orlodax/metaconcert</a>
+        </div>
+      </div>
+      <div>
+        <div class="origin">
+          <div class="oh">Perché si chiama così</div>
+          <p>Nei romanzi del Milieu Galattico di Julian May un <em>metaconcert</em> è un insieme di menti che operano in modo indipendente e vengono fuse sotto un direttore.</p>
+          <p>Nei libri il punto debole è sempre il direttore: se è corrotto, l'apparato diventa un amplificatore per l'intenzione di una sola mente. Da lì la regola numero uno di questo strumento.</p>
+        </div>
+        <div class="src" style="margin-top:12px">Il marchio: le quattro famiglie di bias disposte attorno a un centro vuoto. Il centro è il direttore, ed è vuoto apposta.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 18 · 17 PROTOCOLLO -->
+<section class="slide proto" data-act="g" data-part="PARTE V · METACONCERT">
+  <div class="wrap">
+    <div class="protobadge">Metaconcert · il protocollo</div>
+    <div class="shead"><div class="stop"><span class="spart" style="color:var(--viola)">Parte V · Metaconcert</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk" style="border-color:var(--viola)"><span class="snum" style="-webkit-text-stroke-color:var(--viola)">17</span></span><span class="stit">Come gira una esecuzione</span></div></div>
+    <h2 class="wide">Nove fasi, e tre punti in cui la macchina si ferma e chiede a te.</h2>
+    <div class="pflow">
+      <div class="ph"><span class="pn">intake</span><span class="pa">brief + quarantena</span></div><span class="pfa">›</span>
+      <div class="ph"><span class="pn">mappa</span><span class="pa">system-map</span></div><span class="pfa">›</span>
+      <div class="ph"><span class="pn">ipotesi</span><span class="pa">ranking + forecast</span></div><span class="pfa">›</span>
+      <div class="gate"><span class="gn">◆ divergenza</span><span class="gs">decidi tu</span></div><span class="pfa">›</span>
+      <div class="ph"><span class="pn">falsifica</span><span class="pa">osservazione grezza</span></div><span class="pfa">›</span>
+      <div class="ph"><span class="pn">specifica</span><span class="pa">criteri di accettazione</span></div><span class="pfa">›</span>
+      <div class="gate"><span class="gn">◆ domande aperte</span><span class="gs">decidi tu</span></div><span class="pfa">›</span>
+      <div class="ph"><span class="pn">costruisci</span><span class="pa">diff + model-delta</span></div><span class="pfa">›</span>
+      <div class="ph"><span class="pn">attacca</span><span class="pa">findings</span></div><span class="pfa">›</span>
+      <div class="gate"><span class="gn">◆ riconcilia</span><span class="gs">decidi tu</span></div><span class="pfa">›</span>
+      <div class="ph"><span class="pn">registro</span><span class="pa">riga di ledger</span></div>
+    </div>
+    <div class="g3" style="margin-top:clamp(11px,1.9vh,19px)">
+      <div class="card" style="border-color:rgba(99,178,149,.36)">
+        <span class="lab" style="color:var(--verde)">Fermata 1 · divergenza</span>
+        <p>La tua intuizione — in quarantena dall'inizio — accanto alla diagnosi ricavata da chi non l'ha mai vista. Il direttore non sceglie. Se glielo chiedi, <strong>rifiuta e ripresenta la divergenza</strong>.</p></div>
+      <div class="card" style="border-color:rgba(99,178,149,.36)">
+        <span class="lab" style="color:var(--verde)">Fermata 2 · domande aperte</span>
+        <p>Le ambiguità della specifica che l'oracolo si è rifiutato di risolvere da solo. Arrivano <strong>prima</strong> che venga costruito qualcosa: risolvere in silenzio è come un buco di specifica diventa un bug in produzione.</p></div>
+      <div class="card" style="border-color:rgba(99,178,149,.36)">
+        <span class="lab" style="color:var(--verde)">Fermata 3 · riconcilia</span>
+        <p>I criteri scritti in anticipo accanto ai risultati dell'attacco. <strong>Le lacune fra i due sono il risultato</strong>, non un disordine da sistemare prima di mostrartelo.</p></div>
+    </div>
+    <div class="rules" style="margin-top:clamp(11px,1.9vh,19px)">
+      <div class="rule"><div class="n">1</div><div class="x"><b>Prima indipendenti, poi confronto. Mai convergenza.</b> L'accordo fra membri che hanno condiviso l'impostazione è un'eco. Solo l'accordo fra chi non poteva vedersi è una prova.</div></div>
+      <div class="rule"><div class="n">2</div><div class="x"><b>Attraversano la membrana gli artefatti, non i ragionamenti.</b> Il razionale è il veicolo con cui il punto cieco di uno diventa di tutti.</div></div>
+      <div class="rule"><div class="n">3</div><div class="x"><b>Riconcilia l'umano.</b> Se il flusso ti consegna un consenso ordinato, ha fallito in silenzio.</div></div>
+      <div class="rule"><div class="n">4</div><div class="x"><b>I verdetti risalgono a osservazioni.</b> «Chi aveva ragione» si decide alla fase <em>falsifica</em> con un test registrato in anticipo, mai alla fermata della divergenza per giudizio. Senza quell'osservazione il registro scrive <code>unresolved</code>.</div></div>
+    </div>
+    <div class="note">Fase senza membro → si salta, e il direttore deve <strong style="color:var(--luce)">dichiarare quale bias resta scoperto</strong> per quella esecuzione. Non può mai sostituirsi a un membro mancante, né riassumere ciò che i membri producono: il riassunto è precisamente il punto in cui l'illusione di fluidità rientra dalla finestra.</div>
+  </div>
+</section>
+
+<!-- 19 · 18 MEMBRANA -->
+<section class="slide proto" data-act="g" data-part="PARTE V · METACONCERT">
+  <div class="wrap">
+    <div class="protobadge">Metaconcert · il meccanismo</div>
+    <div class="shead"><div class="stop"><span class="spart" style="color:var(--viola)">Parte V · Metaconcert</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk" style="border-color:var(--viola)"><span class="snum" style="-webkit-text-stroke-color:var(--viola)">18</span></span><span class="stit">La membrana</span></div></div>
+    <h2 class="wide">Il divieto è meccanico — ma solo per la parte che il direttore compone.</h2>
+    <div class="cols">
+      <div>
+        <p>Un subagente riceve un contesto <strong>conversazionalmente nuovo</strong>, e ciò che il direttore mette nella stringa di prompt è il canale che il direttore controlla. Costruisce quel prompt <strong>dalla sola lista <code>receives</code></strong> del membro: ciò che non è in quella lista non gli è stato chiesto di ignorare, non gli è proprio arrivato.</p>
+        <div class="codeblk">
+<span class="cm">## MEMBRANE — mc-adversary</span><br>
+phase:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attack<br>
+domain:&nbsp;&nbsp;&nbsp;&nbsp;code<br>
+<u>receives:&nbsp;&nbsp;diff, spec, acceptance-criteria</u><br>
+<i>never:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;deliberation, build-report, rationale</i><br>
+produces:&nbsp;&nbsp;findings<br>
+<b>model:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;opus (famiglia diversa, se disponibile)</b>
+        </div>
+        <div class="src">Ogni membro dichiara il proprio blocco. Il direttore lo legge e ne costruisce il piano di esecuzione. Nuovo membro = nuovo file in <code>.claude/agents/</code>, adottato alla prossima esecuzione, skill mai modificata.</div>
+      </div>
+      <div>
+        <div class="memb">
+          <div class="mcol pass">
+            <div class="mh">Attraversa</div>
+            <div class="chip ok">Artefatti a formato fisso, con nomi stabili</div>
+            <div class="chip ok">Passati verbatim, mai riassunti né rinominati</div>
+            <div class="chip ok">Solo dove la lista <code>receives</code> lo permette</div>
+          </div>
+          <div class="mline2"></div>
+          <div class="mcol block">
+            <div class="mh">Non attraversa</div>
+            <div class="chip no">Il ragionamento che ha prodotto una decisione</div>
+            <div class="chip no">La quarantena — la tua ipotesi iniziale</div>
+            <div class="chip no">Le ipotesi scartate e i livelli di confidenza</div>
+            <div class="chip no">L'autovalutazione di chi ha costruito</div>
+          </div>
+        </div>
+        <div class="kicker al" style="margin-top:1.1em"><strong>Ma la garanzia è più stretta di così, e va detta esatta:</strong> l'esclusione è strutturale per il materiale che il direttore compone e sceglie di trattenere. Per tutto il resto <em>non lo è</em>. La slide seguente spiega come si è scoperto.</div>
+        <div class="kicker" style="border-left-color:var(--viola)">Se a un membro arriva materiale fuori dalla sua lista, <strong>deve dirlo</strong>. Una membrana bucata invalida l'esecuzione, e tollerarla in silenzio è peggio del buco.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 20 · 19 RITRATTAZIONE -->
+<section class="slide proto" data-act="g" data-part="PARTE V · METACONCERT">
+  <div class="wrap">
+    <div class="protobadge al">Metaconcert · ritrattazione · run 001–002</div>
+    <div class="shead"><div class="stop"><span class="spart" style="color:var(--allarme)">Parte V · Metaconcert</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk" style="border-color:var(--allarme)"><span class="snum" style="-webkit-text-stroke-color:var(--allarme)">19</span></span><span class="stit">Il primo errore che ha trovato</span></div></div>
+    <h2 class="wide">Era nel README di chi l'ha scritto. E in una versione precedente di queste slide.</h2>
+    <div class="cols">
+      <div>
+        <p>La versione precedente diceva: <em>il contesto di un subagente parte vuoto, e l'unico canale che lo raggiunge è la stringa di prompt.</em></p>
+        <p><strong>Era falso.</strong> Ad accorgersene è stato il protocollo stesso, alla sua prima esecuzione.</p>
+        <div class="nums" style="grid-template-columns:1fr 1fr;margin-top:clamp(9px,1.6vh,16px)">
+          <div class="num al brk"><div class="v">28.500</div><div class="k">token di strato<br>ambientale, per membro</div></div>
+          <div class="num a brk"><div class="v">257</div><div class="k">token del prompt<br>costruito dal direttore</div></div>
+        </div>
+        <p style="margin-top:1em">Il contesto di un subagente è <strong>conversazionalmente</strong> nuovo, non vuoto. Accanto al prompt siedono istruzioni dell'harness, definizioni degli strumenti, file di ambiente e di progetto. Quello strato non è sopprimibile — e non deve esserlo: è ciò che rende un membro un agente capace invece che un completamento nudo.</p>
+        <p>Alla seconda esecuzione è emerso il secondo buco: uno <strong>snapshot vecchio dello stato del repository</strong> è arrivato ai membri fuori dalla stringa di prompt, e fuori dalla portata del direttore.</p>
+      </div>
+      <div>
+        <div class="hazard" style="--acc:var(--allarme);margin-top:0"></div>
+        <div class="kicker al"><strong>La formulazione corretta:</strong> l'esclusione è strutturale per il materiale che il direttore compone e sceglie di trattenere; l'esclusione di tutto il resto non lo è.</div>
+        <div class="kicker" style="border-left-color:var(--verde);margin-top:1.4em">Uno strumento che non ha ancora dimostrato di funzionare ha comunque prodotto la cosa più difficile da ottenere in tutto questo mestiere: la ritrattazione di un'affermazione del suo stesso autore, con la correzione scritta nel README al posto della frase sbagliata.</div>
+        <div class="kicker">È anche l'unico modo in cui questa presentazione poteva restare coerente con sé stessa. Una slide su come i bias sopravvivono, che avesse tenuto in piedi una comodità dell'autore già smentita, sarebbe stata la dimostrazione del punto — dalla parte sbagliata.</div>
+        <div class="note">I numeri vengono da <code>.metaconcert/ledger.md</code>, run 001 e 002: un registro locale, escluso dal repository, quindi <strong style="color:var(--luce)">non verificabile dall'esterno</strong> — e questa riga fa parte del referto. Che l'origine dello snapshot sia la sessione padre e non l'harness è a sua volta un'inferenza, non un'osservazione.</div>
+        <div class="tags"><span class="tag inf">inferito · origine dello snapshot</span><span class="tag nt">non verificabile · dall'esterno</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 21 · 20 MEMBRI -->
+<section class="slide proto" data-act="g" data-part="PARTE V · METACONCERT">
+  <div class="wrap">
+    <div class="protobadge">Metaconcert · il gruppo</div>
+    <div class="shead"><div class="stop"><span class="spart" style="color:var(--viola)">Parte V · Metaconcert</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk" style="border-color:var(--viola)"><span class="snum" style="-webkit-text-stroke-color:var(--viola)">20</span></span><span class="stit">I membri</span></div></div>
+    <h2 class="full">Ognuno è definito da ciò che non ha il permesso di sapere.</h2>
+    <div class="roster">
+      <div class="mem">
+        <span class="ic icsm"><svg><use href="#ic-filtro"/></svg></span>
+        <div><div class="mname">mc-observer <em>intake</em></div>
+          <div class="mdesc">Separa <b>osservazione</b> da <b>diagnosi</b> nel report. Le tue ipotesi non le cancella: le mette in quarantena, così restano confrontabili. Se scrive «perché», si ferma e cancella la frase.</div></div>
+        <div class="mmeta"><span class="mno">non vede: niente — è l'ingresso</span><span class="mcost">sonnet · costo minimo</span></div>
+      </div>
+      <div class="mem">
+        <span class="ic icsm"><svg><use href="#ic-buchi"/></svg></span>
+        <div><div class="mname">mc-cartographer <em>mappa</em></div>
+          <div class="mdesc">Disegna il modello del sistema prima di ogni modifica ed etichetta <b>ogni singola voce</b> come [verificato] / [inferito] / [assunto]. La lista degli assunti è il buco della maledizione della conoscenza reso leggibile.</div></div>
+        <div class="mmeta"><span class="mno">non vede: la quarantena</span><span class="mcost">sonnet · costo basso</span></div>
+      </div>
+      <div class="mem">
+        <span class="ic icsm"><svg><use href="#ic-filtro"/></svg></span>
+        <div><div class="mname">mc-diagnostician <em>ipotesi</em></div>
+          <div class="mdesc">Minimo <b>tre</b> ipotesi, almeno una che colloca il guasto <b>fuori</b> dal componente dove appare il sintomo, ognuna con un falsificatore preciso. Ordinate per informazione-per-costo, non per probabilità. Non propone mai un fix.</div></div>
+        <div class="mmeta"><span class="mno">non vede: quarantena, forecast</span><span class="mcost">sonnet · costo basso</span></div>
+      </div>
+      <div class="mem">
+        <span class="ic icsm"><svg><use href="#ic-fretta"/></svg></span>
+        <div><div class="mname">mc-historian <em>ipotesi</em></div>
+          <div class="mdesc">Stima <b>solo</b> per classe di riferimento: cerca nella storia git lavori con la stessa firma strutturale e riporta quanto sono costati davvero, coda di rilavorazione inclusa. Gli è <b>vietato</b> scomporre il compito e sommare i pezzi.</div></div>
+        <div class="mmeta"><span class="mno">non vede: quarantena, ipotesi</span><span class="mcost">haiku · costo minimo</span></div>
+      </div>
+      <div class="mem">
+        <span class="ic icsm"><svg><use href="#ic-buchi"/></svg></span>
+        <div><div class="mname">mc-oracle <em>specifica</em></div>
+          <div class="mdesc">Scrive i criteri di accettazione dalla <b>sola specifica</b>, cieco all'implementazione, e deve nominare l'implementazione sbagliata più plausibile. Le ambiguità non le risolve: le elenca come domande aperte.</div></div>
+        <div class="mmeta"><span class="mno">non vede: diff, deliberazione</span><span class="mcost">sonnet · costo basso</span></div>
+      </div>
+      <div class="mem">
+        <span class="ic icsm"><svg><use href="#ic-filtro"/></svg></span>
+        <div><div class="mname">mc-falsify <em>falsifica</em><span class="mnew">nuovo</span></div>
+          <div class="mdesc">Esegue <b>un solo test, registrato in anticipo</b>, cieco a quale esito faccia comodo a chiunque. Riporta l'osservazione grezza prima di ogni interpretazione, e <b>non dice mai «confermato»</b>: dice quale ramo ha trovato. Contro il p-hacking e la lettura orientata al risultato.</div></div>
+        <div class="mmeta"><span class="mno">non vede: chi spera in cosa</span><span class="mcost">sonnet · costo basso</span></div>
+      </div>
+      <div class="mem">
+        <span class="ic icsm"><svg><use href="#ic-fretta"/></svg></span>
+        <div><div class="mname">mc-builder <em>costruisci</em></div>
+          <div class="mdesc">Riceve la <b>decisione</b>, non la deliberazione che l'ha prodotta — ereditare un razionale significa ereditarne i punti ciechi. Se scoprendo il codice trova che la mappa è sbagliata <b>si ferma</b>: non la ripara ragionando e prosegue.</div></div>
+        <div class="mmeta"><span class="mno">non vede: deliberazione, scarti, quarantena</span><span class="mcost">sonnet · costo medio</span></div>
+      </div>
+      <div class="mem">
+        <span class="ic icsm"><svg><use href="#ic-fretta"/></svg></span>
+        <div><div class="mname">mc-adversary <em>attacca</em></div>
+          <div class="mdesc">Attacca il diff senza il razionale. <b>Non può scrivere «sembra a posto»</b>: se non trova niente deve elencare cosa ha controllato, con quale prova, e cosa non ha potuto controllare. Verifica <b>eseguendo</b>, non leggendo e convincendosi.</div></div>
+        <div class="mmeta"><span class="mno">non vede: deliberazione, report, razionale</span><span class="mcost">opus, altra famiglia · alto</span></div>
+      </div>
+      <div class="mem dir">
+        <span class="ic icsm" style="color:var(--viola)"><svg><use href="#ic-memoria"/></svg></span>
+        <div><div class="mname" style="color:var(--viola)">Direttore <em>non è un subagente</em></div>
+          <div class="mdesc">È la skill nella sessione principale. Applica il protocollo e <b>non si forma un'opinione</b>. Non riassume, non fonde, non sceglie, non si sostituisce a un membro mancante. Contro: ri-centralizzazione, pressione al consenso, sintesi prematura.</div></div>
+        <div class="mmeta"><span class="mno" style="color:var(--viola);border-color:rgba(169,140,224,.5)">non ha mai: un'opinione propria</span><span class="mcost">gratis nei dispatch · paga in contesto</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 22 · 21 SOFFITTI E STATO -->
+<section class="slide proto" data-act="g" data-part="PARTE V · METACONCERT">
+  <div class="wrap">
+    <div class="protobadge al">Metaconcert · limiti dichiarati</div>
+    <div class="shead"><div class="stop"><span class="spart" style="color:var(--viola)">Parte V · Metaconcert</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk" style="border-color:var(--viola)"><span class="snum" style="-webkit-text-stroke-color:var(--viola)">21</span></span><span class="stit">Cinque soffitti, e il numero</span></div></div>
+    <div class="cols">
+      <div>
+        <h2 class="full" style="font-size:clamp(17px,1.6*var(--u),29px)">L'isolamento dà ai membri un contesto conversazionale indipendente. Nient'altro.</h2>
+        <div class="ceil">
+          <div class="crow"><div class="cn">1</div><div class="ct"><b>A priori condivisi.</b> Pesi condivisi: l'isolamento decorrela il contesto, mai l'addestramento.<br><span class="lev si">leva parziale · adversary su altra famiglia</span></div></div>
+          <div class="crow"><div class="cn">2</div><div class="ct"><b>Strato ambientale condiviso.</b> Identico in ogni membro, ~28.500 token contro 257 (run 001).<br><span class="lev no">nessuna leva</span></div></div>
+          <div class="crow"><div class="cn">3</div><div class="ct"><b>Stato della sessione padre inoltrato.</b> Run 002: uno snapshot vecchio del repository ha raggiunto i membri fuori dal controllo del direttore.<br><span class="lev no">nessuna leva</span></div></div>
+          <div class="crow"><div class="cn">4</div><div class="ct"><b>Permessi degli strumenti.</b> Read/Grep/Glob arrivano ovunque nell'albero di lavoro: un grep per una stringa d'errore fa atterrare un membro nel file che la quarantena tratteneva.<br><span class="lev si">leva fra un'esecuzione e l'altra</span></div></div>
+          <div class="crow"><div class="cn">5</div><div class="ct"><b>Il direttore tiene tutto.</b> Trattenere è meccanico una volta deciso; il decidere è disciplina, non struttura.<br><span class="lev no">nessuna leva interna</span></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="kicker" style="border-left-color:var(--viola)"><strong>Tasso di divergenza:</strong> quante volte la diagnosi indipendente non coincideva con quella con cui sei entrato — e quante volte, quando divergeva, aveva ragione lei. Normalmente il numero non è ottenibile: si scrive l'ipotesi nel prompt e si distrugge il confronto prima che esista.</div>
+        <p style="margin-top:1.1em"><strong>Serve una sessione pulita.</strong> Se lavori un'ora e poi invochi la skill, la quarantena torna vuota: ti sei già raccontato la diagnosi da solo. E se non hai un sospetto, «non lo so» è una risposta completa — non inventarne uno per dar da mangiare alla macchina.</p>
+        <div class="kicker al"><strong>L'invocazione è selezionata sul fallimento.</strong> Si ricorre al protocollo solo dopo che il ciclo veloce ha già fallito: ogni esecuzione è pescata da problemi pre-selezionati perché l'intuizione umana era sbagliata. Questo gonfia sia il tasso di divergenza sia la percentuale di volte in cui il membro aveva ragione. Il braccio di controllo lo corregge solo in parte.</p></div>
+        <div class="status" style="margin-top:1.2em">
+          <div class="strow"><div class="l">Meccanica del protocollo</div><div class="v est">verificata</div></div>
+          <div class="strow"><div class="l">Mappatura membro → bias</div><div class="v inf">intento di progetto</div></div>
+          <div class="strow"><div class="l">Conformità dichiarata dai membri</div><div class="v inf">non è verifica</div></div>
+          <div class="strow"><div class="l">Efficacia sul lavoro reale</div><div class="v nt">non testata · n = 0</div></div>
+        </div>
+        <p style="margin-top:1.1em">Non sostituisce architetto / builder / tester. È il <strong>git bisect del ragionamento</strong>: quando il ciclo veloce ha già fallito due volte, o quando un errore silenzioso costa caro.</p>
+        <div class="kicker" style="border-left-color:var(--viola)">Usato come default lo abbandonerete entro una settimana, e i dati si perdono con voi. Questo è il modo realistico in cui fallisce — non che non funzioni.</div>
+        <div class="reflist" style="margin-top:12px">
+          <a class="ref big" href="https://github.com/orlodax/metaconcert" target="_blank" rel="noopener">github.com/orlodax/metaconcert</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 23 · CHIUSURA -->
+<section class="slide" data-act="g" data-part="CHIUSURA">
+  <div class="wrap">
+    <div class="shead"><div class="stop"><span class="spart">Teksistemi · Newsletter tecnica</span><span class="sline"></span></div>
+      <div class="sid"><span class="snumbox brk"><span class="snum">▪</span></span><span class="stit">Chiusura</span></div></div>
+    <h2 class="full">Non possiamo diventare meno soggetti ai bias.<br>Possiamo costruire processi che non dipendono dal fatto che lo siamo.</h2>
+    <p style="max-width:58ch">Il debug ci corregge perché il feedback è immediato e non discutibile. Tutto il resto del nostro lavoro non ha quella proprietà, e gli agenti ce l'hanno tolta anche dove ce l'avevamo. La contromisura non è essere più attenti: è progettare deliberatamente dove l'informazione ha il permesso di passare.</p>
+    <div class="closing">L'obiettivo non è avere ragione più spesso. È accorgersene prima.</div>
+    <div class="hazard"></div>
+    <div class="note">Fonti: Pronin, Lin &amp; Ross 2002 · Englich, Mussweiler &amp; Strack 2006 · Glöckner &amp; Englich 2015 · Kahneman &amp; Klein 2009 · Wason 1960 · Wald / SRG 1943 · Gigerenzer 2004 · Gaissmaier &amp; Gigerenzer 2012 · Klein 2007 · Flyvbjerg · Vaughan 1996 · Mosier et al. 1997 · Skitka et al. 2000 · Parasuraman &amp; Riley 1997 · METR 2025 · Julian May, <em>Galactic Milieu</em><br><br>Direzione visiva ispirata a <strong style="color:var(--luce)">NERV-UI</strong> di mdrbx (MIT) — github.com/mdrbx/nerv-ui — a sua volta un omaggio a <em>Neon Genesis Evangelion</em>. Da lì: bordi a spigolo vivo, staffe d'angolo, bande di pericolo, scanline CRT e i readout in monospaziato.</div>
+  </div>
+</section>
+
+</main>
+
+<div class="ov" id="ov">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mtitle">
+    <button class="mx" id="mx" aria-label="Chiudi">✕</button>
+    <div class="mcat"><span class="ic" id="mic"></span><span id="mcatname"></span></div>
+    <svg class="mill" viewBox="0 0 200 120" id="mill"><use href="#il-dado" id="milluse"/></svg>
+    <h3 id="mtitle"></h3>
+    <div id="mbody"></div>
+  </div>
+</div>
+
+<div class="mback" id="mback"></div>
+<aside class="rail" id="rail" aria-label="Indice delle sezioni">
+  <div class="railhd"><span>Indice // mappa</span><button id="railclose" aria-label="Nascondi l'indice">✕</button></div>
+  <div id="menubody"></div>
+</aside>
+
+<nav class="nav">
+  <button class="mtoggle" id="mtoggle" aria-label="Apri l'indice"><b><i></i><i></i><i></i></b>Indice</button>
+  <div class="prog" id="prog"></div>
+  <div class="ctrl">
+    <span class="count" id="count">01 / 23</span>
+    <button class="arrow" id="prev" aria-label="Slide precedente">←</button>
+    <button class="arrow" id="next" aria-label="Slide successiva">→</button>
+  </div>
+</nav>
+
+<script>
+(function(){
+  var slides = [].slice.call(document.querySelectorAll('.slide'));
+  var prog = document.getElementById('prog');
+  var count = document.getElementById('count');
+  var prev = document.getElementById('prev');
+  var next = document.getElementById('next');
+  var tbpart = document.getElementById('tbpart');
+  var i = 0;
+
+  var toc = [
+    {act:'a', name:'Parte I · I bias', items:[
+      {n:'01', t:'Che cosa sono', s:1},{n:'02', t:'Il punto cieco', s:2},
+      {n:'03', t:'Le quattro famiglie', s:3},{n:'04', t:'Casi documentati', s:4}]},
+    {act:'a', name:'Parte II · Nel software',
+      items:[{n:'05', t:"Dove l'intuito si calibra", s:5}],
+      sub:{label:'Fasi del ciclo', items:[
+        {n:'06', t:'Progettazione', s:6},{n:'07', t:'Scrittura e debug', s:7},
+        {n:'08', t:'Manutenzione ed evoluzione', s:8}]},
+      after:[{n:'09', t:'Ogni ruolo, il suo bias', s:9}]},
+    {act:'v', name:'Parte III · Con gli agenti', items:[
+      {n:'10', t:'Cambio di terreno', s:10},{n:'11', t:"L'attrito è informazione", s:11},
+      {n:'12', t:'I quattro canali', s:12},{n:'13', t:'La misura (METR)', s:13}]},
+    {act:'g', name:'Parte IV · Contromisure', items:[
+      {n:'14', t:'Cambiare il processo', s:14},{n:'15', t:'Sintomo, non diagnosi', s:15}]},
+    {act:'g', name:'Parte V · Metaconcert', items:[
+      {n:'16', t:'Che cos\u2019\u00e8', s:16},{n:'17', t:'Come gira', s:17},
+      {n:'18', t:'La membrana', s:18},{n:'19', t:'La ritrattazione', s:19},
+      {n:'20', t:'I membri', s:20},{n:'21', t:'Cinque soffitti', s:21},
+      {n:'▪', t:'Chiusura', s:22}]}
+  ];
+
+  var menubody = document.getElementById('menubody');
+  function mkItem(it){
+    var b = document.createElement('button');
+    b.className = 'mitem'; b.dataset.s = it.s;
+    b.innerHTML = '<em>' + it.n + '</em><span>' + it.t + '</span>';
+    b.addEventListener('click', function(){ go(it.s); if(window.innerWidth < 1040) closeRail(); });
+    return b;
+  }
+  var openBlock = document.createElement('div');
+  openBlock.className = 'mpart'; openBlock.dataset.act = 'a';
+  openBlock.appendChild(mkItem({n:'—', t:'Copertina', s:0}));
+  menubody.appendChild(openBlock);
+  toc.forEach(function(p){
+    var blk = document.createElement('div');
+    blk.className = 'mpart'; blk.dataset.act = p.act;
+    var nm = document.createElement('span'); nm.className = 'mpname'; nm.textContent = p.name;
+    blk.appendChild(nm);
+    p.items.forEach(function(it){ blk.appendChild(mkItem(it)); });
+    if(p.sub){
+      var sw = document.createElement('div'); sw.className = 'msub';
+      var sl = document.createElement('div'); sl.className = 'msublab'; sl.textContent = p.sub.label;
+      sw.appendChild(sl);
+      p.sub.items.forEach(function(it){ sw.appendChild(mkItem(it)); });
+      blk.appendChild(sw);
+    }
+    if(p.after){ p.after.forEach(function(it){ blk.appendChild(mkItem(it)); }); }
+    menubody.appendChild(blk);
+  });
+  var mitems = [].slice.call(document.querySelectorAll('.mitem'));
+
+  var rail = document.getElementById('rail');
+  var mback = document.getElementById('mback');
+  function openRail(){
+    if(window.innerWidth >= 1040){ document.body.classList.remove('railoff'); }
+    else { rail.classList.add('on'); mback.classList.add('on'); }
+  }
+  function closeRail(){
+    if(window.innerWidth >= 1040){ document.body.classList.add('railoff'); }
+    else { rail.classList.remove('on'); mback.classList.remove('on'); }
+  }
+  document.getElementById('mtoggle').addEventListener('click', openRail);
+  document.getElementById('railclose').addEventListener('click', closeRail);
+  mback.addEventListener('click', closeRail);
+
+  slides.forEach(function(s, n){
+    var b = document.createElement('b');
+    b.className = s.dataset.act; b.tabIndex = 0;
+    b.setAttribute('role','button'); b.setAttribute('aria-label','Vai alla slide ' + (n+1));
+    b.addEventListener('click', function(){ go(n); });
+    b.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(n); }});
+    prog.appendChild(b);
+  });
+  var bars = [].slice.call(prog.children);
+
+  function pad(n){ return (n<10?'0':'') + n; }
+  function go(n){
+    if(n < 0 || n >= slides.length) return;
+    slides[i].classList.remove('on');
+    i = n;
+    slides[i].classList.add('on');
+    slides[i].scrollTop = 0;
+    bars.forEach(function(b,k){ b.classList.toggle('done', k <= i); });
+    var active = null;
+    mitems.forEach(function(m){
+      var on = (+m.dataset.s === i);
+      m.classList.toggle('here', on);
+      if(on) active = m;
+    });
+    if(active && active.scrollIntoView) active.scrollIntoView({block:'nearest'});
+    tbpart.textContent = slides[i].dataset.part || '';
+    count.textContent = pad(i+1) + ' / ' + pad(slides.length);
+    prev.disabled = (i === 0); next.disabled = (i === slides.length - 1);
+  }
+  prev.addEventListener('click', function(){ go(i-1); });
+  next.addEventListener('click', function(){ go(i+1); });
+
+  var cases = {
+    dado:{cat:'Filtriamo · ancoraggio', ic:'#ic-filtro', ill:'#il-dado', title:'Giudici e dadi',
+      body:'<p>A giudici con esperienza reale veniva fatto tirare un dado davanti a un fascicolo, prima di indicare la pena. Il risultato del dado — un numero che tutti sapevano essere casuale — spostava la pena richiesta. L\'esperienza professionale non riduceva l\'effetto.</p>'
+        +'<div class="cav"><p><strong>Quanto regge.</strong> Repliche successive con àncore <em>palesemente</em> irrilevanti non hanno ritrovato l\'effetto. L\'ancoraggio da àncore <em>pertinenti</em> — la richiesta del pubblico ministero, la tua prima stima, il numero già scritto nel ticket — resta invece molto solido. Che per noi è la versione peggiore: nel prompt, la nostra ipotesi è l\'àncora più pertinente che esista.</p></div>'
+        +'<p class="src">Englich, Mussweiler &amp; Strack 2006 · replica contestata: Glöckner &amp; Englich 2015</p>'},
+    bomber:{cat:'Riempiamo i buchi · sopravvivenza', ic:'#ic-buchi', ill:'#il-bomber', title:'I bombardieri di Wald',
+      body:'<p>Seconda guerra mondiale. I fori di proiettile sugli aerei rientrati dalle missioni erano concentrati su ali e fusoliera. La proposta ovvia era corazzare lì, dove i colpi arrivavano.</p>'
+        +'<p>Abraham Wald fece notare che il campione era composto solo da aerei <strong>tornati</strong>. La distribuzione dei colpi era uniforme; i fori assenti nel campione indicavano dove un colpo impediva il ritorno. Corazzare i motori.</p>'
+        +'<div class="cav"><p><strong>Quanto regge.</strong> Il ragionamento è documentato nei memorandum dello Statistical Research Group. La versione popolare — con la scena drammatica e i generali zittiti — è in gran parte romanzata.</p></div>'
+        +'<p class="src">Statistical Research Group, Columbia University, 1943</p>'},
+    opera:{cat:'Ci diamo fiducia · pianificazione', ic:'#ic-fretta', ill:'#il-opera', title:'Sydney Opera House',
+      body:'<p>Stima iniziale nel 1957: sette milioni di dollari australiani, consegna nel 1963. Consegna effettiva: 1973, centodue milioni. Un fattore quattordici sul costo e dieci anni di ritardo.</p>'
+        +'<p>Non è incompetenza. È la stima fatta <strong>dall\'interno</strong>, scomponendo il lavoro in pezzi e sommandoli: un metodo che descrive con grande precisione il caso in cui non succede niente di imprevisto.</p>'
+        +'<div class="cav"><p><strong>Quanto regge.</strong> Il caso è storico e verificabile. La generalizzazione — che quasi tutti i grandi progetti sforino nella stessa direzione — è supportata da raccolte sistematiche di dati sui megaprogetti, non da un singolo esempio.</p></div>'
+        +'<p class="src">Caso storico · analizzato in Flyvbjerg, ricerca sui megaprogetti</p>'},
+    volo:{cat:'Comprimiamo · disponibilità', ic:'#ic-memoria', ill:'#il-volo', title:"Dopo l'11 settembre",
+      body:'<p>Molti americani smisero di volare e si spostarono in automobile, che per chilometro percorso è considerevolmente più pericolosa. Il rischio evitato era vivido e raro; quello scelto era invisibile e frequente.</p>'
+        +'<div class="cav"><p><strong>Quanto regge.</strong> Le stime dei morti stradali in eccesso vanno da circa 350 in tre mesi a circa 1600 in dodici; un\'altra analisi non trova un effetto nazionale statisticamente significativo. Sulla direzione c\'è accordo, sulla grandezza no — e dirlo fa parte del punto di questa presentazione.</p></div>'
+        +'<p class="src">Gigerenzer 2004 · Gaissmaier &amp; Gigerenzer 2012 · analisi in disaccordo successive</p>'}
+  };
+  var ov = document.getElementById('ov');
+  function openCase(k){
+    var c = cases[k]; if(!c) return;
+    document.getElementById('mic').innerHTML = '<svg><use href="'+c.ic+'"/></svg>';
+    document.getElementById('mcatname').textContent = c.cat;
+    document.getElementById('milluse').setAttribute('href', c.ill);
+    document.getElementById('mtitle').textContent = c.title;
+    document.getElementById('mbody').innerHTML = c.body;
+    ov.classList.add('on'); document.getElementById('mx').focus();
+  }
+  function closeCase(){ ov.classList.remove('on'); }
+  [].slice.call(document.querySelectorAll('[data-case]')).forEach(function(el){
+    el.addEventListener('click', function(){ openCase(el.dataset.case); });
+  });
+  document.getElementById('mx').addEventListener('click', closeCase);
+  ov.addEventListener('click', function(e){ if(e.target === ov) closeCase(); });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){ closeCase(); if(window.innerWidth < 1040) closeRail(); return; }
+    if(ov.classList.contains('on')) return;
+    if(e.target.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return;
+    if(e.key === 'ArrowRight' || e.key === 'PageDown'){ e.preventDefault(); go(i+1); }
+    if(e.key === 'ArrowLeft'  || e.key === 'PageUp'){ e.preventDefault(); go(i-1); }
+    if(e.key === 'Home'){ e.preventDefault(); go(0); }
+    if(e.key === 'End'){ e.preventDefault(); go(slides.length-1); }
+  });
+
+  var x0=null, y0=null;
+  document.addEventListener('touchstart', function(e){
+    x0=e.changedTouches[0].clientX; y0=e.changedTouches[0].clientY; }, {passive:true});
+  document.addEventListener('touchend', function(e){
+    if(x0===null || ov.classList.contains('on') || rail.classList.contains('on')) return;
+    var dx=e.changedTouches[0].clientX-x0, dy=e.changedTouches[0].clientY-y0;
+    if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.6){ go(dx<0 ? i+1 : i-1); }
+    x0=null; y0=null; }, {passive:true});
+
+  var hv = document.getElementById('heroviz');
+  var lit = [2,3,7,11,12,13,17,19,22,23,26,29];
+  for(var h=0; h<32; h++){
+    var cell = document.createElement('i');
+    if(lit.indexOf(h) > -1) cell.className = 'on';
+    hv.appendChild(cell);
+  }
+
+  var dist = document.getElementById('dist');
+  [6,12,26,48,74,96,88,62,34,16,9,5,3,2,2,1].forEach(function(hh,k){
+    var b = document.createElement('div');
+    b.className = 'bar' + (k < 8 ? ' me' : '');
+    b.style.left = (k*6.25) + '%'; b.style.height = hh + '%';
+    dist.appendChild(b);
+  });
+  var med = document.createElement('div'); med.className='med'; dist.appendChild(med);
+  var ml = document.createElement('div'); ml.className='medlab'; ml.textContent='mediana reale'; dist.appendChild(ml);
+
+  var stages = [
+    {t:'compilazione', n:'2 secondi', h:100, c:'var(--verde)'},
+    {t:'test', n:'minuti', h:82, c:'var(--verde)'},
+    {t:'code review', n:'ore', h:58, c:'#86A98F'},
+    {t:'bug in produzione', n:'giorni', h:38, c:'#B8AC78'},
+    {t:'debito tecnico', n:'mesi', h:20, c:'var(--ambra)'},
+    {t:'architettura', n:'anni · o mai', h:7, c:'var(--ambra)'}
+  ];
+  var lr = document.getElementById('latrow'), ll = document.getElementById('latlabs');
+  stages.forEach(function(s){
+    var col = document.createElement('div'); col.className='latcol';
+    var bar = document.createElement('div'); bar.className='latbar';
+    bar.style.height = s.h + '%'; bar.style.background = s.c;
+    bar.style.opacity = (0.4 + (s.h/100)*0.55).toFixed(2);
+    col.appendChild(bar); lr.appendChild(col);
+    var lab = document.createElement('div'); lab.className='latlab';
+    lab.innerHTML = '<div class="t">'+s.t+'</div><div class="n">'+s.n+'</div>';
+    ll.appendChild(lab);
+  });
+
+  var prompts = {
+    bad:{html:'Nel pool di connessioni <mark>c\'è una race condition</mark> che fa fallire il checkout sotto carico.<br><br>Sistema il <mark>locking</mark> in <mark>ConnectionPool.acquire()</mark>.',
+      ann:['diagnosi già decisa','soluzione già scelta','file già scelto'], ok:false},
+    good:{html:'Sotto carico (oltre 200 richieste/s) il checkout fallisce con timeout, <mark class="ok">circa 1 volta su 40</mark>. Sotto le 50 req/s <mark class="ok">non succede mai</mark>. Allego log e tracciato.<br><br>Prima di proporre qualsiasi modifica: <mark class="ok">elenca almeno tre ipotesi</mark> sulla causa, ordinate per quanto costa escluderle, e per ciascuna dimmi <mark class="ok">quale osservazione la falsificherebbe</mark>.<br><br>Dimmi anche cosa non ti ho specificato e cosa hai assunto.',
+      ann:['solo osservazioni','soglie e frequenza','ipotesi multiple','test di falsificazione','assunzioni esplicite'], ok:true}
+  };
+  var pbox = document.getElementById('pbox'), pann = document.getElementById('pann');
+  var ptabs = [].slice.call(document.querySelectorAll('.seg button'));
+  function setPrompt(key){
+    var p = prompts[key];
+    pbox.innerHTML = p.html;
+    pann.className = 'pann' + (p.ok ? ' ok' : '');
+    pann.innerHTML = p.ann.map(function(a){ return '<span>'+a+'</span>'; }).join('');
+    ptabs.forEach(function(t){ t.classList.toggle('on', t.dataset.p === key); });
+  }
+  ptabs.forEach(function(t){ t.addEventListener('click', function(){ setPrompt(t.dataset.p); }); });
+  setPrompt('bad');
+
+  /* una scelta esplicita di lingua vince sul rilevamento automatico */
+  [].slice.call(document.querySelectorAll('.tb-lang a')).forEach(function(a){
+    a.addEventListener('click', function(){
+      try{ localStorage.setItem('tks-lang', a.dataset.lang); }catch(e){}
+    });
+  });
+  try{ if(!localStorage.getItem('tks-lang')) localStorage.setItem('tks-lang','it'); }catch(e){}
+
+  go(0);
+})();
+</script>
+</body>
+</html>
