@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Code Craft for Odoo Python — Teksistemi</title>
+<meta name="description" content="A three-level engineering guideline for writing well-organised Python in Odoo addons.">
+<link rel="alternate" hreflang="it" href="https://orlodax.github.io/tks-newsletter/006-code-craft-python-odoo.html">
+<link rel="alternate" hreflang="en" href="https://orlodax.github.io/tks-newsletter/en/006-code-craft-for-odoo-python.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400;12..96,75..100,600;12..96,75..100,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0C1618; --ink-2:#112024; --ink-3:#16292E;
+  --rail:#254A52; --line:#1D373C;
+  --fg:#DCE7E5; --fg-dim:#8FA7A9;
+  --amber:#E2A15A; --sage:#62BFA5; --warn:#D2705F; --meta:#8FA0C9;
+  --accent:#E2A15A; --tint:rgba(226,161,90,.05);
+  --l1:#57C4DC; --l2:#E2A15A; --l3:#A78BD8;
+  --display:'Bricolage Grotesque','Arial Black',system-ui,sans-serif;
+  --body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Consolas,monospace;
+  /* Unita' fluida di base, stesso sistema del numero 005. Cresce con la larghezza
+     ma e' limitata dall'altezza, cosi' su schermi larghi e bassi il deck non
+     deborda. Il testo deriva da qui: niente si ferma piu' al 1080p. */
+  --u:min(1vw,1.62vh);
+  --f-nano:clamp(8.5px,.30*var(--u) + 5.6px,12.5px);
+  --f-micro:clamp(9.5px,.36*var(--u) + 5.9px,14px);
+  --f-mono:clamp(10.5px,.40*var(--u) + 6.5px,15.5px);
+  --f-mono-l:clamp(11.5px,.44*var(--u) + 7.1px,17px);
+  --f-code:clamp(11.8px,.45*var(--u) + 7.3px,17.5px);
+  --f-sm:clamp(13px,.50*var(--u) + 8px,19px);
+  --f-base:clamp(16px,.58*var(--u) + 10.2px,23px);
+  --railw:clamp(212px,13.5vw,300px);
+  --bar:clamp(58px,2.6*var(--u) + 26px,86px);
+}
+/* ---- per-level identity ---- */
+body[data-level="1"]{--accent:var(--l1);--ink:#09161A;--ink-2:#0F2027;--ink-3:#14282F;--rail:#245059;--line:#1B3740;--tint:rgba(87,196,220,.06)}
+body[data-level="2"]{--accent:var(--l2);--ink:#0E1517;--ink-2:#141F21;--ink-3:#1A282A;--rail:#2B4A48;--line:#223636;--tint:rgba(226,161,90,.05)}
+body[data-level="3"]{--accent:var(--l3);--ink:#0C1220;--ink-2:#141B2B;--ink-3:#1A2234;--rail:#37375E;--line:#232B41;--tint:rgba(167,139,216,.07)}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+html{font-size:var(--f-base)}   /* ogni rem qui sotto scala con --u */
+body{
+  margin:0;background:var(--ink);color:var(--fg);
+  font-family:var(--body);font-size:1rem;line-height:1.6;
+  -webkit-font-smoothing:antialiased;overflow:hidden;
+  transition:background-color .45s ease;
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid currentColor;opacity:.95}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+b,strong{font-weight:600;color:var(--fg)}
+
+#prog{position:fixed;top:0;left:0;height:2px;background:var(--accent);width:0;z-index:60;transition:width .25s,background-color .45s}
+
+/* ---------- tree rail ---------- */
+#rail{
+  position:fixed;left:0;top:0;bottom:var(--bar);width:var(--railw);z-index:40;
+  border-right:1px solid var(--line);padding:1.4rem .8rem 1rem 1.1rem;
+  font-family:var(--mono);font-size:var(--f-mono);overflow-y:auto;
+}
+#rail .logo{font-family:var(--display);font-size:var(--f-sm);font-weight:800;color:var(--fg);line-height:1.15;margin-bottom:1.2rem;cursor:pointer;letter-spacing:-.01em}
+#rail .logo span{display:block;font-family:var(--mono);font-size:var(--f-nano);font-weight:400;color:var(--fg-dim);letter-spacing:.14em;text-transform:uppercase;margin-top:.3rem}
+.lvhead{
+  display:block;width:100%;text-align:left;background:none;border:0;cursor:pointer;
+  font-family:var(--mono);font-size:var(--f-micro);letter-spacing:.13em;text-transform:uppercase;
+  padding:.55rem 0 .3rem;margin-top:.55rem;font-weight:700;
+}
+.lvhead .dot{display:inline-block;width:7px;height:7px;margin-right:.5rem;vertical-align:.5px}
+.lv1{color:var(--l1)}.lv1 .dot{background:var(--l1)}
+.lv2{color:var(--l2)}.lv2 .dot{background:var(--l2)}
+.lv3{color:var(--l3)}.lv3 .dot{background:var(--l3)}
+.lv0{color:var(--fg-dim)}.lv0 .dot{background:var(--fg-dim)}
+.lvhead small{display:block;font-size:var(--f-nano);letter-spacing:.1em;color:var(--fg-dim);font-weight:400;margin:.2rem 0 0 1.05rem;text-transform:none}
+#rail .topic{
+  display:block;width:100%;text-align:left;background:none;border:0;
+  border-left:2px solid var(--line);color:var(--fg-dim);
+  font-family:var(--mono);font-size:var(--f-micro);padding:.28rem 0 .28rem .65rem;
+  margin-left:.35rem;cursor:pointer;line-height:1.35;transition:color .15s,border-color .15s;
+}
+#rail .topic:hover{color:var(--fg)}
+#rail .topic.on{color:var(--accent);border-left-color:var(--accent)}
+
+/* ---------- stage ---------- */
+#stage{position:absolute;left:var(--railw);right:0;top:0;bottom:var(--bar);overflow-y:auto;padding:2.4rem clamp(1rem,4vw,3.4rem) 3rem}
+.slide{display:none;max-width:clamp(1060px,80vw,1680px);margin:0 auto;animation:in .28s ease}
+.slide.active{display:block}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.tag{font-family:var(--mono);font-size:var(--f-micro);letter-spacing:.18em;text-transform:uppercase;color:var(--fg-dim)}
+.tag b{color:var(--accent);font-weight:500}
+h2{font-family:var(--display);font-weight:800;font-stretch:88%;letter-spacing:-.022em;
+  font-size:clamp(1.45rem,3.4vw,2.15rem);line-height:1.06;margin:.5rem 0 0;max-width:27ch}
+h2 .sm{font-size:.5em;font-family:var(--mono);color:var(--fg-dim);font-weight:400;letter-spacing:0}
+.sub{color:var(--fg-dim);margin:.7rem 0 0;max-width:70ch;font-size:1rem}
+.sub strong{color:var(--fg)}
+.slide > *:not(h2):not(.tag){margin-top:1.05rem}
+p{margin:.7rem 0;max-width:70ch}
+ul{padding-left:1.1rem;margin:.6rem 0;max-width:70ch}
+li{margin:.3rem 0}li::marker{color:var(--rail)}
+.dim{color:var(--fg-dim)}.mini{font-size:.9rem}
+
+/* ---------- title & dividers ---------- */
+.title-slide{padding-top:3vh}
+.title-slide h1{font-family:var(--display);font-weight:800;font-stretch:86%;
+  font-size:clamp(2.2rem,6.5vw,4.6rem);line-height:.95;letter-spacing:-.03em;margin:1rem 0 0;max-width:17ch}
+.title-slide h1 em{font-style:normal;color:var(--accent)}
+.divider{padding-top:6vh}
+.divider .lvnum{font-family:var(--display);font-size:clamp(4rem,14vw,9rem);font-weight:800;
+  line-height:.8;color:var(--accent);letter-spacing:-.05em}
+.divider h1{font-family:var(--display);font-weight:800;font-stretch:88%;
+  font-size:clamp(1.9rem,5vw,3.2rem);line-height:1;letter-spacing:-.03em;margin:.8rem 0 0;max-width:20ch}
+.divider .demand{border-left:2px solid var(--accent);padding-left:1rem;margin-top:1.4rem;max-width:64ch;color:var(--fg-dim)}
+.pills{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:1.3rem}
+.pill{font-family:var(--mono);font-size:var(--f-mono);border:1px solid var(--line);background:var(--ink-2);
+  padding:.3rem .55rem;color:var(--fg-dim)}
+
+/* ---------- chips ---------- */
+.chip{font-family:var(--mono);font-size:var(--f-micro);letter-spacing:.1em;text-transform:uppercase;
+  padding:.14rem .42rem;border:1px solid currentColor;border-radius:2px;white-space:nowrap;vertical-align:.14em}
+.est{color:var(--sage)}.inf{color:var(--meta)}.unt{color:var(--amber)}.ver{color:var(--warn)}
+
+/* ---------- callouts ---------- */
+.note{border-left:2px solid var(--meta);background:rgba(143,160,201,.07);padding:.75rem .95rem;font-size:.94rem;max-width:74ch}
+.note.trap{border-left-color:var(--warn);background:rgba(210,112,95,.07)}
+.note p:first-child{margin-top:0}.note p:last-child{margin-bottom:0}
+.term{border:1px solid var(--line);border-left:2px solid var(--accent);background:var(--ink-2);padding:.75rem .95rem;font-size:.94rem;max-width:74ch}
+.term dt{font-family:var(--mono);font-size:var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:.3rem}
+.term dd{margin:0;color:var(--fg-dim)}.term dd b{color:var(--fg)}
+.skippy{padding:.85rem 1rem;border:1px dashed var(--rail);background:var(--tint);font-size:.95rem;color:var(--fg-dim);max-width:76ch}
+.skippy::before{content:"// WHAT WOULD SKIPPY SAY?";display:block;font-family:var(--mono);
+  font-size:var(--f-micro);letter-spacing:.16em;color:var(--accent);margin-bottom:.45rem}
+.skippy b{color:var(--fg)}
+.skippy p{margin:.55rem 0;max-width:none}
+.skippy p:first-of-type{margin-top:0}.skippy p:last-child{margin-bottom:0}
+
+/* ---------- code ---------- */
+figure.code{margin:0;background:var(--ink-2);border:1px solid var(--line);min-width:0;display:flex;flex-direction:column}
+figure.code figcaption{font-family:var(--mono);font-size:var(--f-mono);letter-spacing:.05em;color:var(--fg-dim);
+  padding:.5rem .75rem;border-bottom:1px solid var(--line);display:flex;gap:.55rem;align-items:center}
+figure.code figcaption b{font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:var(--f-micro)}
+.before figcaption b{color:var(--warn)}.after figcaption b{color:var(--sage)}
+.before{border-top:2px solid rgba(210,112,95,.55)}.after{border-top:2px solid rgba(98,191,165,.55)}
+pre{margin:0;padding:.8rem;overflow-x:auto;flex:1}
+code{font-family:var(--mono);font-size:var(--f-code);line-height:1.58;white-space:pre}
+p code,li code,td code,dd code,.note code,.skippy code,.card code{white-space:normal;background:var(--ink-3);
+  padding:.08em .32em;border-radius:2px;font-size:.85em;color:#BFD8D3}
+.k{color:#7FB4D6}.s{color:#C7A96B}.c{color:#5C7377;font-style:italic}.n{color:#D08770}.f{color:#8FD8C0}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+@media(max-width:1000px){.pair{grid-template-columns:1fr}}
+.cap{font-size:.88rem;color:var(--fg-dim);max-width:76ch}
+.tree{font-family:var(--mono);font-size:var(--f-code);line-height:1.65;background:var(--ink-2);
+  border:1px solid var(--line);padding:.85rem;overflow-x:auto;white-space:pre}
+.tree .c{color:#5C7377}
+
+/* ---------- tables ---------- */
+.tw{overflow-x:auto;border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:.87rem}
+th,td{text-align:left;padding:.55rem .7rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-size:var(--f-micro);letter-spacing:.1em;text-transform:uppercase;color:var(--fg-dim);font-weight:500;background:var(--ink-2)}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--tint)}
+
+/* ---------- grids ---------- */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem}
+@media(max-width:900px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+.card{border:1px solid var(--line);background:var(--ink-2);padding:.85rem .95rem;font-size:.92rem}
+.card h4{font-family:var(--mono);font-size:var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:0 0 .45rem;font-weight:500}
+.card p{margin:.35rem 0;max-width:none;color:var(--fg-dim)}
+.card p b{color:var(--fg)}
+.num{border:1px solid var(--line);background:var(--ink-2);padding:.8rem;text-align:center}
+.num b{display:block;font-family:var(--display);font-size:1.7rem;font-weight:800;color:var(--accent);line-height:1}
+.num span{display:block;font-size:.82rem;color:var(--fg-dim);margin-top:.35rem}
+
+/* ---------- svg ---------- */
+.dia{width:100%;background:var(--ink-2);border:1px solid var(--line);padding:.6rem}
+.dia svg{display:block;width:100%;height:auto}
+.d-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;fill:var(--fg-dim)}
+.d-lbl-b{font-family:'JetBrains Mono',monospace;font-size:10px;fill:var(--fg)}
+.d-box{fill:var(--ink-3);stroke:var(--rail);stroke-width:1}
+.d-box-w{fill:rgba(210,112,95,.14);stroke:var(--warn);stroke-width:1}
+.d-box-g{fill:rgba(98,191,165,.13);stroke:var(--sage);stroke-width:1}
+.d-ln{stroke:var(--rail);stroke-width:1;fill:none}
+.d-ln-a{stroke:var(--accent);stroke-width:1.5;fill:none}
+
+/* ---------- checklist ---------- */
+.chk{list-style:none;padding:0;margin:0}
+.chk li{display:flex;gap:.6rem;padding:.42rem .5rem;border-bottom:1px solid var(--line);
+  align-items:flex-start;cursor:pointer;font-size:.9rem;color:var(--fg-dim);transition:background .12s}
+.chk li:hover{background:var(--tint)}
+.chk li::before{content:"☐";font-family:var(--mono);color:var(--rail);line-height:1.5}
+.chk li.done{opacity:.42}
+.chk li.done::before{content:"☑";color:var(--accent)}
+.chk li b{color:var(--fg)}
+.chk li.done b{text-decoration:line-through}
+.chkbar{display:flex;gap:.8rem;align-items:center;font-family:var(--mono);font-size:var(--f-mono);color:var(--fg-dim)}
+
+/* ---------- bottom bar ---------- */
+#bar{position:fixed;left:0;right:0;bottom:0;height:var(--bar);z-index:50;background:var(--ink);
+  border-top:1px solid var(--line);display:flex;align-items:center;gap:.8rem;padding:0 clamp(.8rem,3vw,2rem);
+  transition:background-color .45s ease}
+#bar .where{font-family:var(--mono);font-size:var(--f-mono);color:var(--fg-dim);flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#bar .where b{color:var(--accent);font-weight:500}
+.navbtn{background:var(--ink-2);border:1px solid var(--rail);color:var(--fg);font-family:var(--mono);
+  font-size:var(--f-mono-l);letter-spacing:.08em;text-transform:uppercase;padding:.6rem 1rem;cursor:pointer;
+  border-radius:2px;transition:background .15s}
+.navbtn:hover:not(:disabled){background:var(--rail)}
+.navbtn:disabled{opacity:.3;cursor:default}
+.navbtn.primary{background:var(--accent);border-color:var(--accent);color:#0A1214;font-weight:700}
+.navbtn.primary:hover{filter:brightness(1.12)}
+#count{font-family:var(--mono);font-size:var(--f-mono);color:var(--fg-dim);white-space:nowrap}
+
+@media(max-width:880px){
+  :root{--bar:58px}
+  /* The rail is gone on narrow screens, but the archive link and the language
+     switch live inside it and every other issue in this archive keeps both
+     reachable. Collapse the rail into a slim fixed strip that carries just
+     those two; the logo and the topic tree are what actually drop. */
+  #rail{
+    position:fixed;left:0;right:0;top:0;bottom:auto;width:auto;height:36px;
+    display:flex;align-items:center;gap:.6rem;overflow:visible;z-index:45;
+    background:var(--ink);border-right:0;border-bottom:1px solid var(--line);
+    padding:0 .9rem;
+  }
+  #rail .logo,#rail #tree{display:none}
+  #rail .archlink{order:1;margin:0}
+  #rail .langsw{order:2;margin:0 0 0 auto}
+  #stage{left:0;top:36px;padding:1.5rem 1rem 2rem}
+  .navbtn{padding:.55rem .75rem}
+}
+
+/* ---------- language switch ---------- */
+.langsw{display:flex;gap:.3rem;margin:.6rem 0 1.1rem;font-family:var(--mono);font-size:var(--f-micro)}
+.langsw a{border:1px solid var(--line);color:var(--fg-dim);padding:.18rem .42rem;letter-spacing:.1em;
+  text-transform:uppercase;border-bottom:1px solid var(--line);opacity:1}
+.langsw a:hover{color:var(--fg);border-color:var(--rail)}
+.langsw a.cur{color:var(--accent);border-color:var(--accent)}
+
+/* Skippy label, per language */
+html[lang="it"] .skippy::before{content:"// COSA DIREBBE SKIPPY?"}
+
+/* ---------- archive link (repo convention: every issue links back) ---------- */
+#rail .archlink{
+  display:block;font-family:var(--mono);font-size:var(--f-micro);letter-spacing:.12em;
+  text-transform:uppercase;color:var(--fg-dim);border-bottom:0;opacity:1;
+  margin:0 0 1.1rem;transition:color .15s;
+}
+#rail .archlink:hover{color:var(--accent)}
+</style>
+</head>
+<body data-level="0">
+
+<div id="prog"></div>
+
+<nav id="rail" aria-label="Contents">
+  <div class="logo" onclick="go(0)">Code Craft<br>for Odoo Python<span>Teksistemi</span></div>
+  <div class="langsw">
+    <a class="cur" href="#" data-lang="en">EN</a>
+    <a href="../006-code-craft-python-odoo.html" data-base="../006-code-craft-python-odoo.html" data-lang="it">IT</a>
+  </div>
+  <a class="archlink" href="index.html">&larr; Archive</a>
+  <div id="tree"></div>
+</nav>
+
+<div id="stage">
+
+
+<!-- ================= INTRO ================= -->
+<section class="slide title-slide" data-level="0" data-topic="intro" data-name="Start">
+  <div class="tag">Engineering guideline · Python / Odoo addons</div>
+  <h1>Your code works. That's <em>the easy half</em>.</h1>
+  <p class="sub" style="font-size:1.04rem">The hard half is whether the person who opens that file in eighteen months — statistically: <strong>you</strong> — can change it without breaking three things they didn't know existed. Odoo work never teaches you that half. The framework does the organising and hands you a place to put code.</p>
+  <p class="sub"><strong>Don't read this end to end.</strong> It's three separate sessions, in increasing order of what they demand from you. Finish one, go and use it for a fortnight, come back.</p>
+  <div class="grid3" style="margin-top:1.3rem">
+    <div class="card" style="border-left:2px solid var(--l1)">
+      <h4 style="color:var(--l1)">Level 1 · Do it now</h4>
+      <p><b>~15 min · zero theory.</b> Mechanical fixes you can apply to your very next commit without understanding a single new concept. Seven topics.</p>
+    </div>
+    <div class="card" style="border-left:2px solid var(--l2)">
+      <h4 style="color:var(--l2)">Level 2 · Build the habit</h4>
+      <p><b>~25 min · needs judgement.</b> The vocabulary and the trade-offs. Rules with boundaries, which means deciding when they apply. Nine topics.</p>
+    </div>
+    <div class="card" style="border-left:2px solid var(--l3)">
+      <h4 style="color:var(--l3)">Level 3 · Go deeper</h4>
+      <p><b>~25 min · needs practice.</b> Design decisions you'll only really learn by making them badly once. Reading list included. Seven topics.</p>
+    </div>
+  </div>
+  <p class="mini dim" style="margin-top:1.2rem;font-family:var(--mono);font-size:var(--f-mono);line-height:1.9">
+    Trust labels &nbsp;<span class="chip est">established</span> documented or provable &nbsp;<span class="chip inf">inferred</span> reasoned, not measured &nbsp;<span class="chip unt">untested</span> our opinion &nbsp;<span class="chip ver">version</span> check your Odoo version<br>
+    Buttons below · chapter tree at left · ← → arrow keys · swipe on mobile
+  </p>
+</section>
+
+<section class="slide" data-level="0" data-topic="intro" data-name="The whole point">
+  <div class="tag">Introduction</div>
+  <h2>Same behaviour. One of them you can read.</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>drifted</b> models.py · line 612</figcaption>
+<pre><code><span class="k">def</span> <span class="f">action_confirm</span>(self):
+    <span class="k">for</span> rec <span class="k">in</span> self:
+        <span class="k">if</span> rec.state == <span class="s">'draft'</span>:
+            <span class="k">if</span> rec.partner_id.credit_limit:
+                total = <span class="n">0</span>
+                <span class="k">for</span> l <span class="k">in</span> rec.line_ids:
+                    total += l.price_unit * l.qty
+                <span class="k">if</span> total &gt; rec.partner_id.credit_limit:
+                    <span class="k">raise</span> UserError(<span class="s">"nope"</span>)
+                <span class="k">else</span>:
+                    rec.state = <span class="s">'confirmed'</span>
+                    rec.env[<span class="s">'mail.mail'</span>].create({...})
+                    <span class="c"># 40 more lines</span></code></pre></figure>
+    <figure class="code after"><figcaption><b>intended</b> models/sale_order.py</figcaption>
+<pre><code><span class="k">def</span> <span class="f">action_confirm</span>(self):
+    <span class="s">"""Confirm draft orders. Raises if over credit."""</span>
+    <span class="k">for</span> order <span class="k">in</span> self.filtered(<span class="k">lambda</span> o: o.state == <span class="s">'draft'</span>):
+        order._check_credit_limit()
+        order._set_confirmed()
+        order._notify_confirmation()
+
+<span class="k">def</span> <span class="f">_check_credit_limit</span>(self):
+    self.ensure_one()
+    limit = self.partner_id.credit_limit
+    <span class="k">if</span> limit <span class="k">and</span> self.amount_total &gt; limit:
+        <span class="k">raise</span> UserError(self._credit_error_message())</code></pre></figure>
+  </div>
+  <p class="cap">The machine cannot tell them apart. But answer <em>"what does confirming an order do?"</em> from each and time yourself. Right: four seconds, no details read. Left: you read all of it, or you guess. Everything in all three levels serves that one difference.</p>
+</section>
+
+<section class="slide" data-level="0" data-topic="intro" data-name="Why levels">
+  <div class="tag">Introduction</div>
+  <h2>Why this is split into three</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 175" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Four memory slots overflowing">
+      <text x="0" y="14" class="d-lbl-b">WORKING MEMORY · about four items</text>
+      <rect x="0" y="26" width="60" height="34" class="d-box-g"/><text x="18" y="48" class="d-lbl">if #1</text>
+      <rect x="66" y="26" width="60" height="34" class="d-box-g"/><text x="84" y="48" class="d-lbl">loop</text>
+      <rect x="132" y="26" width="60" height="34" class="d-box-g"/><text x="147" y="48" class="d-lbl">total</text>
+      <rect x="198" y="26" width="60" height="34" class="d-box-g"/><text x="214" y="48" class="d-lbl">state</text>
+      <text x="272" y="48" class="d-lbl" style="fill:var(--sage)">← capacity ends here</text>
+      <text x="0" y="92" class="d-lbl-b">WHAT ONE NESTED METHOD ASKS YOU TO HOLD</text>
+      <rect x="0" y="104" width="60" height="30" class="d-box-w"/><text x="16" y="123" class="d-lbl">if #2</text>
+      <rect x="66" y="104" width="60" height="30" class="d-box-w"/><text x="82" y="123" class="d-lbl">if #3</text>
+      <rect x="132" y="104" width="60" height="30" class="d-box-w"/><text x="148" y="123" class="d-lbl">if #4</text>
+      <rect x="198" y="104" width="60" height="30" class="d-box-w"/><text x="212" y="123" class="d-lbl">else#1</text>
+      <rect x="264" y="104" width="60" height="30" class="d-box-w"/><text x="278" y="123" class="d-lbl">else#2</text>
+      <rect x="330" y="104" width="60" height="30" class="d-box-w"/><text x="346" y="123" class="d-lbl">tax</text>
+      <rect x="396" y="104" width="60" height="30" class="d-box-w"/><text x="410" y="123" class="d-lbl">lines</text>
+      <rect x="462" y="104" width="60" height="30" class="d-box-w"/><text x="474" y="123" class="d-lbl">limit</text>
+      <rect x="528" y="104" width="60" height="30" class="d-box-w"/><text x="540" y="123" class="d-lbl">mail</text>
+      <rect x="594" y="104" width="60" height="30" class="d-box-w"/><text x="606" y="123" class="d-lbl">ctx</text>
+      <text x="0" y="158" class="d-lbl" style="fill:var(--warn)">Past capacity you stop reading. You skim, pattern-match, and change the line that looks right.</text>
+      <text x="0" y="172" class="d-lbl">That is where bugs come from — not ignorance. Code that exceeded its reader, and got edited anyway.</text>
+    </svg>
+  </div>
+  <p class="sub">Capacity figure: Cowan (2001). <span class="chip est">established</span> &nbsp;— and it applies to <strong>this deck too</strong>, which is why it isn't one long page any more. Three sittings, spaced apart, beats one heroic afternoon you'll retain nothing from.</p>
+</section>
+
+<!-- ================= LEVEL 1 ================= -->
+<section class="slide divider" data-level="1" data-topic="l1-start" data-name="Level 1 begins">
+  <div class="tag">Level one</div>
+  <div class="lvnum">01</div>
+  <h1>Do it now</h1>
+  <div class="demand">
+    <p><b>What it demands of you: nothing.</b> No new concepts, no theory, no design judgement. Seven mechanical habits you can apply to your next commit this afternoon, each of which makes your code measurably easier for the next person to read.</p>
+    <p>If you only ever do Level 1, you will already be ahead of most Odoo codebases in production.</p>
+  </div>
+  <div class="pills">
+    <span class="pill">Split the file</span><span class="pill">Mark what's private</span><span class="pill">Flatten control flow</span>
+    <span class="pill">Extract &amp; assert</span><span class="pill">Don't break the chain</span><span class="pill">Let tools do it</span><span class="pill">Recap</span>
+  </div>
+</section>
+
+<section class="slide" data-level="1" data-topic="l1-files" data-name="Split the file">
+  <div class="tag"><b>L1</b> · Split the file</div>
+  <h2>One model per file. Start today, no thinking required.</h2>
+  <div class="tree"><span class="c"># before                          # after</span>
+tk_plant_nursery/                tk_plant_nursery/
+└── models/                      └── models/
+    ├── __init__.py                  ├── __init__.py
+    └── models.py  <span class="c">← 900 lines</span>       ├── plant_nursery.py
+                                     ├── plant_order.py
+                                     ├── plant_order_line.py
+                                     └── res_partner.py  <span class="c">← extensions keep the CORE name</span></div>
+  <div class="grid4">
+    <div class="card"><h4>Finding things</h4><p>A colleague opens <code>plant_order.py</code>. Not a 900-line scroll.</p></div>
+    <div class="card"><h4>Merge conflicts</h4><p>Different files merge automatically. Pays for itself in a month. <span class="chip inf">inferred</span></p></div>
+    <div class="card"><h4>Readable history</h4><p>"What changed in orders?" stops being archaeology.</p></div>
+    <div class="card"><h4>Length means something</h4><p>One subject → length is a signal. Nine subjects → noise.</p></div>
+  </div>
+  <div class="note"><p><b>Rule:</b> file named after the model, dots become underscores. Your additions to core models go in a file named after the <b>core</b> model, so anyone hunting partner behaviour finds them without knowing your addon exists. Watch the import order in <code>__init__.py</code> — base models before the ones referencing them.</p></div>
+</section>
+
+<section class="slide" data-level="1" data-topic="l1-names" data-name="Mark what's private">
+  <div class="tag"><b>L1</b> · Mark what's private</div>
+  <h2>Four keystrokes, three fewer promises</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>wrong</b> everything is public API</figcaption>
+<pre><code><span class="k">class</span> <span class="f">SaleOrder</span>(models.Model):
+    _inherit = <span class="s">'sale.order'</span>
+
+    <span class="k">def</span> <span class="f">compute_discount</span>(self):   <span class="c"># RPC-callable!</span>
+        ...
+    <span class="k">def</span> <span class="f">build_payload</span>(self):      <span class="c"># RPC-callable!</span>
+        ...
+    <span class="k">def</span> <span class="f">send_to_erp</span>(self):        <span class="c"># RPC-callable!</span>
+        ...</code></pre></figure>
+    <figure class="code after"><figcaption><b>right</b> one door, clearly marked</figcaption>
+<pre><code><span class="k">class</span> <span class="f">SaleOrder</span>(models.Model):
+    _inherit = <span class="s">'sale.order'</span>
+
+    <span class="c"># --- public API (buttons / RPC) ---</span>
+    <span class="k">def</span> <span class="f">action_push_to_erp</span>(self):
+        <span class="k">for</span> order <span class="k">in</span> self:
+            order._push_one()
+
+    <span class="c"># --- internals, free to change ---</span>
+    <span class="k">def</span> <span class="f">_push_one</span>(self): ...
+    <span class="k">def</span> <span class="f">_build_payload</span>(self): ...
+    <span class="k">def</span> <span class="f">_compute_discount</span>(self): ...</code></pre></figure>
+  </div>
+  <p class="cap">A name without an underscore can be called by another addon, a customer's RPC script, or a consultant's automated action from 2021 — so renaming it is a breaking change. With the underscore, Odoo <b>refuses</b> the RPC call, and renaming takes five minutes. <span class="chip est">established</span></p>
+  <div class="skippy">
+    <p>Same code. Same behaviour. Four extra underscore characters — and you went from three things you can never safely rename to one.</p>
+    <p>Here is a rule your monkey brain can follow without thinking: <b>start every method with an underscore, and delete the underscore only when you can name the specific outside caller that needs it.</b> Default to closed. Opening is free. Closing is a breaking change, an apology, and a customer call at an inconvenient hour.</p>
+  </div>
+</section>
+
+<section class="slide" data-level="1" data-topic="l1-names" data-name="Mark what's private">
+  <div class="tag"><b>L1</b> · Mark what's private</div>
+  <h2>Same order in every model file. No debate.</h2>
+  <figure class="code"><figcaption>models/plant_order.py</figcaption>
+<pre><code><span class="k">class</span> <span class="f">PlantOrder</span>(models.Model):
+    _name = <span class="s">'plant.order'</span>
+    _inherit = [<span class="s">'mail.thread'</span>]
+    _description = <span class="s">'Plant Order'</span>
+    _order = <span class="s">'date_order desc, id desc'</span>
+
+    <span class="c"># 1. default methods            _default_*</span>
+    <span class="c"># 2. field declarations</span>
+    <span class="c"># 3. _sql_constraints</span>
+    <span class="c"># 4. compute / inverse / search  _compute_*  _inverse_*  _search_*</span>
+    <span class="c"># 5. selection methods           _selection_*</span>
+    <span class="c"># 6. constraints and onchange    @api.constrains  @api.onchange</span>
+    <span class="c"># 7. CRUD overrides              create / write / unlink / copy</span>
+    <span class="c"># 8. action methods              action_*   ← the public API</span>
+    <span class="c"># 9. private business helpers    _*</span></code></pre></figure>
+  <p class="cap">Not tidiness. A reviewer hunting your constraints should find them by <b>position</b>, without reading a single name. Copy this comment block into your next new model and fill it in. Mirrors Odoo's own guideline. <span class="chip est">established</span></p>
+</section>
+
+<section class="slide" data-level="1" data-topic="l1-flat" data-name="Flatten control flow">
+  <div class="tag"><b>L1</b> · Flatten the control flow</div>
+  <h2>Guard clauses, not nesting</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>arrow</b> error handling 12 lines from its check</figcaption>
+<pre><code><span class="k">def</span> <span class="f">_validate</span>(self):
+    <span class="k">if</span> self.partner_id:
+        <span class="k">if</span> self.line_ids:
+            <span class="k">if</span> self.date_order:
+                <span class="k">if</span> self.state == <span class="s">'draft'</span>:
+                    <span class="k">return</span> <span class="k">True</span>
+                <span class="k">else</span>:
+                    <span class="k">raise</span> UserError(_(<span class="s">"Not draft"</span>))
+            <span class="k">else</span>:
+                <span class="k">raise</span> UserError(_(<span class="s">"No date"</span>))
+        <span class="k">else</span>:
+            <span class="k">raise</span> UserError(_(<span class="s">"No lines"</span>))
+    <span class="k">else</span>:
+        <span class="k">raise</span> UserError(_(<span class="s">"No partner"</span>))</code></pre></figure>
+    <figure class="code after"><figcaption><b>flat</b> each failure handled where it's found</figcaption>
+<pre><code><span class="k">def</span> <span class="f">_validate</span>(self):
+    self.ensure_one()
+    <span class="k">if</span> <span class="k">not</span> self.partner_id:
+        <span class="k">raise</span> UserError(_(<span class="s">"No partner"</span>))
+    <span class="k">if</span> <span class="k">not</span> self.line_ids:
+        <span class="k">raise</span> UserError(_(<span class="s">"No lines"</span>))
+    <span class="k">if</span> <span class="k">not</span> self.date_order:
+        <span class="k">raise</span> UserError(_(<span class="s">"No date"</span>))
+    <span class="k">if</span> self.state != <span class="s">'draft'</span>:
+        <span class="k">raise</span> UserError(_(<span class="s">"Not draft"</span>))
+    <span class="k">return</span> <span class="k">True</span></code></pre></figure>
+  </div>
+  <p class="cap"><b>The mechanical move:</b> invert each condition, raise immediately, unindent everything else. The valid path falls out at the bottom.</p>
+  <p class="cap">Adding a fifth rule: <b>left</b> — find the right nesting depth and add another <code>else</code> in the correct place. <b>Right</b> — add two lines anywhere in the list. That difference <em>is</em> maintainability; it isn't a virtue, it's how long the next ticket takes.</p>
+</section>
+
+<section class="slide" data-level="1" data-topic="l1-flat" data-name="Flatten control flow">
+  <div class="tag"><b>L1</b> · Flatten the control flow</div>
+  <h2>Two traps with one-character fixes</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>trap</b> boolean parameters</figcaption>
+<pre><code><span class="c"># What does this do? You cannot know.</span>
+post_invoice(order, <span class="k">True</span>, <span class="k">False</span>)
+
+<span class="c"># To read it you must open another file</span>
+<span class="c"># and count arguments. Every time. Forever.</span>
+
+<span class="c"># FIX: a bare * forces names</span>
+<span class="k">def</span> <span class="f">_post_invoice</span>(self, *, send_mail=<span class="k">False</span>,
+                   force_date=<span class="k">None</span>):
+    ...
+
+order._post_invoice(send_mail=<span class="k">True</span>)   <span class="c"># a sentence</span>
+order._post_invoice(<span class="k">True</span>)             <span class="c"># TypeError ✓</span></code></pre></figure>
+    <figure class="code before"><figcaption><b>trap</b> mutable default argument</figcaption>
+<pre><code><span class="k">def</span> <span class="f">add_tag</span>(name, tags=[]):   <span class="c"># [] created ONCE,</span>
+    tags.append(name)            <span class="c"># at import time,</span>
+    <span class="k">return</span> tags                  <span class="c"># shared by all calls</span>
+
+add_tag(<span class="s">"a"</span>)   <span class="c"># ['a']        fine</span>
+add_tag(<span class="s">"b"</span>)   <span class="c"># ['a', 'b']   production bug</span>
+
+<span class="c"># WHY: `def` runs once, at import — not per call.</span>
+<span class="k">def</span> <span class="f">add_tag</span>(name, tags=<span class="k">None</span>):
+    tags = <span class="k">list</span>(tags <span class="k">or</span> [])   <span class="c"># fresh per call</span>
+    tags.append(name)
+    <span class="k">return</span> tags</code></pre></figure>
+  </div>
+  <p class="cap">If a flag makes the function do two genuinely different things, it isn't a parameter — it's two functions in a trench coat. Split them. &nbsp;·&nbsp; The second trap is caught automatically by your linter (<code>B006</code>) — but learn the mechanism, because "runs once at import" explains several other Python surprises you'll meet later.</p>
+</section>
+
+<section class="slide" data-level="1" data-topic="l1-extract" data-name="Extract &amp; assert">
+  <div class="tag"><b>L1</b> · Extract &amp; assert</div>
+  <h2>A comment above a block is that block asking to be a function</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>the comment is the tell</b></figcaption>
+<pre><code><span class="k">def</span> <span class="f">action_confirm</span>(self):
+    ...
+    <span class="c"># check the customer's credit limit</span>
+    limit = self.partner_id.credit_limit
+    <span class="k">if</span> limit:
+        total = <span class="k">sum</span>(l.price_unit * l.qty
+                    <span class="k">for</span> l <span class="k">in</span> self.line_ids)
+        <span class="k">if</span> total &gt; limit:
+            <span class="k">raise</span> UserError(...)
+    ...</code></pre></figure>
+    <figure class="code after"><figcaption><b>the comment became the name</b></figcaption>
+<pre><code><span class="k">def</span> <span class="f">action_confirm</span>(self):
+    ...
+    self._check_credit_limit()
+    ...
+
+<span class="k">def</span> <span class="f">_check_credit_limit</span>(self):
+    limit = self.partner_id.credit_limit
+    <span class="k">if</span> limit <span class="k">and</span> self.amount_total &gt; limit:
+        <span class="k">raise</span> UserError(...)</code></pre></figure>
+  </div>
+  <p class="sub">You already did the hard part — you identified a chunk with one purpose and named it in English. Promote the comment to a method name and the comment disappears, because the code now says it.</p>
+  <p class="cap"><b>Steps:</b> select the block → variables it reads become parameters, what it produces becomes the return → cut into <code>_verb_noun()</code> → replace with the call → run it. &nbsp;·&nbsp; <b>"Isn't jumping to another method harder to read?"</b> For a two-line method with a bad name, yes. For a fifteen-line block with a good name, no — most readers don't want the details at all, and that reader is the common case.</p>
+</section>
+
+<section class="slide" data-level="1" data-topic="l1-extract" data-name="Extract &amp; assert">
+  <div class="tag"><b>L1</b> · Extract &amp; assert</div>
+  <h2><code>self</code> is a collection. Say how many you expect.</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>works in test, explodes in production</b></figcaption>
+<pre><code><span class="k">def</span> <span class="f">_build_payload</span>(self):
+    <span class="k">return</span> {<span class="s">'ref'</span>: self.name}
+
+<span class="c"># your test:      1 order    → fine</span>
+<span class="c"># midnight cron:  400 orders → ValueError</span>
+<span class="c">#                 "Expected singleton"</span>
+
+<span class="c"># because "the name" of 400 records</span>
+<span class="c"># is a meaningless question</span></code></pre></figure>
+    <figure class="code after"><figcaption><b>declare your arity in line one</b></figcaption>
+<pre><code><span class="k">def</span> <span class="f">_build_payload</span>(self):
+    self.ensure_one()      <span class="c"># fails HERE, not 40 lines deeper</span>
+    <span class="k">return</span> {<span class="s">'ref'</span>: self.name}
+
+<span class="k">def</span> <span class="f">action_export</span>(self):    <span class="c"># public API: any number</span>
+    <span class="k">for</span> record <span class="k">in</span> self:
+        record._build_payload()</code></pre></figure>
+  </div>
+  <p class="sub">In Odoo, <code>self</code> is never one record. It's a <strong>recordset</strong> holding zero, one, or five thousand — and the same method gets called with all three, from code you didn't write.</p>
+  <p class="cap"><code>ensure_one()</code> is not defensive clutter. It is <b>documentation the computer checks</b>: it tells the next reader what the method assumes, and turns a confusing failure deep in the stack into a clear one at the entrance.</p>
+</section>
+
+<section class="slide" data-level="1" data-topic="l1-super" data-name="Don't break the chain">
+  <div class="tag"><b>L1</b> · Don't break the chain</div>
+  <h2>Always call <code>super()</code>. Always return what it gave you.</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>breaks the chain</b></figcaption>
+<pre><code><span class="k">def</span> <span class="f">write</span>(self, vals):
+    <span class="k">if</span> vals.get(<span class="s">'state'</span>) == <span class="s">'done'</span>:
+        self._do_stuff()
+    <span class="c"># forgot to return!</span>
+    <span class="k">super</span>().write(vals)
+
+<span class="n">@api</span>.model_create_multi
+<span class="k">def</span> <span class="f">create</span>(self, vals_list):
+    <span class="k">for</span> vals <span class="k">in</span> vals_list:
+        vals[<span class="s">'code'</span>] = self._next_code()  <span class="c"># stomps the caller</span>
+    <span class="k">return</span> <span class="k">super</span>().create(vals_list)</code></pre></figure>
+    <figure class="code after"><figcaption><b>correct</b></figcaption>
+<pre><code><span class="k">def</span> <span class="f">write</span>(self, vals):
+    result = <span class="k">super</span>().write(vals)
+    <span class="k">if</span> <span class="s">'state'</span> <span class="k">in</span> vals:
+        self._on_state_changed(vals[<span class="s">'state'</span>])
+    <span class="k">return</span> result
+
+<span class="n">@api</span>.model_create_multi
+<span class="k">def</span> <span class="f">create</span>(self, vals_list):
+    <span class="k">for</span> vals <span class="k">in</span> vals_list:
+        vals.setdefault(<span class="s">'code'</span>, self._next_code())
+    <span class="k">return</span> <span class="k">super</span>().create(vals_list)</code></pre></figure>
+  </div>
+  <div class="grid3">
+    <div class="card"><h4>No super()</h4><p>You silently delete every other addon's behaviour — including core Odoo's. The bug report arrives weeks later from a different feature and looks unrelated.</p></div>
+    <div class="card"><h4>No return</h4><p>Callers get <code>None</code>. It breaks far away from your file, and nobody will connect it to you.</p></div>
+    <div class="card"><h4>Assignment vs setdefault</h4><p><code>vals['code'] = ...</code> overwrites whatever the caller passed. <code>setdefault</code> fills in only when it's missing. One of these breaks a data import.</p></div>
+  </div>
+  <p class="cap"><span class="chip ver">version</span> <code>@api.model_create_multi</code> with a <code>vals_list</code> is required on modern versions. Old single-<code>vals</code> examples you'll find online are deprecated. <em>Why</em> the chain exists is a Level 3 topic — for now, just always do both.</p>
+</section>
+
+<section class="slide" data-level="1" data-topic="l1-tools" data-name="Let tools do it">
+  <div class="tag"><b>L1</b> · Let tools do it</div>
+  <h2>Delete the entire category of style argument</h2>
+  <div class="pair">
+    <figure class="code after"><figcaption>pyproject.toml — copy this, commit it, done</figcaption>
+<pre><code>[tool.ruff]
+line-length = <span class="n">100</span>
+target-version = <span class="s">"py311"</span>       <span class="c"># match your Odoo runtime</span>
+
+[tool.ruff.lint]
+select = [
+  <span class="s">"E"</span>, <span class="s">"F"</span>,   <span class="c"># the basics: obvious mistakes</span>
+  <span class="s">"I"</span>,        <span class="c"># import sorting</span>
+  <span class="s">"UP"</span>,       <span class="c"># outdated syntax copied from old addons</span>
+  <span class="s">"B"</span>,        <span class="c"># mutable defaults and friends</span>
+  <span class="s">"SIM"</span>,      <span class="c"># simplifiable branches</span>
+  <span class="s">"RET"</span>,      <span class="c"># return / guard-clause hygiene</span>
+]
+ignore = [<span class="s">"E501"</span>]           <span class="c"># the formatter owns line length</span>
+
+[tool.ruff.lint.per-file-ignores]
+<span class="s">"__init__.py"</span> = [<span class="s">"F401"</span>]   <span class="c"># re-exports are the point</span></code></pre></figure>
+    <div>
+      <div class="card"><h4>1 · ruff</h4><p>Linter <b>and</b> formatter in one, fast enough to run every time you save. Replaces flake8, isort, pyupgrade and black with one config file. <b>If you adopt one thing on this entire page, this is it.</b> <span class="chip inf">inferred</span></p></div>
+      <div class="card" style="margin-top:.7rem"><h4>2 · pre-commit</h4><p>Runs it automatically before each commit. Nobody has to remember; nobody has to be nagged in review.</p></div>
+      <div class="card" style="margin-top:.7rem"><h4>3 · .editorconfig</h4><p>One small file that ends the tabs-versus-spaces and line-ending noise between different editors.</p></div>
+      <div class="note" style="margin-top:.7rem"><p>Note what's <b>missing</b> from this config: the complexity gate. That one needs a rollout strategy, and it's in Level 2.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-level="1" data-topic="l1-recap" data-name="Level 1 recap">
+  <div class="tag"><b>L1</b> · Recap</div>
+  <h2>Everything you can do before lunch</h2>
+  <div class="grid3">
+    <div class="card"><h4>Structure</h4><p><b>Split models.py</b> one model per file, named after the model.<br><b>Copy the section order</b> comment block into new models.</p></div>
+    <div class="card"><h4>Names</h4><p><b>Underscore-prefix every method</b> unless you can name the outside caller.<br><b>No boolean parameters</b> — use a bare <code>*</code>.</p></div>
+    <div class="card"><h4>Control flow</h4><p><b>Invert nested ifs</b> into guard clauses that raise early.<br><b>Never</b> a mutable default argument.</p></div>
+    <div class="card"><h4>Extraction</h4><p><b>Every comment above a block</b> becomes a method name.</p></div>
+    <div class="card"><h4>Safety</h4><p><b><code>ensure_one()</code></b> on any method reading <code>self.field</code>.<br><b>Call and return <code>super()</code></b> in every override.</p></div>
+    <div class="card"><h4>Automation</h4><p><b>Add ruff + pre-commit</b> to the repo. One PR, once, forever.</p></div>
+  </div>
+  <div class="skippy">
+    <p>Notice something about that list: not one item required you to understand a new concept. No theory. No design judgement. No architecture. Just nine mechanical habits that a sufficiently well-trained monkey could apply — and I mean that as a compliment, because <b>mechanical habits are the only kind that survive a deadline.</b></p>
+    <p>Go and use these for two weeks. Actually use them, on real tickets, until the underscore appears without you deciding to type it. <b>Then</b> come back for Level 2, which will ask you to start making judgement calls, and which is considerably less forgiving if the basics aren't automatic yet.</p>
+  </div>
+</section>
+
+<!-- ================= LEVEL 2 ================= -->
+<section class="slide divider" data-level="2" data-topic="l2-start" data-name="Level 2 begins">
+  <div class="tag">Level two</div>
+  <div class="lvnum">02</div>
+  <h1>Build the habit</h1>
+  <div class="demand">
+    <p><b>What it demands of you: judgement.</b> Level 1 was rules you apply always. From here on, every rule has a <b>boundary</b> — conditions under which it stops paying and starts costing — so you have to decide each time.</p>
+    <p>You also get the vocabulary: coupling, cohesion, encapsulation, abstraction. Not to sound clever, but because a review comment that names the problem is actionable, and "this is ugly" is not.</p>
+  </div>
+  <div class="pills">
+    <span class="pill">How code drifts</span><span class="pill">Encapsulation</span><span class="pill">Abstraction &amp; contracts</span>
+    <span class="pill">The services layer</span><span class="pill">Refactoring discipline</span><span class="pill">Choosing inheritance</span>
+    <span class="pill">Queries &amp; recordsets</span><span class="pill">Tests</span><span class="pill">Gates &amp; checklist</span>
+  </div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-drift" data-name="How code drifts">
+  <div class="tag"><b>L2</b> · How code drifts</div>
+  <h2>Nobody decided to write a 900-line file</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="File growth across tickets">
+      <line x1="40" y1="150" x2="690" y2="150" class="d-ln"/>
+      <rect x="50" y="138" width="46" height="12" class="d-box-g"/>
+      <rect x="160" y="128" width="46" height="22" class="d-box-g"/>
+      <rect x="270" y="112" width="46" height="38" class="d-box"/>
+      <rect x="380" y="86" width="46" height="64" class="d-box"/>
+      <rect x="490" y="52" width="46" height="98" class="d-box-w"/>
+      <rect x="600" y="16" width="46" height="134" class="d-box-w"/>
+      <text x="50" y="166" class="d-lbl-b">day 1</text><text x="50" y="180" class="d-lbl">40 lines</text><text x="50" y="192" class="d-lbl">genuinely nice</text>
+      <text x="160" y="166" class="d-lbl-b">ticket 4</text><text x="160" y="180" class="d-lbl">+1 condition</text><text x="160" y="192" class="d-lbl">not worth refactoring</text>
+      <text x="270" y="166" class="d-lbl-b">ticket 9</text><text x="270" y="180" class="d-lbl">nested if</text><text x="270" y="192" class="d-lbl">still not worth it</text>
+      <text x="380" y="166" class="d-lbl-b">ticket 17</text><text x="380" y="180" class="d-lbl">copy 15 lines</text><text x="380" y="192" class="d-lbl">it's Thursday</text>
+      <text x="490" y="166" class="d-lbl-b">ticket 31</text><text x="490" y="180" class="d-lbl">fix one copy</text><text x="490" y="192" class="d-lbl">not the other</text>
+      <text x="600" y="166" class="d-lbl-b">month 18</text><text x="600" y="180" class="d-lbl">900 lines</text><text x="600" y="192" class="d-lbl">estimates tripled</text>
+    </svg>
+  </div>
+  <p class="sub"><strong>Every single step was locally reasonable.</strong> That is exactly why explicit rules are needed — good local judgement, applied repeatedly, reliably produces this. There is never a ticket called "reorganise the file": no visible business value, first thing cut from the sprint.</p>
+  <dl class="term"><dt>Technical debt</dt><dd>The accumulated cost of choices that were fast to make and are slow to live with. Small amounts are a legitimate tool. The problem is the <b>interest</b>: every future change in that area costs more, forever, until someone pays the principal. Debt taken deliberately and written down is a decision. Debt taken by accident is a leak.</dd></dl>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-drift" data-name="How code drifts">
+  <div class="tag"><b>L2</b> · How code drifts</div>
+  <h2>Four forces pushing you there</h2>
+  <div class="grid2">
+    <div class="card"><h4>Framework owns the entry points</h4><p>You never write the starting point — you write methods Odoo calls. Nothing in your code ever <b>assembles</b> anything, so assembling never becomes a habit you have.</p></div>
+    <div class="card"><h4>The model is a magnet</h4><p><code>self</code> gives you the record, cursor, user, context and every other model. All logic is <b>reachable</b> from the model, so all logic ends up <b>on</b> it.</p></div>
+    <div class="card"><h4>Nothing fails at build time</h4><p>A 200-line method compiles fine. Feedback arrives eight months later as an incident nobody connects to the cause. <b>Late consequences don't teach.</b></p></div>
+    <div class="card"><h4>You learned from core addons</h4><p>15 years of patches written under Odoo's own rule: <em>never restructure a stable file, keep diffs minimal.</em> <span class="chip est">established</span></p></div>
+  </div>
+  <div class="note"><p>Read core addons to learn <b>how the framework works</b>. Do not read them to learn <b>how code should look</b> — you'd be copying a style produced by a constraint that does not apply to you.</p></div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-drift" data-name="How code drifts">
+  <div class="tag"><b>L2</b> · How code drifts</div>
+  <h2>Two words that name the entire problem</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Coupling and cohesion">
+      <text x="10" y="16" class="d-lbl-b">HIGH COUPLING — change A, break B C D</text>
+      <circle cx="40" cy="60" r="15" class="d-box-w"/><text x="34" y="64" class="d-lbl">A</text>
+      <circle cx="130" cy="40" r="15" class="d-box"/><text x="124" y="44" class="d-lbl">B</text>
+      <circle cx="130" cy="80" r="15" class="d-box"/><text x="124" y="84" class="d-lbl">C</text>
+      <circle cx="220" cy="60" r="15" class="d-box"/><text x="214" y="64" class="d-lbl">D</text>
+      <line x1="55" y1="55" x2="115" y2="42" class="d-ln-a"/><line x1="55" y1="66" x2="115" y2="78" class="d-ln-a"/>
+      <line x1="145" y1="45" x2="205" y2="57" class="d-ln-a"/><line x1="145" y1="76" x2="205" y2="64" class="d-ln-a"/>
+      <text x="10" y="122" class="d-lbl">Every "I fixed one thing and broke two others"</text>
+      <text x="10" y="136" class="d-lbl">story is a coupling story.</text>
+      <line x1="330" y1="0" x2="330" y2="150" class="d-ln"/>
+      <text x="360" y="16" class="d-lbl-b">LOW COHESION — one file, nine subjects</text>
+      <rect x="360" y="30" width="300" height="62" class="d-box-w"/>
+      <text x="372" y="48" class="d-lbl">pricing · e-mail · PDF · stock · EDI</text>
+      <text x="372" y="66" class="d-lbl">cron · portal · VAT · migration</text>
+      <text x="372" y="84" class="d-lbl" style="fill:var(--warn)">models.py — 900 lines</text>
+      <text x="360" y="122" class="d-lbl">Neighbours for no reason other than</text>
+      <text x="360" y="136" class="d-lbl">arriving on the same day.</text>
+    </svg>
+  </div>
+  <p class="sub"><strong>Target, always: low coupling, high cohesion.</strong> Nearly every rule in this deck is one of those two in a costume. When you can't remember why a rule exists, ask which one it protects — that question answers most of Level 2 on its own.</p>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-encap" data-name="Encapsulation">
+  <div class="tag"><b>L2</b> · Encapsulation</div>
+  <h2>Level 1 gave you the underscore. Here's what it's actually for.</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>public</b> a promise to strangers</figcaption>
+<pre><code><span class="k">def</span> <span class="f">build_payload</span>(self):
+    ...
+
+<span class="c"># who calls this? unknown.</span>
+<span class="c">#   - your own views          ✓ you can grep</span>
+<span class="c">#   - another addon           ? maybe</span>
+<span class="c">#   - a customer RPC script   ? maybe</span>
+<span class="c">#   - a consultant in 2021    ? probably</span>
+
+<span class="c"># renaming it = a breaking change</span></code></pre></figure>
+    <figure class="code after"><figcaption><b>private</b> yours to change</figcaption>
+<pre><code><span class="k">def</span> <span class="f">_build_payload</span>(self):
+    ...
+
+<span class="c"># who calls this? exactly one file.</span>
+<span class="c"># Odoo REFUSES to expose it over RPC.</span>
+
+<span class="c"># rename it  → 5 minutes</span>
+<span class="c"># split it   → 5 minutes</span>
+<span class="c"># delete it  → 5 minutes</span></code></pre></figure>
+  </div>
+  <dl class="term"><dt>Encapsulation</dt><dd>Deciding <b>on purpose</b> which parts of your code the outside world may depend on, and keeping that set as small as you can get away with. The smaller the promised surface, the more freely everything behind it can change. Not secrecy — <b>freedom</b>. Most useful idea in this deck.</dd></dl>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-encap" data-name="Encapsulation">
+  <div class="tag"><b>L2</b> · Encapsulation</div>
+  <h2>The OOP words, mapped onto what you already do</h2>
+  <div class="tw"><table>
+    <thead><tr><th>They say</th><th>Meaning</th><th>You already write it as</th></tr></thead>
+    <tbody>
+      <tr><td><b>Class</b></td><td>Template: what data it holds, what it can do</td><td><code>class SaleOrder(models.Model)</code> — fields are the data, methods are the doing</td></tr>
+      <tr><td><b>Object / instance</b></td><td>One actual thing made from the template</td><td>A record — or a <em>recordset</em>, Odoo's twist</td></tr>
+      <tr><td><b>Method</b></td><td>Function belonging to a class, receiving the object first</td><td>Every <code>def x(self)</code> you have written. <code>self</code> = "the thing this was called on"</td></tr>
+      <tr><td><b>Inheritance</b></td><td>Build on another class, reuse and override it</td><td><code>_inherit</code>, plus three other flavours — later in this level</td></tr>
+      <tr><td><b>Polymorphism</b></td><td>Many classes, same method name, caller doesn't care which</td><td>Barely used in addons. Best available upgrade — Level 3</td></tr>
+    </tbody>
+  </table></div>
+  <p class="sub">"You should use OOP here" is not a proposal to adopt new technology. <strong>You are already in it.</strong> It means: put this behaviour on the thing that owns the data, and give it a name.</p>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-encap" data-name="Encapsulation">
+  <div class="tag"><b>L2</b> · Encapsulation</div>
+  <h2>The Python toolbox, and what each actually enforces</h2>
+  <div class="tw"><table>
+    <thead><tr><th>You want</th><th>Mechanism</th><th>Enforced?</th></tr></thead>
+    <tbody>
+      <tr><td>Internal method</td><td><code>_underscore</code></td><td>Convention — <b>but Odoo blocks RPC calls to it.</b> Real boundary at the API edge <span class="chip est">established</span></td></tr>
+      <tr><td>No name collisions, ever</td><td><code>__double</code></td><td>Renamed to <code>_Class__attr</code>. <b>Never in Odoo models</b> — breaks inheritance chains <span class="chip inf">inferred</span></td></tr>
+      <tr><td>Derived value that looks like an attribute</td><td><code>@property</code></td><td><b>Yes.</b> No setter = assigning raises</td></tr>
+      <tr><td>Small data bundle, unmodifiable</td><td><code>@dataclass(frozen=True)</code></td><td><b>Yes.</b> Plus free equality and a readable repr for debugging</td></tr>
+      <tr><td>"Subclasses MUST implement this"</td><td><code>abc.ABC</code> + <code>@abstractmethod</code></td><td><b>Yes.</b> Forget it and the class can't be instantiated at all</td></tr>
+      <tr><td>Contract without a shared base class</td><td><code>typing.Protocol</code></td><td>Tooling only, zero runtime cost</td></tr>
+      <tr><td>State what goes in and comes out</td><td>Type hints</td><td>Not at runtime — but your editor and CI use them</td></tr>
+    </tbody>
+  </table></div>
+  <p class="cap">You don't need all of these today. Know that they exist, so that when you feel the need for one you don't reinvent it badly. <code>@dataclass(frozen=True)</code> and <code>abc.ABC</code> both show up again in Level 3.</p>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-abstract" data-name="Abstraction &amp; contracts">
+  <div class="tag"><b>L2</b> · Abstraction &amp; contracts</div>
+  <h2>One level of abstraction per function</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Recipe levels analogy">
+      <text x="4" y="16" class="d-lbl-b">A RECIPE, TOP LEVEL</text>
+      <rect x="4" y="24" width="150" height="26" class="d-box-g"/><text x="18" y="41" class="d-lbl">make the sauce</text>
+      <rect x="162" y="24" width="150" height="26" class="d-box-g"/><text x="176" y="41" class="d-lbl">cook the pasta</text>
+      <rect x="320" y="24" width="150" height="26" class="d-box-g"/><text x="334" y="41" class="d-lbl">combine</text>
+      <text x="4" y="80" class="d-lbl-b">NOW MIX THE LEVELS</text>
+      <rect x="4" y="88" width="120" height="26" class="d-box"/><text x="18" y="105" class="d-lbl">make the sauce</text>
+      <rect x="132" y="88" width="250" height="26" class="d-box-w"/><text x="146" y="105" class="d-lbl">stir 30s so the garlic doesn't burn</text>
+      <rect x="390" y="88" width="110" height="26" class="d-box"/><text x="404" y="105" class="d-lbl">combine</text>
+      <text x="512" y="105" class="d-lbl" style="fill:var(--warn)">← you were planning,</text>
+      <text x="512" y="118" class="d-lbl" style="fill:var(--warn)">   then yanked into the pan</text>
+    </svg>
+  </div>
+  <p class="sub">A function either <strong>orchestrates named steps</strong> or <strong>performs one step</strong>. Never both. When you see <code>self._notify_partner()</code> two lines from string concatenation — that's the yank. Extract.</p>
+  <dl class="term"><dt>Abstraction</dt><dd>Choosing a level of detail and staying on it. A good one lets you use something correctly <b>without</b> knowing its internals — you drive without knowing about fuel injection. A leaky one makes you learn the internals anyway, so it bought you nothing.</dd></dl>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-abstract" data-name="Abstraction &amp; contracts">
+  <div class="tag"><b>L2</b> · Abstraction &amp; contracts</div>
+  <h2>Docstrings state the contract, not the name</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>noise</b> retypes the method name</figcaption>
+<pre><code><span class="k">def</span> <span class="f">_allocate_stock</span>(self, quantity):
+    <span class="s">"""Allocate the stock."""</span>
+    ...
+
+<span class="c"># Caller still has to read the body to learn:</span>
+<span class="c">#   - does it need one record or many?</span>
+<span class="c">#   - what if stock is short?</span>
+<span class="c">#   - what does it return?</span>
+<span class="c">#   - what does it write to?</span>
+<span class="c">#   - what units is quantity in?</span></code></pre></figure>
+    <figure class="code after"><figcaption><b>earns its lines</b></figcaption>
+<pre><code><span class="k">def</span> <span class="f">_allocate_stock</span>(self, quantity):
+    <span class="s">"""Reserve `quantity` (product UoM) against this line.
+
+    Requires a singleton. Partially allocates if stock
+    is short. Returns the quantity actually reserved.
+    Raises UserError if the line is already delivered.
+    Writes to stock.move — call inside the caller's
+    transaction.
+    """</span></code></pre></figure>
+  </div>
+  <p class="cap">The test: <b>could someone call this correctly having read only the docstring?</b> Write what the caller cannot see from the signature — preconditions, what it raises, what it changes, units. Everything else is noise, and noise trains people to skip docstrings entirely.</p>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-abstract" data-name="Abstraction &amp; contracts">
+  <div class="tag"><b>L2</b> · Abstraction &amp; contracts</div>
+  <h2>Smoke alarms, not laws</h2>
+  <p class="sub">Cross one and you don't automatically have a problem — you have <strong>a question to answer in the PR description</strong>. Numbers chosen to be slightly uncomfortable rather than optimal. <span class="chip unt">untested</span></p>
+  <div class="grid4">
+    <div class="num"><b>25</b><span>lines in a function → justify or extract</span></div>
+    <div class="num"><b>3</b><span>levels of nesting → guard clauses</span></div>
+    <div class="num"><b>300</b><span>lines in a model → a service is hiding in there</span></div>
+    <div class="num"><b>4</b><span>parameters → some of them are one object</span></div>
+  </div>
+  <div class="note"><p><b>And the fifth: the same 3 lines in 3 places.</b> Extract them, <em>then</em> decide where the extracted thing lives.</p>
+  <p>But note carefully — <b>duplication is a signal, not automatically a sin.</b> Two blocks that look identical today but will change for different reasons should stay separate; merging them creates coupling between two things that have nothing to do with each other. Extract when they change <b>together</b>. This is your first real judgement call.</p></div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-services" data-name="The services layer">
+  <div class="tag"><b>L2</b> · The services layer</div>
+  <h2>The loop that kills every refactoring attempt</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Doom loop">
+      <rect x="4" y="20" width="128" height="46" class="d-box"/><text x="16" y="40" class="d-lbl-b">1 · logic on model</text><text x="16" y="56" class="d-lbl">needs DB + user</text>
+      <rect x="146" y="20" width="128" height="46" class="d-box"/><text x="158" y="40" class="d-lbl-b">2 · testing is dear</text><text x="158" y="56" class="d-lbl">20 lines of fixtures</text>
+      <rect x="288" y="20" width="128" height="46" class="d-box"/><text x="300" y="40" class="d-lbl-b">3 · tests unwritten</text><text x="300" y="56" class="d-lbl">the deadline is real</text>
+      <rect x="430" y="20" width="128" height="46" class="d-box-w"/><text x="442" y="40" class="d-lbl-b">4 · no safety net</text><text x="442" y="56" class="d-lbl">nobody dares touch it</text>
+      <rect x="572" y="20" width="124" height="46" class="d-box-w"/><text x="584" y="40" class="d-lbl-b">5 · it grows</text><text x="584" y="56" class="d-lbl">see "how code drifts"</text>
+      <path d="M132 43 L146 43 M274 43 L288 43 M416 43 L430 43 M558 43 L572 43" class="d-ln-a"/>
+      <path d="M634 66 L634 96 L66 96 L66 66" class="d-ln-a" stroke-dasharray="4 3"/>
+      <text x="290" y="112" class="d-lbl" style="fill:var(--accent)">and around again, every sprint</text>
+      <line x1="4" y1="132" x2="696" y2="132" class="d-ln"/>
+      <text x="4" y="154" class="d-lbl-b">THE CUT: move the rules to plain Python and step 1 stops being true.</text>
+      <text x="4" y="172" class="d-lbl">Not for elegance — to make tests cheap enough that they actually get written,</text>
+      <text x="4" y="188" class="d-lbl">which is what makes everything else in this deck possible.</text>
+    </svg>
+  </div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-services" data-name="The services layer">
+  <div class="tag"><b>L2</b> · The services layer</div>
+  <h2>Two directories Odoo never mentions</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>coupled</b> needs a database to run at all</figcaption>
+<pre><code><span class="k">def</span> <span class="f">_compute_amount</span>(self):
+    <span class="k">for</span> order <span class="k">in</span> self:
+        total = <span class="n">0.0</span>
+        <span class="k">for</span> line <span class="k">in</span> order.line_ids:
+            sub = line.qty * line.price_unit
+            <span class="k">if</span> line.qty &gt;= <span class="n">100</span>:
+                sub *= <span class="n">0.9</span>
+            <span class="k">elif</span> line.qty &gt;= <span class="n">50</span>:
+                sub *= <span class="n">0.95</span>
+            total += sub
+        <span class="k">if</span> order.partner_id.is_vip:
+            total *= <span class="n">0.97</span>
+        order.amount_total = total</code></pre></figure>
+    <figure class="code after"><figcaption><b>separated</b> services/pricing.py — zero Odoo imports</figcaption>
+<pre><code><span class="n">@dataclass</span>(frozen=<span class="k">True</span>)
+<span class="k">class</span> <span class="f">LineInput</span>:
+    qty: <span class="f">float</span>
+    price_unit: <span class="f">float</span>
+
+VOLUME_TIERS = ((<span class="n">100</span>, <span class="n">0.90</span>), (<span class="n">50</span>, <span class="n">0.95</span>))
+
+<span class="k">def</span> <span class="f">line_subtotal</span>(line: LineInput) -&gt; <span class="f">float</span>:
+    <span class="k">for</span> threshold, factor <span class="k">in</span> VOLUME_TIERS:
+        <span class="k">if</span> line.qty &gt;= threshold:
+            <span class="k">return</span> line.qty * line.price_unit * factor
+    <span class="k">return</span> line.qty * line.price_unit</code></pre></figure>
+  </div>
+  <div class="grid3">
+    <div class="card"><h4>services/</h4><p>Business rules as plain Python. No ORM inheritance, no <code>self.env</code>. Tests in milliseconds.</p></div>
+    <div class="card"><h4>tools/</h4><p>Stateless helpers: parsing, formatting, date arithmetic, VAT number validation.</p></div>
+    <div class="card"><h4>The three wins here</h4><p>Tiers became <b>data</b> instead of control flow · tests need no database · Sales changes the tiers, you touch one file.</p></div>
+  </div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-services" data-name="The services layer">
+  <div class="tag"><b>L2</b> · The services layer</div>
+  <h2>The boundary — where this stops paying</h2>
+  <p class="sub">The test: <strong>could a business person state this rule without mentioning Odoo?</strong></p>
+  <div class="grid2">
+    <div class="card" style="border-left:2px solid var(--sage)"><h4 style="color:var(--sage)">Yes → move it to services/</h4><p>pricing rules · VAT · discount tiers · scheduling · file parsing · external API payloads · date arithmetic</p></div>
+    <div class="card" style="border-left:2px solid var(--warn)"><h4 style="color:var(--warn)">No → leave it on the model</h4><p>setting a state field · posting to chatter · building a search domain · creating related records · anything fundamentally an ORM operation</p></div>
+  </div>
+  <div class="skippy">
+    <p>Watch carefully, because here is where a freshly-educated monkey brain reliably goes wrong. You have just learned a Powerful Concept, the concept feels <b>good</b>, and so you will want to apply it to <b>everything</b>. Within a week you will have <code>services/state_setter.py</code>. Congratulations: you have reinvented the model layer, only slower and with more files.</p>
+    <p>The mark of an actual engineer is not knowing a technique. It is knowing the technique's <b>boundary</b> — the exact conditions under which it stops paying and starts costing. Every rule in this level has one. Learn the boundaries with the same energy you learn the rules, or you will simply generate a more sophisticated grade of mess.</p>
+  </div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-refactor" data-name="Refactoring discipline">
+  <div class="tag"><b>L2</b> · Refactoring discipline</div>
+  <h2>Refactoring = structure changes, behaviour doesn't</h2>
+  <p class="sub">Not "improving it". Not "rewriting while I'm in there". <strong>Structure only.</strong> The definition sounds pedantic and is entirely load-bearing.</p>
+  <div class="dia">
+    <svg viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mixed commit versus split commits">
+      <text x="4" y="16" class="d-lbl-b">ONE MIXED COMMIT — unreviewable</text>
+      <rect x="4" y="24" width="320" height="52" class="d-box-w"/>
+      <text x="18" y="44" class="d-lbl">+198 −186   moved code</text>
+      <text x="18" y="60" class="d-lbl" style="fill:var(--warn)">+2 −2       ...a rule change, invisible in the noise</text>
+      <text x="4" y="98" class="d-lbl">Reviewer approves without seeing the two lines</text>
+      <text x="4" y="112" class="d-lbl">that actually change what the software does.</text>
+      <line x1="352" y1="0" x2="352" y2="140" class="d-ln"/>
+      <text x="376" y="16" class="d-lbl-b">TWO COMMITS — reviewable</text>
+      <rect x="376" y="24" width="310" height="24" class="d-box-g"/>
+      <text x="390" y="40" class="d-lbl">commit 1  +198 −186  refactor, tests unchanged</text>
+      <rect x="376" y="52" width="310" height="24" class="d-box-g"/>
+      <text x="390" y="68" class="d-lbl">commit 2  +2 −2      behaviour, + new test</text>
+      <text x="376" y="98" class="d-lbl">Reviewer reads commit 2 in ten seconds</text>
+      <text x="376" y="112" class="d-lbl">and actually thinks about it.</text>
+    </svg>
+  </div>
+  <dl class="term"><dt>Code smell</dt><dd>A surface symptom that often — not always — indicates a deeper problem. "Smell", not "bug": the code works. It's the software equivalent of a noise from the engine. You investigate; sometimes it's nothing.</dd></dl>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-refactor" data-name="Refactoring discipline">
+  <div class="tag"><b>L2</b> · Refactoring discipline</div>
+  <h2>Four named moves you'll use weekly</h2>
+  <div class="pair">
+    <figure class="code after"><figcaption><b>Introduce Parameter Object</b> · smell: 4 args always travel together</figcaption>
+<pre><code><span class="n">@dataclass</span>(frozen=<span class="k">True</span>)
+<span class="k">class</span> <span class="f">ShipmentRequest</span>:
+    weight_kg: <span class="f">float</span>
+    country_code: <span class="f">str</span>
+    is_express: <span class="f">bool</span> = <span class="k">False</span>
+    insured_value: Decimal = Decimal(<span class="s">"0"</span>)
+
+    <span class="k">def</span> <span class="f">__post_init__</span>(self):
+        <span class="k">if</span> self.weight_kg &lt;= <span class="n">0</span>:
+            <span class="k">raise</span> ValueError(<span class="s">"weight must be positive"</span>)
+
+<span class="c"># before: quote(2.5, "IE", True, Decimal("100"), None)</span>
+<span class="c"># after : quote(ShipmentRequest(weight_kg=2.5,</span>
+<span class="c">#                              country_code="IE"))</span></code></pre></figure>
+    <figure class="code after"><figcaption><b>Move Method</b> · smell: uses another record's fields more than its own</figcaption>
+<pre><code><span class="c"># models/sale_order.py — wrong house</span>
+<span class="k">def</span> <span class="f">_get_partner_discount</span>(self):
+    <span class="k">if</span> self.partner_id.is_vip:
+        <span class="k">return</span> self.partner_id.vip_rate
+    <span class="k">return</span> self.partner_id.default_rate
+
+<span class="c"># models/res_partner.py — right house</span>
+<span class="k">def</span> <span class="f">_get_discount</span>(self):
+    <span class="k">return</span> self.vip_rate <span class="k">if</span> self.is_vip <span class="k">else</span> self.default_rate
+
+<span class="c"># Behaviour lives next to the data it needs.</span>
+<span class="c"># Traditional name for the smell: "feature envy".</span></code></pre></figure>
+  </div>
+  <div class="grid2">
+    <div class="card"><h4>Replace Temp with Query</h4><p><b>Smell:</b> a variable set at the top, used 40 lines later. Long-lived temps are the invisible reason long functions <b>stay</b> long — you try to extract and find the block needs three temps computed elsewhere, so you give up. Kill the temps first: this is a <b>preparatory move</b>, its job is to make other moves possible.</p></div>
+    <div class="card"><h4>Split Loop</h4><p><b>Smell:</b> one loop accumulating four unrelated things. Split it: one loop, one job, each extractable. "But it iterates four times!" — yes, and it doesn't matter, the data is in memory. <b>Exception:</b> if the loop body touches the database, don't split — <b>batch</b>.</p></div>
+  </div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-inherit" data-name="Choosing inheritance">
+  <div class="tag"><b>L2</b> · Choosing inheritance</div>
+  <h2>The four mechanisms. Learn this table.</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Mechanism</th><th>Declaration</th><th>What happens</th><th>Use when</th></tr></thead>
+    <tbody>
+      <tr><td><b>Extension</b><br>(classic)</td><td><code>_inherit = 'sale.order'</code><br>no <code>_name</code></td><td>Adds to the <em>existing</em> model and table. Everything already using <code>sale.order</code> gets your changes.</td><td><b>Your default.</b> Adding behaviour to something that exists.</td></tr>
+      <tr><td><b>Prototype</b><br>(copy)</td><td><code>_inherit = 'x'</code><br><code>_name = 'y'</code></td><td>New model, new table, fields copied. <em>No link back</em> — later upstream changes never reach you.</td><td>Rarely. Nine times in ten, a mixin is what you meant.</td></tr>
+      <tr><td><b>Delegation</b></td><td><code>_inherits = {...}</code><br><span class="dim">note the <b>s</b></span></td><td>Composition with automatic field forwarding. Your record <em>has a</em> partner; its fields appear as yours. Two tables.</td><td>"A kind of X with its own lifetime" — like <code>res.users</code> → <code>res.partner</code>. Expensive to reverse.</td></tr>
+      <tr><td><b>Mixin</b></td><td><code>models.AbstractModel</code><br>then list it in <code>_inherit</code></td><td>No table of its own. Injects fields and behaviour into any model listing it.</td><td>Behaviour shared by 2+ unrelated models. It's how <code>mail.thread</code> gives half the system a chatter.</td></tr>
+    </tbody>
+  </table></div>
+  <p class="cap"><b>Memorise this gotcha:</b> <code>_inherit</code> and <code>_inherits</code> differ by one letter and do entirely different things. The plural takes a dictionary and creates a delegation link. Read it twice in review. &nbsp;·&nbsp; <em>Why</em> mixins are the safest of the four is a Level 3 topic.</p>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-inherit" data-name="Choosing inheritance">
+  <div class="tag"><b>L2</b> · Choosing inheritance</div>
+  <h2>Cheaper than a <code>create</code> override</h2>
+  <p class="sub">CRUD overrides run on <strong>every</strong> path, forever: your UI, imports, other addons, migration scripts, RPC. Before writing one, check whether Odoo already has a narrower mechanism.</p>
+  <div class="tw"><table>
+    <thead><tr><th>What you want</th><th>Use this instead</th><th>Why it's better</th></tr></thead>
+    <tbody>
+      <tr><td>A starting value</td><td><code>default=</code> or a <code>_default_*</code> method</td><td>Runs only when creating, only when nothing was supplied</td></tr>
+      <tr><td>A value derived from other fields</td><td>A computed field — <code>store=True</code> if you need to search it</td><td>Odoo recalculates it for you, at the right moments</td></tr>
+      <tr><td>A rule that must always hold</td><td><code>@api.constrains</code></td><td>Fires on create <em>and</em> write, and reads as a rule instead of hiding in a method</td></tr>
+      <tr><td>A reaction while the user types in a form</td><td><code>@api.onchange</code></td><td>Form only — and note it does <b>not</b> fire on imports or RPC writes, which is a common bug</td></tr>
+      <tr><td>A side effect that genuinely must follow persistence</td><td><em>Now</em> override <code>create</code>/<code>write</code></td><td>You've earned it</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><p><b>The judgement call:</b> people override <code>create</code> because it's the mechanism they already know, not because it fits. Every one of the four rows above is narrower, which means fewer paths where your code can surprise someone. <span class="chip inf">inferred</span></p></div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-perf" data-name="Queries &amp; recordsets">
+  <div class="tag"><b>L2</b> · Queries &amp; recordsets</div>
+  <h2>N+1: the loop that queries</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="N+1 query cost">
+      <text x="4" y="16" class="d-lbl-b">SEARCH INSIDE A LOOP · 2000 ORDERS</text>
+      <g fill="none" stroke="var(--warn)" stroke-width="1">
+        <path d="M60 26 L60 40 M75 26 L75 40 M90 26 L90 40 M105 26 L105 40 M120 26 L120 40 M135 26 L135 40 M150 26 L150 40 M165 26 L165 40 M180 26 L180 40 M195 26 L195 40 M210 26 L210 40 M225 26 L225 40 M240 26 L240 40 M255 26 L255 40 M270 26 L270 40 M285 26 L285 40 M300 26 L300 40 M315 26 L315 40 M330 26 L330 40 M345 26 L345 40 M360 26 L360 40 M375 26 L375 40 M390 26 L390 40 M405 26 L405 40 M420 26 L420 40 M435 26 L435 40 M450 26 L450 40 M465 26 L465 40 M480 26 L480 40"/>
+      </g>
+      <text x="496" y="38" class="d-lbl" style="fill:var(--warn)">… ×2000 round trips ≈ 2 s of pure waiting</text>
+      <text x="4" y="70" class="d-lbl-b">GROUPED ONCE</text>
+      <line x1="60" y1="78" x2="60" y2="92" stroke="var(--sage)" stroke-width="1"/>
+      <text x="76" y="90" class="d-lbl" style="fill:var(--sage)">1 query ≈ 1 ms</text>
+      <text x="4" y="112" class="d-lbl">Nothing in the syntax hints that each iteration is a network round trip to PostgreSQL. That's why it's easy to write.</text>
+    </svg>
+  </div>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>1 + N queries</b></figcaption>
+<pre><code><span class="k">for</span> order <span class="k">in</span> orders:
+    lines = self.env[<span class="s">'sale.order.line'</span>].search([
+        (<span class="s">'order_id'</span>, <span class="s">'='</span>, order.id),
+    ])
+    order.line_count = <span class="k">len</span>(lines)</code></pre></figure>
+    <figure class="code after"><figcaption><b>1 query</b> — let the database count</figcaption>
+<pre><code>counts = self.env[<span class="s">'sale.order.line'</span>]._read_group(
+    domain=[(<span class="s">'order_id'</span>, <span class="s">'in'</span>, orders.ids)],
+    groupby=[<span class="s">'order_id'</span>], aggregates=[<span class="s">'__count'</span>],
+)
+by_order = {order.id: n <span class="k">for</span> order, n <span class="k">in</span> counts}
+<span class="k">for</span> order <span class="k">in</span> orders:
+    order.line_count = by_order.get(order.id, <span class="n">0</span>)</code></pre></figure>
+  </div>
+  <p class="cap"><b>Spot it without profiling:</b> for every loop, ask "does anything in here talk to the database?" — <code>search</code>, <code>create</code>, <code>write</code>, <code>unlink</code>, or reading a relational field on records not fetched together. &nbsp;<span class="chip ver">version</span> the grouping API changed shape across recent releases; copy the signature from a core addon in <em>your</em> source tree, not from a blog post.</p>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-perf" data-name="Queries &amp; recordsets">
+  <div class="tag"><b>L2</b> · Queries &amp; recordsets</div>
+  <h2>Speak recordset, not plain Python</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Instead of</th><th>Write</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td><code>[l.product_id for l in lines]</code></td><td><code>lines.mapped('product_id')</code></td><td>Deduplicated recordset, fetched in one query instead of one per line</td></tr>
+      <tr><td><code>[l for l in lines if l.qty &gt; 0]</code></td><td><code>lines.filtered(lambda l: l.qty &gt; 0)</code></td><td>Stays a recordset, so you can keep chaining</td></tr>
+      <tr><td><code>len(model.search(domain))</code></td><td><code>model.search_count(domain)</code></td><td>Counts in the database instead of loading every record to measure a list</td></tr>
+      <tr><td><code>search(domain)[0]</code></td><td><code>search(domain, limit=1)</code></td><td>Fetches one row instead of all of them and throwing the rest away</td></tr>
+      <tr><td>manual loops to combine sets</td><td><code>recs_a | recs_b</code> &nbsp;<code>-</code>&nbsp; <code>&amp;</code></td><td>Recordsets support union, difference and intersection directly</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><p><b>One more, and it causes the nastiest bugs on this page:</b> <code>@api.depends</code> must list <b>every</b> field the compute reads, including through relations (<code>'line_ids.price_unit'</code>). It's how Odoo knows when to recalculate. Miss one and the field silently keeps a stale value — only under certain edit sequences, only sometimes. <b>Update the depends in the same keystroke as the field.</b> <span class="chip est">established</span></p></div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-tests" data-name="Tests">
+  <div class="tag"><b>L2</b> · Tests</div>
+  <h2>Tests are what make refactoring legal</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 125" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Feedback loop speed">
+      <text x="4" y="16" class="d-lbl-b">FEEDBACK LOOP · "did I break it?"</text>
+      <rect x="4" y="26" width="18" height="20" class="d-box-g"/>
+      <text x="32" y="41" class="d-lbl" style="fill:var(--sage)">2 s · run the unit test</text>
+      <rect x="4" y="56" width="480" height="20" class="d-box-w"/>
+      <text x="494" y="71" class="d-lbl" style="fill:var(--warn)">3 min · click through the UI</text>
+      <text x="4" y="102" class="d-lbl">Not a 90× speed-up on one task. It changes how you work:</text>
+      <text x="4" y="118" class="d-lbl">at 2 seconds you experiment freely. At 3 minutes you guess carefully.</text>
+    </svg>
+  </div>
+  <div class="grid3">
+    <div class="card"><h4>Permission to change</h4><p>The real reason people fear that 900-line file is that they can't tell whether they broke it. Tests answer in seconds — fear becomes a task.</p></div>
+    <div class="card"><h4>Documentation that can't rot</h4><p>Comments lie eventually. A test that lies <b>fails</b>.</p></div>
+    <div class="card"><h4>A named specification</h4><p><code>test_tier_boundary_is_inclusive</code> is the entire diagnostic you get at 2am. <code>test_1</code> tells the on-call engineer nothing.</p></div>
+  </div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-tests" data-name="Tests">
+  <div class="tag"><b>L2</b> · Tests</div>
+  <h2>Two tiers — and this is why the services layer mattered</h2>
+  <div class="pair">
+    <figure class="code after"><figcaption><b>unit</b> tests/test_pricing.py · no database anywhere</figcaption>
+<pre><code><span class="k">from</span> odoo.addons.tk_plant_nursery.services <span class="k">import</span> pricing
+
+<span class="k">class</span> <span class="f">TestVolumeTiers</span>(unittest.TestCase):
+
+    <span class="k">def</span> <span class="f">test_no_discount_below_first_tier</span>(self):
+        line = pricing.LineInput(qty=<span class="n">49</span>, price_unit=<span class="n">10.0</span>)
+        self.assertEqual(pricing.line_subtotal(line), <span class="n">490.0</span>)
+
+    <span class="k">def</span> <span class="f">test_tier_boundary_is_inclusive</span>(self):
+        line = pricing.LineInput(qty=<span class="n">50</span>, price_unit=<span class="n">10.0</span>)
+        self.assertEqual(pricing.line_subtotal(line), <span class="n">475.0</span>)</code></pre></figure>
+    <div>
+      <div class="tw"><table>
+        <thead><tr><th>Tier</th><th>Speed</th><th>Write</th></tr></thead>
+        <tbody>
+          <tr><td><b>Unit</b><br><span class="dim">plain TestCase, imports services/</span></td><td>ms, no DB</td><td><b>Many.</b> Every edge, boundary and weird input</td></tr>
+          <tr><td><b>Integration</b><br><span class="dim">TransactionCase</span></td><td>seconds, rolls back</td><td><b>Few.</b> Happy path + each real failure mode</td></tr>
+        </tbody>
+      </table></div>
+      <div class="note" style="margin-top:.9rem"><p><b>Team rule: a bug fix ships with a test that fails before the fix.</b> Sounds like extra work; usually isn't. The failing test gives you a one-command reproduction, so you stop clicking through the UI to check yourself — and it's the only thing that stops the bug returning in eight months.</p></div>
+    </div>
+  </div>
+  <p class="cap">The interesting cases — exactly 50 units, zero, a negative price — are the ones nobody writes when each test costs a database fixture. At a millisecond each you write fifteen and find two bugs you weren't looking for.</p>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-gates" data-name="Gates &amp; checklist">
+  <div class="tag"><b>L2</b> · Gates &amp; checklist</div>
+  <h2>Add the complexity gate — slowly</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>complexity 9</b> — nine paths a reader must hold</figcaption>
+<pre><code><span class="k">def</span> <span class="f">_state_label</span>(self):        <span class="c"># 1 (the function)</span>
+    <span class="k">if</span> self.state == <span class="s">'draft'</span>:   <span class="c"># 2</span>
+        <span class="k">if</span> self.is_late:         <span class="c"># 3</span>
+            <span class="k">return</span> <span class="s">'late draft'</span>
+        <span class="k">return</span> <span class="s">'draft'</span>
+    <span class="k">elif</span> self.state == <span class="s">'sent'</span>:  <span class="c"># 4</span>
+        <span class="k">for</span> l <span class="k">in</span> self.line_ids:    <span class="c"># 5</span>
+            <span class="k">if</span> l.blocked <span class="k">and</span> l.qty:  <span class="c"># 6, 7</span>
+                <span class="k">return</span> <span class="s">'blocked'</span>
+        <span class="k">return</span> <span class="s">'sent'</span>
+    <span class="k">elif</span> self.state == <span class="s">'done'</span>:  <span class="c"># 8</span>
+        <span class="k">return</span> <span class="s">'done'</span>
+    <span class="k">elif</span> self.late_flag:        <span class="c"># 9</span>
+        <span class="k">return</span> <span class="s">'??'</span></code></pre></figure>
+    <div>
+      <p><b>What <code>C90</code> counts:</b> the number of independent paths through a function — roughly one, plus every <code>if</code>, <code>elif</code>, <code>for</code>, <code>while</code>, <code>and</code>, <code>or</code>.</p>
+      <p>A decent proxy for "how many cases must a reader hold in their head", and an excellent one for "how many tests would cover this properly". When it complains, the fix is almost always guard clauses or extraction.</p>
+      <figure class="code after" style="margin-top:.8rem"><figcaption>add to pyproject.toml</figcaption>
+<pre><code>[tool.ruff.lint]
+select = [..., <span class="s">"C90"</span>]
+
+[tool.ruff.lint.mccabe]
+max-complexity = <span class="n">12</span>   <span class="c"># just above today's worst</span></code></pre></figure>
+      <div class="note trap" style="margin-top:.8rem"><p><b>Ratchet, don't big-bang.</b> Set it just above today's worst function, then lower by one whenever CI is green. A gate that fails 400 times on day one gets switched off on day two — and then you have no gate <b>and</b> a demoralised team. <span class="chip inf">inferred</span></p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-gates" data-name="Gates &amp; checklist">
+  <div class="tag"><b>L2</b> · Gates &amp; checklist</div>
+  <h2>The daily artifact <span class="sm">tap an item to tick it</span></h2>
+  <div class="chkbar">
+    <span id="chkcount">0 / 15 checked</span>
+    <button class="navbtn" style="padding:.3rem .6rem;font-size:var(--f-mono)" onclick="resetChk()">reset</button>
+  </div>
+  <ul class="chk" id="chklist">
+    <li><span><b>Can I name what each method does in one sentence?</b> If the sentence needs "and", it does two things</span></li>
+    <li><span><b>Is every non-API method prefixed with <code>_</code>?</b> Public names are promises to strangers</span></li>
+    <li><span><b>Does any method both decide and execute?</b> Separate the rule from the action</span></li>
+    <li><span><b>Is there business logic that could live in <code>services/</code>?</b> Rules a business person could state</span></li>
+    <li><span><b>Any query inside a loop?</b> <code>search</code>, <code>create</code>, <code>write</code>, or a relational read on unfetched records</span></li>
+    <li><span><b>Does every single-record method start with <code>ensure_one()</code>?</b></span></li>
+    <li><span><b>Do the <code>@api.depends</code> lists match what the compute actually reads?</b> Including through relations</span></li>
+    <li><span><b>Does every override call <code>super()</code> and return its result?</b></span></li>
+    <li><span><b>Is this override the cheapest mechanism?</b> Could it be a default, a compute, or a constraint?</span></li>
+    <li><span><b>Is <code>sudo()</code> scoped to one expression, with a comment saying why?</b></span></li>
+    <li><span><b>Are user-facing strings wrapped in <code>_()</code>?</b> And the lazy variant at class level</span></li>
+    <li><span><b>A new if/elif on an existing Selection field?</b> Check whether that ladder exists elsewhere</span></li>
+    <li><span><b>Is there a test that fails without this change?</b></span></li>
+    <li><span><b>Are refactoring commits separate from behaviour commits?</b> A mixed diff can't be reviewed</span></li>
+    <li><span><b>Could a new hire find this code?</b> File named after the model, no logic in <code>__init__.py</code></span></li>
+  </ul>
+  <div class="note"><p><b>Run it on your own PR before requesting review.</b> That's where the learning happens — you catch your own patterns. And a comment on your code is not a comment on you: the reviewer is the first person to read what you wrote, which makes them a free usability test on your own thinking. If they misunderstood, the code was ambiguous. That's data, and it's the cheapest you'll ever get.</p></div>
+</section>
+
+<!-- ================= LEVEL 3 ================= -->
+<section class="slide divider" data-level="3" data-topic="l3-start" data-name="Level 3 begins">
+  <div class="tag">Level three</div>
+  <div class="lvnum">03</div>
+  <h1>Go deeper</h1>
+  <div class="demand">
+    <p><b>What it demands of you: practice, and being wrong once or twice.</b> These are design decisions, not rules. Nobody absorbs them from a slide — you'll read this, think you've understood, apply it in the wrong place, and <em>then</em> understand it. That's the intended path, not a failure of it.</p>
+    <p>Everything here also has a reading list attached, because a deck is the wrong medium for material this size and pretending otherwise would be dishonest.</p>
+  </div>
+  <div class="pills">
+    <span class="pill">Composition vs inheritance</span><span class="pill">Polymorphism</span><span class="pill">Bigger surgery</span>
+    <span class="pill">Design patterns</span><span class="pill">ORM depth</span><span class="pill">Why any of this works</span><span class="pill">Keep going</span>
+  </div>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-compose" data-name="Composition vs inheritance">
+  <div class="tag"><b>L3</b> · Composition vs inheritance</div>
+  <h2>"is a" versus "has a"</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Inheritance versus composition">
+      <text x="4" y="16" class="d-lbl-b">INHERITANCE — "is a"</text>
+      <rect x="40" y="24" width="140" height="24" class="d-box"/><text x="54" y="40" class="d-lbl">Account</text>
+      <rect x="40" y="70" width="140" height="24" class="d-box"/><text x="54" y="86" class="d-lbl">SavingsAccount</text>
+      <path d="M110 70 L110 48" class="d-ln-a"/>
+      <text x="196" y="42" class="d-lbl">gets everything, can override</text>
+      <text x="196" y="58" class="d-lbl" style="fill:var(--warn)">coupled to the parent's INTERNALS —</text>
+      <text x="196" y="74" class="d-lbl" style="fill:var(--warn)">parent changes, your subclass breaks</text>
+      <text x="196" y="92" class="d-lbl">and in Odoo the parent belongs to another</text>
+      <text x="196" y="108" class="d-lbl">company, across major versions</text>
+      <line x1="0" y1="120" x2="700" y2="120" class="d-ln"/>
+    </svg>
+  </div>
+  <div class="dia" style="margin-top:.6rem">
+    <svg viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Composition">
+      <text x="4" y="16" class="d-lbl-b">COMPOSITION — "has a"</text>
+      <rect x="40" y="26" width="140" height="24" class="d-box-g"/><text x="54" y="42" class="d-lbl">Order</text>
+      <rect x="230" y="26" width="150" height="24" class="d-box-g"/><text x="244" y="42" class="d-lbl">PriceCalculator</text>
+      <path d="M180 38 L226 38" class="d-ln-a"/>
+      <text x="400" y="42" class="d-lbl">holds a reference, delegates to it</text>
+      <text x="40" y="70" class="d-lbl" style="fill:var(--sage)">looser: swap the calculator, or reuse it somewhere else entirely</text>
+      <text x="40" y="88" class="d-lbl">In Odoo this appears as MIXINS, and as the plain classes in services/</text>
+    </svg>
+  </div>
+  <p class="sub"><strong>"Prefer composition over inheritance"</strong> is not fashion. Inheritance couples you to the parent's internals, not just its interface — and in Odoo the parent is maintained by someone else, on their release schedule. That's why, of the four mechanisms in Level 2, the <strong>mixin</strong> is the one to reach for when you're unsure.</p>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-compose" data-name="Composition vs inheritance">
+  <div class="tag"><b>L3</b> · Composition vs inheritance</div>
+  <h2>What <code>super()</code> actually does</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 155" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Runtime inheritance chain across addons">
+      <text x="4" y="16" class="d-lbl-b">ODOO BUILDS ONE CLASS AT RUNTIME FROM EVERY ADDON THAT EXTENDS sale.order</text>
+      <rect x="4" y="30" width="130" height="34" class="d-box-g"/><text x="16" y="51" class="d-lbl">your addon</text>
+      <rect x="154" y="30" width="130" height="34" class="d-box"/><text x="166" y="51" class="d-lbl">sale_margin</text>
+      <rect x="304" y="30" width="130" height="34" class="d-box"/><text x="316" y="51" class="d-lbl">a customer addon</text>
+      <rect x="454" y="30" width="130" height="34" class="d-box"/><text x="466" y="51" class="d-lbl">core sale</text>
+      <path d="M134 47 L150 47 M284 47 L300 47 M434 47 L450 47" class="d-ln-a"/>
+      <text x="600" y="51" class="d-lbl">→ database</text>
+      <text x="4" y="88" class="d-lbl">super() means "call the next one along". You do NOT control your position —</text>
+      <text x="4" y="104" class="d-lbl">it depends on which modules that particular customer has installed.</text>
+      <text x="4" y="130" class="d-lbl" style="fill:var(--warn)">No super()  → you silently delete every other addon's behaviour, including core's.</text>
+      <text x="4" y="146" class="d-lbl" style="fill:var(--warn)">No return   → callers get None, far away from your file, weeks later.</text>
+    </svg>
+  </div>
+  <p class="sub">Level 1 told you to always call it and always return it. This is <strong>why</strong>: you're not overriding a method, you're inserting a link into a chain assembled at runtime from code you have never read, whose order changes per deployment.</p>
+  <p class="cap">Consequence worth sitting with: your override must work correctly <b>no matter what runs before or after it</b>. That's the real argument for keeping overrides tiny and delegating immediately to a private method of your own.</p>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-poly" data-name="Polymorphism">
+  <div class="tag"><b>L3</b> · Polymorphism</div>
+  <h2>Replace Conditional with Polymorphism <span class="sm">smell: the same if/elif in several methods</span></h2>
+  <p class="sub">Odoo is full of <code>Selection</code> fields, and every selection eventually grows a matching ladder in five methods. Add an option, find all five. Miss one → a bug that only appears for that option, which QA never hits.</p>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>ladder</b> repeated across 5 methods</figcaption>
+<pre><code><span class="k">def</span> <span class="f">_send</span>(self):
+    <span class="k">if</span> self.channel == <span class="s">'email'</span>:
+        payload = {<span class="s">'to'</span>: self.partner_id.email, ...}
+        self.env[<span class="s">'mail.mail'</span>].create(payload).send()
+    <span class="k">elif</span> self.channel == <span class="s">'sms'</span>:
+        <span class="k">if</span> <span class="k">not</span> self.partner_id.mobile:
+            <span class="k">raise</span> UserError(...)
+        self.env[<span class="s">'sms.api'</span>]._send(...)
+    <span class="k">elif</span> self.channel == <span class="s">'edi'</span>:
+        <span class="c"># 30 lines of XML building</span>
+        ...
+    <span class="k">else</span>:
+        <span class="k">raise</span> UserError(_(<span class="s">"Unknown channel"</span>))</code></pre></figure>
+    <figure class="code after"><figcaption><b>strategy</b> one class per channel</figcaption>
+<pre><code><span class="c"># services/channels.py</span>
+<span class="k">class</span> <span class="f">Channel</span>(abc.ABC):
+    code: <span class="f">str</span>
+    <span class="n">@abc</span>.abstractmethod
+    <span class="k">def</span> <span class="f">send</span>(self, env, record) -&gt; <span class="k">None</span>: ...
+
+<span class="k">class</span> <span class="f">EmailChannel</span>(Channel):
+    code = <span class="s">'email'</span>
+    <span class="k">def</span> <span class="f">send</span>(self, env, record):
+        env[<span class="s">'mail.mail'</span>].create(self._payload(record)).send()
+
+REGISTRY = {c.code: c <span class="k">for</span> c <span class="k">in</span> (EmailChannel(), SmsChannel(), EdiChannel())}
+
+<span class="c"># models/notification.py</span>
+<span class="k">def</span> <span class="f">_send</span>(self):
+    <span class="k">for</span> rec <span class="k">in</span> self:
+        channels.REGISTRY[rec.channel].send(self.env, rec)</code></pre></figure>
+  </div>
+  <p class="cap"><b>Polymorphism, plainly:</b> instead of the caller asking "which kind is this?" and branching, each kind gets a small class offering the same method name. The <em>type</em> does the choosing. This is the technique Level 2 kept deferring to.</p>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-poly" data-name="Polymorphism">
+  <div class="tag"><b>L3</b> · Polymorphism</div>
+  <h2>The payoff, stated as a diff</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Adding a channel: ladder versus registry">
+      <text x="4" y="16" class="d-lbl-b">ADD A WHATSAPP CHANNEL — WITH THE LADDER</text>
+      <rect x="4" y="24" width="80" height="22" class="d-box-w"/><text x="14" y="39" class="d-lbl">_send()</text>
+      <rect x="92" y="24" width="80" height="22" class="d-box-w"/><text x="102" y="39" class="d-lbl">_preview()</text>
+      <rect x="180" y="24" width="80" height="22" class="d-box-w"/><text x="190" y="39" class="d-lbl">_validate()</text>
+      <rect x="268" y="24" width="80" height="22" class="d-box-w"/><text x="278" y="39" class="d-lbl">_retry()</text>
+      <rect x="356" y="24" width="80" height="22" class="d-box-w"/><text x="366" y="39" class="d-lbl">_report()</text>
+      <text x="450" y="39" class="d-lbl" style="fill:var(--warn)">5 files modified · 5 chances to break email</text>
+      <text x="4" y="80" class="d-lbl-b">WITH THE REGISTRY</text>
+      <rect x="4" y="88" width="150" height="22" class="d-box-g"/><text x="14" y="103" class="d-lbl">+ WhatsAppChannel</text>
+      <rect x="162" y="88" width="150" height="22" class="d-box-g"/><text x="172" y="103" class="d-lbl">+ 1 registry entry</text>
+      <text x="326" y="103" class="d-lbl" style="fill:var(--sage)">0 existing files modified · email cannot break</text>
+      <text x="4" y="136" class="d-lbl">Extend without modifying. That property has a name: the Open/Closed Principle.</text>
+    </svg>
+  </div>
+  <p class="mini"><code>abc.ABC</code> does real work here: forget <code>send()</code> in a new channel and the class cannot be created at all. The mistake surfaces at import, not in production at 2am. <span class="chip est">established</span></p>
+  <div class="note trap"><p><b>The boundary:</b> this costs indirection — the reader has to jump to another file. With two branches that never change, the plain <code>if</code> is better. Apply when the ladder appears in more than one method, or when the third option arrives. <b>Two is a coincidence; three is a pattern.</b></p></div>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-surgery" data-name="Bigger surgery">
+  <div class="tag"><b>L3</b> · Bigger surgery</div>
+  <h2>Extract Class <span class="sm">smell: a group of methods only touches a group of fields</span></h2>
+  <p class="sub">Open a large model and check which fields each method uses. If eight methods only touch five fields, and the other twenty never touch those five — that's two classes sharing a file by accident. <strong>Low cohesion, made measurable.</strong></p>
+  <div class="grid3">
+    <div class="card"><h4>Destination 1 · service class</h4><p>Plain Python in <code>services/</code>. Cheapest. Correct when the extracted thing is <b>rules</b>.</p></div>
+    <div class="card"><h4>Destination 2 · AbstractModel mixin</h4><p>When it needs the ORM <b>and</b> is reused by several models.</p></div>
+    <div class="card"><h4>Destination 3 · new model</h4><p>Most expensive — a table, views, access rules. Only when the thing has its own identity and lifetime in the database.</p></div>
+  </div>
+  <div class="note"><p><b>The steps, and the order matters more than the destination:</b></p>
+  <p>name the concept → create the new class → move <b>one</b> method → make the old method delegate to the new one → run tests → repeat → delete the delegating methods once nothing calls them.</p>
+  <p>At no point is the system broken. If you're interrupted for three days, what's on the branch still works and can still be merged. That property is the whole technique — everything else is bookkeeping.</p></div>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-surgery" data-name="Bigger surgery">
+  <div class="tag"><b>L3</b> · Bigger surgery</div>
+  <h2>Strangler: changing code you're afraid of</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 165" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Strangler fig migration">
+      <rect x="4" y="26" width="118" height="30" class="d-box-w"/><text x="16" y="46" class="d-lbl">old path · 100%</text>
+      <rect x="144" y="26" width="118" height="30" class="d-box-w"/><text x="156" y="46" class="d-lbl">old · 99%</text>
+      <rect x="144" y="60" width="118" height="16" class="d-box-g"/><text x="156" y="72" class="d-lbl">new · 1 company</text>
+      <rect x="284" y="26" width="118" height="22" class="d-box-w"/><text x="296" y="42" class="d-lbl">old · 60%</text>
+      <rect x="284" y="52" width="118" height="24" class="d-box-g"/><text x="296" y="68" class="d-lbl">new · 40%</text>
+      <rect x="424" y="26" width="118" height="14" class="d-box-w"/><text x="436" y="37" class="d-lbl">old · 5%</text>
+      <rect x="424" y="44" width="118" height="32" class="d-box-g"/><text x="436" y="64" class="d-lbl">new · 95%</text>
+      <rect x="564" y="26" width="122" height="50" class="d-box-g"/><text x="576" y="55" class="d-lbl">new · 100%</text>
+      <path d="M126 45 L140 45 M266 45 L280 45 M406 45 L420 45 M546 45 L560 45" class="d-ln-a"/>
+      <text x="4" y="96" class="d-lbl-b">1 · build beside</text><text x="144" y="96" class="d-lbl-b">2 · route one case</text>
+      <text x="284" y="96" class="d-lbl-b">3 · verify, widen</text><text x="424" y="96" class="d-lbl-b">4 · verify again</text>
+      <text x="564" y="96" class="d-lbl-b">5 · delete old</text>
+      <line x1="4" y1="112" x2="696" y2="112" class="d-ln"/>
+      <text x="4" y="132" class="d-lbl">Every step independently revertible — the only property that makes changing scary legacy code survivable.</text>
+      <text x="4" y="150" class="d-lbl">Named after the fig that grows around a host tree and stands on its own when the tree is gone.</text>
+    </svg>
+  </div>
+  <p class="cap">Both instincts are wrong: leaving it alone forever is slow decay; the heroic weekend rewrite is an unreviewable diff carrying every bug you introduced <em>plus</em> every undocumented behaviour you didn't know it had. <span class="chip est">established</span> — a documented industrial technique, not our invention.</p>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-surgery" data-name="Bigger surgery">
+  <div class="tag"><b>L3</b> · Bigger surgery</div>
+  <h2>What every move in this deck has in common</h2>
+  <div class="grid3">
+    <div class="card"><h4>Small</h4><p>Each fits in one sitting. None requires holding the whole system in your head — which, per the introduction, you cannot do anyway.</p></div>
+    <div class="card"><h4>Verifiable</h4><p>Tests green after each one. You always know whether you're still standing on solid ground.</p></div>
+    <div class="card"><h4>Reversible</h4><p>Interrupted for three days? What's on the branch still works. <code>git revert</code> is always available.</p></div>
+  </div>
+  <div class="skippy">
+    <p>The heroic weekend rewrite <i>feels</i> like engineering because it feels <b>hard</b>, and your monkey brain has an unfortunate habit of mistaking effort for value. It is not engineering. It is a bet, placed with your team's uptime, by someone who confused adrenaline with competence.</p>
+    <p>Real engineering is boring on purpose: ten dull steps, each verified, arriving somewhere you could not have jumped to. <b>If your refactor is exciting, stop — you've made the steps too big.</b></p>
+  </div>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-patterns" data-name="Design patterns">
+  <div class="tag"><b>L3</b> · Design patterns</div>
+  <h2>A pattern is a <em>name</em>, not a technology</h2>
+  <p class="sub">Someone noticed the same shape appearing in thousands of programs, wrote it down, and gave it a name so people could discuss it in three words instead of thirty. That's the whole idea — and it means you have already invented several by accident.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Pattern</th><th>Problem it solves</th><th>In Odoo</th><th>Cost</th></tr></thead>
+    <tbody>
+      <tr><td><b>Template Method</b></td><td>Fixed steps, varying details</td><td>You use it daily — every <code>super()</code> override is one. Formalise it by extracting <code>_hook_*</code> methods so future addons plug in instead of copying your method.</td><td>~zero</td></tr>
+      <tr><td><b>Strategy + Registry</b></td><td>if/elif ladder over a Selection</td><td>Dict of <code>code → handler</code> in <code>services/</code>. Worked example two slides back.</td><td>1 indirection</td></tr>
+      <tr><td><b>Adapter / Gateway</b></td><td>An external system leaking everywhere</td><td>One class per external system. Translates <em>their</em> vocabulary to <em>ours</em>; the only file importing <code>requests</code>. Their API changes → you edit one file. Tests fake one object.</td><td>1 class</td></tr>
+      <tr><td><b>Value Object</b></td><td>Meaning carried in bare floats and strings</td><td><code>@dataclass(frozen=True)</code> for money, date ranges, payloads. Same idea as Parameter Object, different entry point.</td><td>~zero</td></tr>
+      <tr><td><b>Null Object</b></td><td><code>if not partner:</code> twenty times</td><td>Free in Odoo and nobody notices: an <b>empty recordset is safe</b> to iterate, filter and test. Drop the guard.</td><td>zero</td></tr>
+    </tbody>
+  </table></div>
+  <p class="cap"><b>Patterns are vocabulary, not architecture.</b> "We should use a pattern here" is not a design. Patterns describe a design after you've decided what the problem is.</p>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-patterns" data-name="Design patterns">
+  <div class="tag"><b>L3</b> · Design patterns</div>
+  <h2>Four we do not want to see here</h2>
+  <div class="grid2">
+    <div class="card"><h4>DI containers</h4><p>Python has module imports and default arguments. A container adds configuration and indirection to solve a problem you don't have.</p></div>
+    <div class="card"><h4>Repository layer over the ORM</h4><p>The ORM <b>is</b> the repository. Wrapping it gives you a second, worse ORM to maintain.</p></div>
+    <div class="card"><h4>Singleton classes</h4><p>A Python module is already a singleton. Just use a module.</p></div>
+    <div class="card"><h4>Do-nothing getters/setters</h4><p><code>get_name()</code> returning <code>self.name</code> is ceremony. Use the plain attribute — promote to <code>@property</code> the day it needs behaviour, and no caller changes.</p></div>
+  </div>
+  <div class="skippy">
+    <p>A warning about what happens next, and I say this with the deepest affection for your species. Roughly three days after learning the word "pattern", a monkey brain enters a phase where <b>everything</b> is a pattern opportunity. Factories producing factories. An interface with exactly one implementation, "for flexibility". Six files where there was a function.</p>
+    <p>The tell is that it feels sophisticated. Actual sophistication looks like this: someone reads your code, understands it immediately, and does not notice anything clever happened. <b>If a reader has to admire your design before they can use it, you didn't build them a tool — you built yourself a monument, and now they have to dust it forever.</b></p>
+  </div>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-ormdepth" data-name="ORM depth">
+  <div class="tag"><b>L3</b> · ORM depth</div>
+  <h2>Three where the cost is correctness, not speed</h2>
+  <div class="grid3">
+    <div class="card"><h4><code>@api.depends</code></h4><p>Must list <b>every</b> field the compute reads, including through relations. Miss one → a stale value, only under certain edit orders, only sometimes. <b>The hardest bug class on this page to reproduce</b> — which is why it's here rather than in Level 1. <span class="chip est">established</span></p></div>
+    <div class="card"><h4><code>sudo()</code></h4><p>Disables access rights. Scope it to one expression, never a whole method, and <b>never</b> to a search whose domain contains user input — that's how you build a data leak by accident. Every use gets a comment saying why.</p></div>
+    <div class="card"><h4>Raw SQL</h4><p>Needs written justification in the PR, and always parameterised: <code>cr.execute(q, (a, b))</code>, never an f-string. It skips caches, record rules and computed fields. Sometimes exactly what you want — never what you want <b>by accident</b>.</p></div>
+  </div>
+  <div class="note trap">
+    <p><b>What links all three:</b> the ORM is doing enormous amounts of work on your behalf — dependency tracking, permission filtering, caching, batching. Each of these three <b>steps outside that machinery</b>, and the failure mode is never a crash. It's quietly wrong data, discovered by an accountant, in a quarter's time.</p>
+    <p>The general principle worth taking away: when you bypass a framework's guarantees, you inherit the responsibility for them. Write down which one you took on, in the PR, where the next person will see it.</p>
+  </div>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-why" data-name="Why any of this works">
+  <div class="tag"><b>L3</b> · Why any of this works</div>
+  <h2>The real reason to write tests</h2>
+  <div class="skippy">
+    <p>I am aware that "write tests" lands on a busy monkey brain as "do extra work for no visible reward", and that when the deadline arrives the tests are the first thing thrown overboard. So let me reframe it in terms your survival instinct will actually process.</p>
+    <p>Tests are not a tax on shipping. Tests are <b>the mechanism by which you stop being afraid of your own code.</b></p>
+    <p>Every developer you have ever met who seemed unreasonably fast at changing complex systems was not smarter than you. I have met smarter, and they were not it. They simply had a way to check their work in under ten seconds — so they tried six things in the time it took you to work up the courage to try one.</p>
+  </div>
+  <p class="sub">Which is the thread running through all three levels: <strong>every technique here converts fear into a procedure.</strong> Split the file so you can find things. Underscore it so you can rename it. Extract it so you can test it. Test it so you can change it. Strangle it so you can replace it without betting the quarter.</p>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-next" data-name="Keep going">
+  <div class="tag"><b>L3</b> · Keep going</div>
+  <h2>Four weeks. Each step makes the next one easier.</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Four week practice plan">
+      <rect x="4" y="24" width="164" height="44" class="d-box-g"/><text x="16" y="42" class="d-lbl-b">WEEK 1 · split one file</text><text x="16" y="58" class="d-lbl">no logic changes, pure moves</text>
+      <rect x="180" y="24" width="164" height="44" class="d-box-g"/><text x="192" y="42" class="d-lbl-b">WEEK 2 · extract 10 fns</text><text x="192" y="58" class="d-lbl">every comment → a method</text>
+      <rect x="356" y="24" width="164" height="44" class="d-box"/><text x="368" y="42" class="d-lbl-b">WEEK 3 · one service</text><text x="368" y="58" class="d-lbl">+ unit tests for the edges</text>
+      <rect x="532" y="24" width="164" height="44" class="d-box"/><text x="544" y="42" class="d-lbl-b">WEEK 4 · kill a ladder</text><text x="544" y="58" class="d-lbl">Selection → registry</text>
+      <path d="M168 46 L176 46 M344 46 L352 46 M520 46 L528 46" class="d-ln-a"/>
+      <text x="4" y="96" class="d-lbl">Week 1: you'll learn what __init__.py import order does by getting it wrong once — the correct way to learn it.</text>
+      <text x="4" y="112" class="d-lbl">Week 3: pay attention to how fast the tests run. That feeling is the entire point of the exercise.</text>
+    </svg>
+  </div>
+  <div class="note"><p><b>Then, ongoing: run the Level 2 checklist on every PR, starting with your own.</b> Reviewing is where pattern recognition actually forms — you're seeing the consequences of choices instead of making them.</p></div>
+  <p class="cap">You will not absorb this by reading it. Nobody does. Reading produces the <em>feeling</em> of understanding, which is a different substance from the ability to do it on a Thursday under pressure.</p>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-next" data-name="Keep going">
+  <div class="tag"><b>L3</b> · Keep going</div>
+  <h2>What to read, in this order</h2>
+  <div class="grid2">
+    <div class="card"><h4>1 · Refactoring — Martin Fowler (2nd ed.)</h4><p>The catalogue that named most of the moves here. Read the first three chapters properly, then use the rest as a lookup. Examples are in JavaScript; they translate without difficulty.</p></div>
+    <div class="card"><h4>2 · A Philosophy of Software Design — Ousterhout</h4><p>Short and opinionated. The best available treatment of <b>where</b> to draw boundaries: deep modules, narrow interfaces. Read it second — it changes how you read Fowler.</p></div>
+    <div class="card"><h4>3 · Odoo Coding Guidelines</h4><p><a href="https://www.odoo.com/documentation/19.0/contributing/development/coding_guidelines.html">The official page</a> for naming, layout and ORM idioms, plus the OCA contributing guide for shared repositories.</p></div>
+    <div class="card"><h4>4 · Your own Odoo source tree</h4><p><code>addons/sale</code> and <code>addons/account</code>, to learn how the framework wants to be extended. Reference material — <b>not</b> a style model, for the reason given in Level 2.</p></div>
+  </div>
+  <div class="note"><p><b>Deliberately not covered:</b> XML and OWL frontend conventions · security and access-rule design · migrating modules between Odoo versions · performance profiling. Each deserves its own deck rather than a paragraph in someone else's.</p></div>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-next" data-name="Keep going">
+  <div class="tag"><b>L3</b> · Keep going</div>
+  <h2>One last thing</h2>
+  <div class="skippy">
+    <p>Everything in these three levels is a technique for working around a brain that holds four things at once, forgets its own decisions within weeks, and reliably mistakes familiarity for understanding.</p>
+    <p>That is not an insult. It is the design spec you are working with. It is the same one every great engineer in history worked with, and the great ones were simply the people who stopped arguing with it and started building around it.</p>
+    <p>The developers you think are brilliant are not holding more in their heads than you are. They just spent years accumulating small habits so that they don't have to. You have now been handed a list of those habits in about an hour, which frankly is a considerable head start, and I expect you to be appropriately grateful.</p>
+    <p><b>Go split a file.</b></p>
+  </div>
+</section>
+
+<!-- ================= CREDITS ================= -->
+<section class="slide" data-level="0" data-topic="credits" data-name="Credits">
+  <div class="tag">Credits &amp; sources</div>
+  <h2>Standing on shoulders, mocking from them</h2>
+  <div class="grid2">
+    <div class="card" style="border-left:2px solid var(--amber)">
+      <h4 style="color:var(--amber)">The voice</h4>
+      <p><b>Skippy the Magnificent</b> is a character created by <b>Craig Alanson</b>, from the <em>Expeditionary Force</em> science-fiction series (2016– ). An ancient, staggeringly powerful and deeply insufferable Elder AI who refers to humans as monkeys and is, irritatingly, usually right.</p>
+      <p>Used here affectionately as a rhetorical device, with no affiliation with or endorsement by the author or publisher. If the voice landed, the books are considerably better than this deck — and the audiobooks, narrated by <b>R.C. Bray</b>, are where most people meet him.</p>
+    </div>
+    <div class="card">
+      <h4>The technical substance</h4>
+      <p><b>Martin Fowler</b> — <em>Refactoring</em> (2nd ed.): Extract Function, Replace Conditional with Polymorphism, Introduce Parameter Object, Replace Temp with Query, Move Method, Split Loop, Extract Class, and the Strangler Fig.</p>
+      <p><b>John Ousterhout</b> — <em>A Philosophy of Software Design</em>: deep modules and narrow interfaces, behind most of Level 2.</p>
+      <p><b>Bertrand Meyer</b> — the Open/Closed Principle, Level 3.</p>
+      <p><b>Nelson Cowan</b> (2001) — <em>The magical number 4 in short-term memory</em>, the capacity figure in the introduction.</p>
+      <p><b>Odoo S.A.</b> — official Coding Guidelines, and the <b>OCA</b> contributing guidelines.</p>
+    </div>
+  </div>
+  <div class="note">
+    <p><b>Corrections are welcome and get merged.</b> Three items are flagged <span class="chip ver">version</span> because they move between Odoo releases — the grouping API, <code>@api.model_create_multi</code>, and SQL constraint declaration. Verify against the version on your branch before copying anything, including from here.</p>
+  </div>
+  <p class="mini dim" style="font-family:var(--mono);font-size:var(--f-mono);line-height:1.9">
+    Code Craft for Odoo Python · Teksistemi Software · engineering newsletter · v4<br>
+    Written for our teams. Living document — send corrections.
+  </p>
+  <div style="margin-top:1.1rem;display:flex;gap:.6rem;flex-wrap:wrap">
+    <button class="navbtn" onclick="goTopic('l1-start')">Level 1</button>
+    <button class="navbtn" onclick="goTopic('l2-start')">Level 2</button>
+    <button class="navbtn" onclick="goTopic('l3-start')">Level 3</button>
+    <button class="navbtn primary" onclick="go(0)">Back to the start</button>
+  </div>
+</section>
+
+</div><!-- /stage -->
+
+<div id="bar">
+  <button class="navbtn" id="prev" onclick="step(-1)">&larr; Back</button>
+  <button class="navbtn primary" id="next" onclick="step(1)">Next &rarr;</button>
+  <div class="where"><b id="lvlabel"></b> <span id="sname"></span></div>
+  <div id="count">1 / 1</div>
+</div>
+
+<script>
+window.DECK = {
+  lang: 'en',
+  ui: { start: 'Start \u2192', next: 'Next \u2192', checked: 'checked' },
+  lvname: {
+    '0': 'Introduction',
+    '1': 'Level 1 \u00b7 Do it now',
+    '2': 'Level 2 \u00b7 Build the habit',
+    '3': 'Level 3 \u00b7 Go deeper'
+  },
+  tree: [
+    { lvl: '0', cls: 'lv0', label: 'Introduction', note: '3 slides', topics: [
+      { k: 'intro', t: 'Start here' }
+    ]},
+    { lvl: '1', cls: 'lv1', label: 'Level 1 \u00b7 Do it now', note: '~15 min \u00b7 no theory', topics: [
+      { k: 'l1-files',   t: 'Split the file' },
+      { k: 'l1-names',   t: 'Mark what&rsquo;s private' },
+      { k: 'l1-flat',    t: 'Flatten control flow' },
+      { k: 'l1-extract', t: 'Extract &amp; assert' },
+      { k: 'l1-super',   t: 'Don&rsquo;t break the chain' },
+      { k: 'l1-tools',   t: 'Let tools do it' },
+      { k: 'l1-recap',   t: 'Recap' }
+    ]},
+    { lvl: '2', cls: 'lv2', label: 'Level 2 \u00b7 Build the habit', note: '~25 min \u00b7 judgement', topics: [
+      { k: 'l2-drift',    t: 'How code drifts' },
+      { k: 'l2-encap',    t: 'Encapsulation' },
+      { k: 'l2-abstract', t: 'Abstraction &amp; contracts' },
+      { k: 'l2-services', t: 'The services layer' },
+      { k: 'l2-refactor', t: 'Refactoring discipline' },
+      { k: 'l2-inherit',  t: 'Choosing inheritance' },
+      { k: 'l2-perf',     t: 'Queries &amp; recordsets' },
+      { k: 'l2-tests',    t: 'Tests' },
+      { k: 'l2-gates',    t: 'Gates &amp; checklist' }
+    ]},
+    { lvl: '3', cls: 'lv3', label: 'Level 3 \u00b7 Go deeper', note: '~25 min \u00b7 practice', topics: [
+      { k: 'l3-compose',  t: 'Composition vs inheritance' },
+      { k: 'l3-poly',     t: 'Polymorphism' },
+      { k: 'l3-surgery',  t: 'Bigger surgery' },
+      { k: 'l3-patterns', t: 'Design patterns' },
+      { k: 'l3-ormdepth', t: 'ORM depth' },
+      { k: 'l3-why',      t: 'Why any of this works' },
+      { k: 'l3-next',     t: 'Keep going' }
+    ]},
+    { lvl: '0', cls: 'lv0', label: 'Credits', note: 'sources', topics: [
+      { k: 'credits', t: 'Credits &amp; sources' }
+    ]}
+  ]
+};
+</script>
+<script>
+/* Code Craft deck — shared navigation.
+   Each page defines window.DECK = { tree, lvname, ui, lang } before loading this file. */
+(function () {
+  var D = window.DECK || {};
+  var UI = D.ui || {};
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var LVSTART = { '1': 'l1-start', '2': 'l2-start', '3': 'l3-start' };
+  var idx = 0;
+
+  /* ---- build the tree rail ---- */
+  var tv = document.getElementById('tree');
+  (D.tree || []).forEach(function (grp) {
+    var h = document.createElement('button');
+    h.className = 'lvhead ' + grp.cls;
+    h.innerHTML = '<span class="dot"></span>' + grp.label + '<small>' + grp.note + '</small>';
+    h.onclick = function () {
+      var start = LVSTART[grp.lvl];
+      goTopic(start && document.querySelector('[data-topic="' + start + '"]') ? start : grp.topics[0].k);
+    };
+    tv.appendChild(h);
+    grp.topics.forEach(function (tp) {
+      var b = document.createElement('button');
+      b.className = 'topic';
+      b.innerHTML = tp.t;
+      b.setAttribute('data-key', tp.k);
+      b.onclick = function () { goTopic(tp.k); };
+      tv.appendChild(b);
+    });
+  });
+
+  function render() {
+    slides.forEach(function (s, i) { s.classList.toggle('active', i === idx); });
+    var cur = slides[idx];
+    var lvl = cur.getAttribute('data-level');
+    var key = cur.getAttribute('data-topic');
+    document.body.setAttribute('data-level', lvl);
+    document.getElementById('lvlabel').textContent = (D.lvname || {})[lvl] || '';
+    document.getElementById('sname').textContent = '· ' + (cur.getAttribute('data-name') || '');
+    document.getElementById('count').textContent = (idx + 1) + ' / ' + slides.length;
+    document.getElementById('prog').style.width = (idx / (slides.length - 1) * 100) + '%';
+    document.getElementById('prev').disabled = (idx === 0);
+    var nx = document.getElementById('next');
+    nx.disabled = (idx === slides.length - 1);
+    nx.textContent = idx === 0 ? (UI.start || 'Start →') : (UI.next || 'Next →');
+    Array.prototype.forEach.call(tv.querySelectorAll('.topic'), function (b) {
+      b.classList.toggle('on', b.getAttribute('data-key') === key);
+    });
+    document.getElementById('stage').scrollTop = 0;
+    if (history.replaceState) history.replaceState(null, '', '#' + (idx + 1));
+    syncLangLinks();
+  }
+
+  /* keep the slide position when switching language */
+  function syncLangLinks() {
+    Array.prototype.forEach.call(document.querySelectorAll('.langsw a[data-base]'), function (a) {
+      a.href = a.getAttribute('data-base') + '#' + (idx + 1);
+    });
+  }
+
+  window.go = function (i) { idx = Math.max(0, Math.min(slides.length - 1, i)); render(); };
+  window.step = function (d) { window.go(idx + d); };
+  window.goTopic = function (key) {
+    for (var i = 0; i < slides.length; i++) {
+      if (slides[i].getAttribute('data-topic') === key) { window.go(i); return; }
+    }
+  };
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') { window.step(1); e.preventDefault(); }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { window.step(-1); e.preventDefault(); }
+    if (e.key === ' ') { window.step(1); e.preventDefault(); }
+    if (e.key === 'Home') { window.go(0); }
+    if (e.key === 'End') { window.go(slides.length - 1); }
+  });
+
+  var x0 = null, stage = document.getElementById('stage');
+  stage.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+  stage.addEventListener('touchend', function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 70) window.step(dx < 0 ? 1 : -1);
+    x0 = null;
+  }, { passive: true });
+
+  /* ---- interactive checklist ---- */
+  var list = document.getElementById('chklist');
+  function countChk() {
+    if (!list) return;
+    document.getElementById('chkcount').textContent =
+      list.querySelectorAll('.done').length + ' / ' + list.children.length + ' ' + (UI.checked || 'checked');
+  }
+  if (list) {
+    Array.prototype.forEach.call(list.children, function (li) {
+      li.addEventListener('click', function () { li.classList.toggle('done'); countChk(); });
+    });
+  }
+  window.resetChk = function () {
+    Array.prototype.forEach.call(list.children, function (li) { li.classList.remove('done'); });
+    countChk();
+  };
+
+  /* An explicit choice beats detection, and is what the router in index.html reads.
+     Only seed the key when it is unset: merely opening an issue is not a choice. */
+  Array.prototype.forEach.call(document.querySelectorAll('.langsw a[data-lang]'), function (a) {
+    a.addEventListener('click', function () {
+      try { localStorage.setItem('tks-lang', a.getAttribute('data-lang')); } catch (e) {}
+    });
+  });
+  try { if (!localStorage.getItem('tks-lang')) localStorage.setItem('tks-lang', D.lang || 'it'); } catch (e) {}
+
+  var h = parseInt((location.hash || '').replace('#', ''), 10);
+  if (h && h >= 1 && h <= slides.length) idx = h - 1;
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Code Craft per Python in Odoo — Teksistemi</title>
+<meta name="description" content="Linea guida di ingegneria su tre livelli per scrivere Python ben organizzato negli addon Odoo.">
+<link rel="alternate" hreflang="it" href="https://orlodax.github.io/tks-newsletter/006-code-craft-python-odoo.html">
+<link rel="alternate" hreflang="en" href="https://orlodax.github.io/tks-newsletter/en/006-code-craft-for-odoo-python.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400;12..96,75..100,600;12..96,75..100,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0C1618; --ink-2:#112024; --ink-3:#16292E;
+  --rail:#254A52; --line:#1D373C;
+  --fg:#DCE7E5; --fg-dim:#8FA7A9;
+  --amber:#E2A15A; --sage:#62BFA5; --warn:#D2705F; --meta:#8FA0C9;
+  --accent:#E2A15A; --tint:rgba(226,161,90,.05);
+  --l1:#57C4DC; --l2:#E2A15A; --l3:#A78BD8;
+  --display:'Bricolage Grotesque','Arial Black',system-ui,sans-serif;
+  --body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Consolas,monospace;
+  /* Unita' fluida di base, stesso sistema del numero 005. Cresce con la larghezza
+     ma e' limitata dall'altezza, cosi' su schermi larghi e bassi il deck non
+     deborda. Il testo deriva da qui: niente si ferma piu' al 1080p. */
+  --u:min(1vw,1.62vh);
+  --f-nano:clamp(8.5px,.30*var(--u) + 5.6px,12.5px);
+  --f-micro:clamp(9.5px,.36*var(--u) + 5.9px,14px);
+  --f-mono:clamp(10.5px,.40*var(--u) + 6.5px,15.5px);
+  --f-mono-l:clamp(11.5px,.44*var(--u) + 7.1px,17px);
+  --f-code:clamp(11.8px,.45*var(--u) + 7.3px,17.5px);
+  --f-sm:clamp(13px,.50*var(--u) + 8px,19px);
+  --f-base:clamp(16px,.58*var(--u) + 10.2px,23px);
+  --railw:clamp(212px,13.5vw,300px);
+  --bar:clamp(58px,2.6*var(--u) + 26px,86px);
+}
+/* ---- per-level identity ---- */
+body[data-level="1"]{--accent:var(--l1);--ink:#09161A;--ink-2:#0F2027;--ink-3:#14282F;--rail:#245059;--line:#1B3740;--tint:rgba(87,196,220,.06)}
+body[data-level="2"]{--accent:var(--l2);--ink:#0E1517;--ink-2:#141F21;--ink-3:#1A282A;--rail:#2B4A48;--line:#223636;--tint:rgba(226,161,90,.05)}
+body[data-level="3"]{--accent:var(--l3);--ink:#0C1220;--ink-2:#141B2B;--ink-3:#1A2234;--rail:#37375E;--line:#232B41;--tint:rgba(167,139,216,.07)}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+html{font-size:var(--f-base)}   /* ogni rem qui sotto scala con --u */
+body{
+  margin:0;background:var(--ink);color:var(--fg);
+  font-family:var(--body);font-size:1rem;line-height:1.6;
+  -webkit-font-smoothing:antialiased;overflow:hidden;
+  transition:background-color .45s ease;
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid currentColor;opacity:.95}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+b,strong{font-weight:600;color:var(--fg)}
+
+#prog{position:fixed;top:0;left:0;height:2px;background:var(--accent);width:0;z-index:60;transition:width .25s,background-color .45s}
+
+/* ---------- tree rail ---------- */
+#rail{
+  position:fixed;left:0;top:0;bottom:var(--bar);width:var(--railw);z-index:40;
+  border-right:1px solid var(--line);padding:1.4rem .8rem 1rem 1.1rem;
+  font-family:var(--mono);font-size:var(--f-mono);overflow-y:auto;
+}
+#rail .logo{font-family:var(--display);font-size:var(--f-sm);font-weight:800;color:var(--fg);line-height:1.15;margin-bottom:1.2rem;cursor:pointer;letter-spacing:-.01em}
+#rail .logo span{display:block;font-family:var(--mono);font-size:var(--f-nano);font-weight:400;color:var(--fg-dim);letter-spacing:.14em;text-transform:uppercase;margin-top:.3rem}
+.lvhead{
+  display:block;width:100%;text-align:left;background:none;border:0;cursor:pointer;
+  font-family:var(--mono);font-size:var(--f-micro);letter-spacing:.13em;text-transform:uppercase;
+  padding:.55rem 0 .3rem;margin-top:.55rem;font-weight:700;
+}
+.lvhead .dot{display:inline-block;width:7px;height:7px;margin-right:.5rem;vertical-align:.5px}
+.lv1{color:var(--l1)}.lv1 .dot{background:var(--l1)}
+.lv2{color:var(--l2)}.lv2 .dot{background:var(--l2)}
+.lv3{color:var(--l3)}.lv3 .dot{background:var(--l3)}
+.lv0{color:var(--fg-dim)}.lv0 .dot{background:var(--fg-dim)}
+.lvhead small{display:block;font-size:var(--f-nano);letter-spacing:.1em;color:var(--fg-dim);font-weight:400;margin:.2rem 0 0 1.05rem;text-transform:none}
+#rail .topic{
+  display:block;width:100%;text-align:left;background:none;border:0;
+  border-left:2px solid var(--line);color:var(--fg-dim);
+  font-family:var(--mono);font-size:var(--f-micro);padding:.28rem 0 .28rem .65rem;
+  margin-left:.35rem;cursor:pointer;line-height:1.35;transition:color .15s,border-color .15s;
+}
+#rail .topic:hover{color:var(--fg)}
+#rail .topic.on{color:var(--accent);border-left-color:var(--accent)}
+
+/* ---------- stage ---------- */
+#stage{position:absolute;left:var(--railw);right:0;top:0;bottom:var(--bar);overflow-y:auto;padding:2.4rem clamp(1rem,4vw,3.4rem) 3rem}
+.slide{display:none;max-width:clamp(1060px,80vw,1680px);margin:0 auto;animation:in .28s ease}
+.slide.active{display:block}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.tag{font-family:var(--mono);font-size:var(--f-micro);letter-spacing:.18em;text-transform:uppercase;color:var(--fg-dim)}
+.tag b{color:var(--accent);font-weight:500}
+h2{font-family:var(--display);font-weight:800;font-stretch:88%;letter-spacing:-.022em;
+  font-size:clamp(1.45rem,3.4vw,2.15rem);line-height:1.06;margin:.5rem 0 0;max-width:27ch}
+h2 .sm{font-size:.5em;font-family:var(--mono);color:var(--fg-dim);font-weight:400;letter-spacing:0}
+.sub{color:var(--fg-dim);margin:.7rem 0 0;max-width:70ch;font-size:1rem}
+.sub strong{color:var(--fg)}
+.slide > *:not(h2):not(.tag){margin-top:1.05rem}
+p{margin:.7rem 0;max-width:70ch}
+ul{padding-left:1.1rem;margin:.6rem 0;max-width:70ch}
+li{margin:.3rem 0}li::marker{color:var(--rail)}
+.dim{color:var(--fg-dim)}.mini{font-size:.9rem}
+
+/* ---------- title & dividers ---------- */
+.title-slide{padding-top:3vh}
+.title-slide h1{font-family:var(--display);font-weight:800;font-stretch:86%;
+  font-size:clamp(2.2rem,6.5vw,4.6rem);line-height:.95;letter-spacing:-.03em;margin:1rem 0 0;max-width:17ch}
+.title-slide h1 em{font-style:normal;color:var(--accent)}
+.divider{padding-top:6vh}
+.divider .lvnum{font-family:var(--display);font-size:clamp(4rem,14vw,9rem);font-weight:800;
+  line-height:.8;color:var(--accent);letter-spacing:-.05em}
+.divider h1{font-family:var(--display);font-weight:800;font-stretch:88%;
+  font-size:clamp(1.9rem,5vw,3.2rem);line-height:1;letter-spacing:-.03em;margin:.8rem 0 0;max-width:20ch}
+.divider .demand{border-left:2px solid var(--accent);padding-left:1rem;margin-top:1.4rem;max-width:64ch;color:var(--fg-dim)}
+.pills{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:1.3rem}
+.pill{font-family:var(--mono);font-size:var(--f-mono);border:1px solid var(--line);background:var(--ink-2);
+  padding:.3rem .55rem;color:var(--fg-dim)}
+
+/* ---------- chips ---------- */
+.chip{font-family:var(--mono);font-size:var(--f-micro);letter-spacing:.1em;text-transform:uppercase;
+  padding:.14rem .42rem;border:1px solid currentColor;border-radius:2px;white-space:nowrap;vertical-align:.14em}
+.est{color:var(--sage)}.inf{color:var(--meta)}.unt{color:var(--amber)}.ver{color:var(--warn)}
+
+/* ---------- callouts ---------- */
+.note{border-left:2px solid var(--meta);background:rgba(143,160,201,.07);padding:.75rem .95rem;font-size:.94rem;max-width:74ch}
+.note.trap{border-left-color:var(--warn);background:rgba(210,112,95,.07)}
+.note p:first-child{margin-top:0}.note p:last-child{margin-bottom:0}
+.term{border:1px solid var(--line);border-left:2px solid var(--accent);background:var(--ink-2);padding:.75rem .95rem;font-size:.94rem;max-width:74ch}
+.term dt{font-family:var(--mono);font-size:var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:.3rem}
+.term dd{margin:0;color:var(--fg-dim)}.term dd b{color:var(--fg)}
+.skippy{padding:.85rem 1rem;border:1px dashed var(--rail);background:var(--tint);font-size:.95rem;color:var(--fg-dim);max-width:76ch}
+.skippy::before{content:"// WHAT WOULD SKIPPY SAY?";display:block;font-family:var(--mono);
+  font-size:var(--f-micro);letter-spacing:.16em;color:var(--accent);margin-bottom:.45rem}
+.skippy b{color:var(--fg)}
+.skippy p{margin:.55rem 0;max-width:none}
+.skippy p:first-of-type{margin-top:0}.skippy p:last-child{margin-bottom:0}
+
+/* ---------- code ---------- */
+figure.code{margin:0;background:var(--ink-2);border:1px solid var(--line);min-width:0;display:flex;flex-direction:column}
+figure.code figcaption{font-family:var(--mono);font-size:var(--f-mono);letter-spacing:.05em;color:var(--fg-dim);
+  padding:.5rem .75rem;border-bottom:1px solid var(--line);display:flex;gap:.55rem;align-items:center}
+figure.code figcaption b{font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:var(--f-micro)}
+.before figcaption b{color:var(--warn)}.after figcaption b{color:var(--sage)}
+.before{border-top:2px solid rgba(210,112,95,.55)}.after{border-top:2px solid rgba(98,191,165,.55)}
+pre{margin:0;padding:.8rem;overflow-x:auto;flex:1}
+code{font-family:var(--mono);font-size:var(--f-code);line-height:1.58;white-space:pre}
+p code,li code,td code,dd code,.note code,.skippy code,.card code{white-space:normal;background:var(--ink-3);
+  padding:.08em .32em;border-radius:2px;font-size:.85em;color:#BFD8D3}
+.k{color:#7FB4D6}.s{color:#C7A96B}.c{color:#5C7377;font-style:italic}.n{color:#D08770}.f{color:#8FD8C0}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+@media(max-width:1000px){.pair{grid-template-columns:1fr}}
+.cap{font-size:.88rem;color:var(--fg-dim);max-width:76ch}
+.tree{font-family:var(--mono);font-size:var(--f-code);line-height:1.65;background:var(--ink-2);
+  border:1px solid var(--line);padding:.85rem;overflow-x:auto;white-space:pre}
+.tree .c{color:#5C7377}
+
+/* ---------- tables ---------- */
+.tw{overflow-x:auto;border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:.87rem}
+th,td{text-align:left;padding:.55rem .7rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-size:var(--f-micro);letter-spacing:.1em;text-transform:uppercase;color:var(--fg-dim);font-weight:500;background:var(--ink-2)}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--tint)}
+
+/* ---------- grids ---------- */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem}
+@media(max-width:900px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+.card{border:1px solid var(--line);background:var(--ink-2);padding:.85rem .95rem;font-size:.92rem}
+.card h4{font-family:var(--mono);font-size:var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:0 0 .45rem;font-weight:500}
+.card p{margin:.35rem 0;max-width:none;color:var(--fg-dim)}
+.card p b{color:var(--fg)}
+.num{border:1px solid var(--line);background:var(--ink-2);padding:.8rem;text-align:center}
+.num b{display:block;font-family:var(--display);font-size:1.7rem;font-weight:800;color:var(--accent);line-height:1}
+.num span{display:block;font-size:.82rem;color:var(--fg-dim);margin-top:.35rem}
+
+/* ---------- svg ---------- */
+.dia{width:100%;background:var(--ink-2);border:1px solid var(--line);padding:.6rem}
+.dia svg{display:block;width:100%;height:auto}
+.d-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;fill:var(--fg-dim)}
+.d-lbl-b{font-family:'JetBrains Mono',monospace;font-size:10px;fill:var(--fg)}
+.d-box{fill:var(--ink-3);stroke:var(--rail);stroke-width:1}
+.d-box-w{fill:rgba(210,112,95,.14);stroke:var(--warn);stroke-width:1}
+.d-box-g{fill:rgba(98,191,165,.13);stroke:var(--sage);stroke-width:1}
+.d-ln{stroke:var(--rail);stroke-width:1;fill:none}
+.d-ln-a{stroke:var(--accent);stroke-width:1.5;fill:none}
+
+/* ---------- checklist ---------- */
+.chk{list-style:none;padding:0;margin:0}
+.chk li{display:flex;gap:.6rem;padding:.42rem .5rem;border-bottom:1px solid var(--line);
+  align-items:flex-start;cursor:pointer;font-size:.9rem;color:var(--fg-dim);transition:background .12s}
+.chk li:hover{background:var(--tint)}
+.chk li::before{content:"☐";font-family:var(--mono);color:var(--rail);line-height:1.5}
+.chk li.done{opacity:.42}
+.chk li.done::before{content:"☑";color:var(--accent)}
+.chk li b{color:var(--fg)}
+.chk li.done b{text-decoration:line-through}
+.chkbar{display:flex;gap:.8rem;align-items:center;font-family:var(--mono);font-size:var(--f-mono);color:var(--fg-dim)}
+
+/* ---------- bottom bar ---------- */
+#bar{position:fixed;left:0;right:0;bottom:0;height:var(--bar);z-index:50;background:var(--ink);
+  border-top:1px solid var(--line);display:flex;align-items:center;gap:.8rem;padding:0 clamp(.8rem,3vw,2rem);
+  transition:background-color .45s ease}
+#bar .where{font-family:var(--mono);font-size:var(--f-mono);color:var(--fg-dim);flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#bar .where b{color:var(--accent);font-weight:500}
+.navbtn{background:var(--ink-2);border:1px solid var(--rail);color:var(--fg);font-family:var(--mono);
+  font-size:var(--f-mono-l);letter-spacing:.08em;text-transform:uppercase;padding:.6rem 1rem;cursor:pointer;
+  border-radius:2px;transition:background .15s}
+.navbtn:hover:not(:disabled){background:var(--rail)}
+.navbtn:disabled{opacity:.3;cursor:default}
+.navbtn.primary{background:var(--accent);border-color:var(--accent);color:#0A1214;font-weight:700}
+.navbtn.primary:hover{filter:brightness(1.12)}
+#count{font-family:var(--mono);font-size:var(--f-mono);color:var(--fg-dim);white-space:nowrap}
+
+@media(max-width:880px){
+  :root{--bar:58px}
+  /* The rail is gone on narrow screens, but the archive link and the language
+     switch live inside it and every other issue in this archive keeps both
+     reachable. Collapse the rail into a slim fixed strip that carries just
+     those two; the logo and the topic tree are what actually drop. */
+  #rail{
+    position:fixed;left:0;right:0;top:0;bottom:auto;width:auto;height:36px;
+    display:flex;align-items:center;gap:.6rem;overflow:visible;z-index:45;
+    background:var(--ink);border-right:0;border-bottom:1px solid var(--line);
+    padding:0 .9rem;
+  }
+  #rail .logo,#rail #tree{display:none}
+  #rail .archlink{order:1;margin:0}
+  #rail .langsw{order:2;margin:0 0 0 auto}
+  #stage{left:0;top:36px;padding:1.5rem 1rem 2rem}
+  .navbtn{padding:.55rem .75rem}
+}
+
+/* ---------- language switch ---------- */
+.langsw{display:flex;gap:.3rem;margin:.6rem 0 1.1rem;font-family:var(--mono);font-size:var(--f-micro)}
+.langsw a{border:1px solid var(--line);color:var(--fg-dim);padding:.18rem .42rem;letter-spacing:.1em;
+  text-transform:uppercase;border-bottom:1px solid var(--line);opacity:1}
+.langsw a:hover{color:var(--fg);border-color:var(--rail)}
+.langsw a.cur{color:var(--accent);border-color:var(--accent)}
+
+/* Skippy label, per language */
+html[lang="it"] .skippy::before{content:"// COSA DIREBBE SKIPPY?"}
+
+/* ---------- archive link (repo convention: every issue links back) ---------- */
+#rail .archlink{
+  display:block;font-family:var(--mono);font-size:var(--f-micro);letter-spacing:.12em;
+  text-transform:uppercase;color:var(--fg-dim);border-bottom:0;opacity:1;
+  margin:0 0 1.1rem;transition:color .15s;
+}
+#rail .archlink:hover{color:var(--accent)}
+</style>
+</head>
+<body data-level="0">
+
+<div id="prog"></div>
+
+<nav id="rail" aria-label="Indice">
+  <div class="logo" onclick="go(0)">Code Craft<br>per Python in Odoo<span>Teksistemi</span></div>
+  <div class="langsw">
+    <a href="en/006-code-craft-for-odoo-python.html" data-base="en/006-code-craft-for-odoo-python.html" data-lang="en">EN</a>
+    <a class="cur" href="#" data-lang="it">IT</a>
+  </div>
+  <a class="archlink" href="index.html">&larr; Archivio</a>
+  <div id="tree"></div>
+</nav>
+
+<div id="stage">
+
+<!-- ================= INTRO ================= -->
+<section class="slide title-slide" data-level="0" data-topic="intro" data-name="Inizio">
+  <div class="tag">Linea guida di ingegneria · Python / addon Odoo</div>
+  <h1>Il tuo codice funziona. Quella è <em>la metà facile</em>.</h1>
+  <p class="sub" style="font-size:1.04rem">La metà difficile è se la persona che aprirà quel file fra diciotto mesi — statisticamente: <strong>tu</strong> — riuscirà a modificarlo senza rompere tre cose di cui ignorava l'esistenza. Lavorare in Odoo non insegna mai quella metà: il framework fa l'organizzazione al posto tuo e ti consegna un posto dove mettere il codice.</p>
+  <p class="sub"><strong>Non leggerlo tutto d'un fiato.</strong> Sono tre sessioni separate, in ordine crescente di quello che pretendono da te. Finiscine una, usala per due settimane, poi torna.</p>
+  <div class="grid3" style="margin-top:1.3rem">
+    <div class="card" style="border-left:2px solid var(--l1)">
+      <h4 style="color:var(--l1)">Livello 1 · Fallo adesso</h4>
+      <p><b>~15 min · zero teoria.</b> Correzioni meccaniche che puoi applicare al prossimo commit senza capire un solo concetto nuovo. Sette argomenti.</p>
+    </div>
+    <div class="card" style="border-left:2px solid var(--l2)">
+      <h4 style="color:var(--l2)">Livello 2 · Costruisci l'abitudine</h4>
+      <p><b>~25 min · serve giudizio.</b> Il vocabolario e i compromessi. Regole con un confine, il che significa decidere ogni volta se valgono. Nove argomenti.</p>
+    </div>
+    <div class="card" style="border-left:2px solid var(--l3)">
+      <h4 style="color:var(--l3)">Livello 3 · Vai a fondo</h4>
+      <p><b>~25 min · serve pratica.</b> Decisioni di design che imparerai davvero solo dopo averle sbagliate una volta. Bibliografia inclusa. Sette argomenti.</p>
+    </div>
+  </div>
+  <p class="mini dim" style="margin-top:1.2rem;font-family:var(--mono);font-size:var(--f-mono);line-height:1.9">
+    Etichette di affidabilità &nbsp;<span class="chip est">assodato</span> documentato o dimostrabile &nbsp;<span class="chip inf">dedotto</span> ragionato, non misurato &nbsp;<span class="chip unt">non verificato</span> opinione nostra &nbsp;<span class="chip ver">versione</span> controlla la tua versione di Odoo<br>
+    Pulsanti in basso · albero degli argomenti a sinistra · frecce ← → · swipe da mobile
+  </p>
+</section>
+
+<section class="slide" data-level="0" data-topic="intro" data-name="Il punto di tutto">
+  <div class="tag">Introduzione</div>
+  <h2>Stesso comportamento. Uno dei due lo sai leggere.</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>degenerato</b> models.py · riga 612</figcaption>
+<pre><code><span class="k">def</span> <span class="f">action_confirm</span>(self):
+    <span class="k">for</span> rec <span class="k">in</span> self:
+        <span class="k">if</span> rec.state == <span class="s">'draft'</span>:
+            <span class="k">if</span> rec.partner_id.credit_limit:
+                total = <span class="n">0</span>
+                <span class="k">for</span> l <span class="k">in</span> rec.line_ids:
+                    total += l.price_unit * l.qty
+                <span class="k">if</span> total &gt; rec.partner_id.credit_limit:
+                    <span class="k">raise</span> UserError(<span class="s">"nope"</span>)
+                <span class="k">else</span>:
+                    rec.state = <span class="s">'confirmed'</span>
+                    rec.env[<span class="s">'mail.mail'</span>].create({...})
+                    <span class="c"># altre 40 righe</span></code></pre></figure>
+    <figure class="code after"><figcaption><b>voluto</b> models/sale_order.py</figcaption>
+<pre><code><span class="k">def</span> <span class="f">action_confirm</span>(self):
+    <span class="s">"""Conferma gli ordini in bozza. Alza se oltre fido."""</span>
+    <span class="k">for</span> order <span class="k">in</span> self.filtered(<span class="k">lambda</span> o: o.state == <span class="s">'draft'</span>):
+        order._check_credit_limit()
+        order._set_confirmed()
+        order._notify_confirmation()
+
+<span class="k">def</span> <span class="f">_check_credit_limit</span>(self):
+    self.ensure_one()
+    limit = self.partner_id.credit_limit
+    <span class="k">if</span> limit <span class="k">and</span> self.amount_total &gt; limit:
+        <span class="k">raise</span> UserError(self._credit_error_message())</code></pre></figure>
+  </div>
+  <p class="cap">La macchina non li distingue. Ma prova a rispondere a <em>"cosa fa la conferma di un ordine?"</em> partendo da ciascuno dei due, e cronometrati. A destra: quattro secondi, senza leggere un dettaglio. A sinistra: leggi tutto, oppure tiri a indovinare. Tutto quello che c'è nei tre livelli serve a quell'unica differenza.</p>
+</section>
+
+<section class="slide" data-level="0" data-topic="intro" data-name="Perché tre livelli">
+  <div class="tag">Introduzione</div>
+  <h2>Perché è diviso in tre</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 175" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Quattro slot di memoria che vanno in overflow">
+      <text x="0" y="14" class="d-lbl-b">MEMORIA DI LAVORO · circa quattro elementi</text>
+      <rect x="0" y="26" width="60" height="34" class="d-box-g"/><text x="18" y="48" class="d-lbl">if #1</text>
+      <rect x="66" y="26" width="60" height="34" class="d-box-g"/><text x="84" y="48" class="d-lbl">loop</text>
+      <rect x="132" y="26" width="60" height="34" class="d-box-g"/><text x="147" y="48" class="d-lbl">totale</text>
+      <rect x="198" y="26" width="60" height="34" class="d-box-g"/><text x="214" y="48" class="d-lbl">stato</text>
+      <text x="272" y="48" class="d-lbl" style="fill:var(--sage)">← la capienza finisce qui</text>
+      <text x="0" y="92" class="d-lbl-b">QUELLO CHE UN SOLO METODO ANNIDATO TI CHIEDE DI TENERE A MENTE</text>
+      <rect x="0" y="104" width="60" height="30" class="d-box-w"/><text x="16" y="123" class="d-lbl">if #2</text>
+      <rect x="66" y="104" width="60" height="30" class="d-box-w"/><text x="82" y="123" class="d-lbl">if #3</text>
+      <rect x="132" y="104" width="60" height="30" class="d-box-w"/><text x="148" y="123" class="d-lbl">if #4</text>
+      <rect x="198" y="104" width="60" height="30" class="d-box-w"/><text x="212" y="123" class="d-lbl">else#1</text>
+      <rect x="264" y="104" width="60" height="30" class="d-box-w"/><text x="278" y="123" class="d-lbl">else#2</text>
+      <rect x="330" y="104" width="60" height="30" class="d-box-w"/><text x="346" y="123" class="d-lbl">iva</text>
+      <rect x="396" y="104" width="60" height="30" class="d-box-w"/><text x="410" y="123" class="d-lbl">righe</text>
+      <rect x="462" y="104" width="60" height="30" class="d-box-w"/><text x="474" y="123" class="d-lbl">fido</text>
+      <rect x="528" y="104" width="60" height="30" class="d-box-w"/><text x="540" y="123" class="d-lbl">mail</text>
+      <rect x="594" y="104" width="60" height="30" class="d-box-w"/><text x="606" y="123" class="d-lbl">ctx</text>
+      <text x="0" y="158" class="d-lbl" style="fill:var(--warn)">Oltre la capienza smetti di leggere. Scorri, riconosci un pattern, e cambi la riga che sembra giusta.</text>
+      <text x="0" y="172" class="d-lbl">È da lì che arrivano i bug — non dall'ignoranza. Codice che ha superato il suo lettore, ed è stato modificato lo stesso.</text>
+    </svg>
+  </div>
+  <p class="sub">Dato sulla capienza: Cowan (2001). <span class="chip est">assodato</span> &nbsp;— e vale <strong>anche per questa presentazione</strong>, motivo per cui non è più una pagina unica. Tre sedute distanziate battono un pomeriggio eroico da cui non ti resterebbe nulla.</p>
+</section>
+
+<!-- ================= LIVELLO 1 ================= -->
+<section class="slide divider" data-level="1" data-topic="l1-start" data-name="Inizio livello 1">
+  <div class="tag">Livello uno</div>
+  <div class="lvnum">01</div>
+  <h1>Fallo adesso</h1>
+  <div class="demand">
+    <p><b>Cosa pretende da te: niente.</b> Nessun concetto nuovo, nessuna teoria, nessuna scelta di design. Sette abitudini meccaniche che puoi applicare al tuo prossimo commit già oggi pomeriggio, ognuna delle quali rende il codice misurabilmente più leggibile per chi verrà dopo.</p>
+    <p>Se ti fermassi al Livello 1 e basta, saresti già avanti rispetto alla maggior parte dei codebase Odoo in produzione.</p>
+  </div>
+  <div class="pills">
+    <span class="pill">Dividi il file</span><span class="pill">Marca cosa è privato</span><span class="pill">Appiattisci il flusso</span>
+    <span class="pill">Estrai e verifica</span><span class="pill">Non spezzare la catena</span><span class="pill">Fai fare ai tool</span><span class="pill">Riepilogo</span>
+  </div>
+</section>
+
+<section class="slide" data-level="1" data-topic="l1-files" data-name="Dividi il file">
+  <div class="tag"><b>L1</b> · Dividi il file</div>
+  <h2>Un model per file. Da oggi, senza pensarci.</h2>
+  <div class="tree"><span class="c"># prima                           # dopo</span>
+tk_plant_nursery/                tk_plant_nursery/
+└── models/                      └── models/
+    ├── __init__.py                  ├── __init__.py
+    └── models.py  <span class="c">← 900 righe</span>       ├── plant_nursery.py
+                                     ├── plant_order.py
+                                     ├── plant_order_line.py
+                                     └── res_partner.py  <span class="c">← le estensioni tengono il nome del model CORE</span></div>
+  <div class="grid4">
+    <div class="card"><h4>Trovare le cose</h4><p>Un collega apre <code>plant_order.py</code>. Non 900 righe da scorrere.</p></div>
+    <div class="card"><h4>Conflitti di merge</h4><p>File diversi si fondono da soli. Si ripaga in un mese. <span class="chip inf">dedotto</span></p></div>
+    <div class="card"><h4>Storia leggibile</h4><p>"Cosa è cambiato negli ordini?" smette di essere archeologia.</p></div>
+    <div class="card"><h4>La lunghezza dice qualcosa</h4><p>Un argomento → la lunghezza è un segnale. Nove argomenti → rumore.</p></div>
+  </div>
+  <div class="note"><p><b>Regola:</b> file con il nome del model, i punti diventano underscore. Le tue aggiunte ai model core vanno in un file che porta il nome del model <b>core</b>, così chi cerca comportamenti sui partner li trova senza sapere che il tuo addon esiste. Attenzione all'ordine degli import in <code>__init__.py</code>: prima i model base, poi quelli che li referenziano.</p></div>
+</section>
+
+<section class="slide" data-level="1" data-topic="l1-names" data-name="Marca cosa è privato">
+  <div class="tag"><b>L1</b> · Marca cosa è privato</div>
+  <h2>Quattro battute di tastiera, tre promesse in meno</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>sbagliato</b> è tutta API pubblica</figcaption>
+<pre><code><span class="k">class</span> <span class="f">SaleOrder</span>(models.Model):
+    _inherit = <span class="s">'sale.order'</span>
+
+    <span class="k">def</span> <span class="f">compute_discount</span>(self):   <span class="c"># richiamabile via RPC!</span>
+        ...
+    <span class="k">def</span> <span class="f">build_payload</span>(self):      <span class="c"># richiamabile via RPC!</span>
+        ...
+    <span class="k">def</span> <span class="f">send_to_erp</span>(self):        <span class="c"># richiamabile via RPC!</span>
+        ...</code></pre></figure>
+    <figure class="code after"><figcaption><b>giusto</b> una porta sola, segnalata</figcaption>
+<pre><code><span class="k">class</span> <span class="f">SaleOrder</span>(models.Model):
+    _inherit = <span class="s">'sale.order'</span>
+
+    <span class="c"># --- API pubblica (bottoni / RPC) ---</span>
+    <span class="k">def</span> <span class="f">action_push_to_erp</span>(self):
+        <span class="k">for</span> order <span class="k">in</span> self:
+            order._push_one()
+
+    <span class="c"># --- interni, liberi di cambiare ---</span>
+    <span class="k">def</span> <span class="f">_push_one</span>(self): ...
+    <span class="k">def</span> <span class="f">_build_payload</span>(self): ...
+    <span class="k">def</span> <span class="f">_compute_discount</span>(self): ...</code></pre></figure>
+  </div>
+  <p class="cap">Un nome senza underscore può essere chiamato da un altro addon, da uno script RPC del cliente o da un'azione automatica scritta da un consulente nel 2021 — quindi rinominarlo è un breaking change. Con l'underscore, Odoo <b>rifiuta</b> la chiamata RPC, e rinominare richiede cinque minuti. <span class="chip est">assodato</span></p>
+  <div class="skippy">
+    <p>Stesso codice. Stesso comportamento. Quattro caratteri underscore in più — e sei passato da tre cose che non potrai mai rinominare in sicurezza a una sola.</p>
+    <p>Ecco una regola che il tuo monkey brain può seguire senza pensare: <b>inizia ogni metodo con un underscore, e toglilo solo quando sai indicare il chiamante esterno preciso che ne ha bisogno.</b> Di default chiuso. Aprire è gratis. Chiudere è un breaking change, una mail di scuse e una telefonata del cliente a un orario scomodo.</p>
+  </div>
+</section>
+
+<section class="slide" data-level="1" data-topic="l1-names" data-name="Marca cosa è privato">
+  <div class="tag"><b>L1</b> · Marca cosa è privato</div>
+  <h2>Stesso ordine in ogni file di model. Senza discutere.</h2>
+  <figure class="code"><figcaption>models/plant_order.py</figcaption>
+<pre><code><span class="k">class</span> <span class="f">PlantOrder</span>(models.Model):
+    _name = <span class="s">'plant.order'</span>
+    _inherit = [<span class="s">'mail.thread'</span>]
+    _description = <span class="s">'Plant Order'</span>
+    _order = <span class="s">'date_order desc, id desc'</span>
+
+    <span class="c"># 1. metodi di default          _default_*</span>
+    <span class="c"># 2. dichiarazione dei campi</span>
+    <span class="c"># 3. _sql_constraints</span>
+    <span class="c"># 4. compute / inverse / search  _compute_*  _inverse_*  _search_*</span>
+    <span class="c"># 5. metodi selection            _selection_*</span>
+    <span class="c"># 6. vincoli e onchange          @api.constrains  @api.onchange</span>
+    <span class="c"># 7. override CRUD               create / write / unlink / copy</span>
+    <span class="c"># 8. metodi azione               action_*   ← l'API pubblica</span>
+    <span class="c"># 9. helper privati di business  _*</span></code></pre></figure>
+  <p class="cap">Non è ordine per il gusto dell'ordine. Chi fa la review e cerca i tuoi vincoli deve trovarli per <b>posizione</b>, senza leggere un solo nome. Copia questo blocco di commenti nel prossimo model nuovo e riempilo. Rispecchia la linea guida ufficiale Odoo. <span class="chip est">assodato</span></p>
+</section>
+
+<section class="slide" data-level="1" data-topic="l1-flat" data-name="Appiattisci il flusso">
+  <div class="tag"><b>L1</b> · Appiattisci il flusso</div>
+  <h2>Guard clause, non annidamento</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>a freccia</b> l'errore sta 12 righe sotto il suo controllo</figcaption>
+<pre><code><span class="k">def</span> <span class="f">_validate</span>(self):
+    <span class="k">if</span> self.partner_id:
+        <span class="k">if</span> self.line_ids:
+            <span class="k">if</span> self.date_order:
+                <span class="k">if</span> self.state == <span class="s">'draft'</span>:
+                    <span class="k">return</span> <span class="k">True</span>
+                <span class="k">else</span>:
+                    <span class="k">raise</span> UserError(_(<span class="s">"Non in bozza"</span>))
+            <span class="k">else</span>:
+                <span class="k">raise</span> UserError(_(<span class="s">"Manca la data"</span>))
+        <span class="k">else</span>:
+            <span class="k">raise</span> UserError(_(<span class="s">"Nessuna riga"</span>))
+    <span class="k">else</span>:
+        <span class="k">raise</span> UserError(_(<span class="s">"Nessun partner"</span>))</code></pre></figure>
+    <figure class="code after"><figcaption><b>piatto</b> ogni fallimento gestito dove viene trovato</figcaption>
+<pre><code><span class="k">def</span> <span class="f">_validate</span>(self):
+    self.ensure_one()
+    <span class="k">if</span> <span class="k">not</span> self.partner_id:
+        <span class="k">raise</span> UserError(_(<span class="s">"Nessun partner"</span>))
+    <span class="k">if</span> <span class="k">not</span> self.line_ids:
+        <span class="k">raise</span> UserError(_(<span class="s">"Nessuna riga"</span>))
+    <span class="k">if</span> <span class="k">not</span> self.date_order:
+        <span class="k">raise</span> UserError(_(<span class="s">"Manca la data"</span>))
+    <span class="k">if</span> self.state != <span class="s">'draft'</span>:
+        <span class="k">raise</span> UserError(_(<span class="s">"Non in bozza"</span>))
+    <span class="k">return</span> <span class="k">True</span></code></pre></figure>
+  </div>
+  <p class="cap"><b>La mossa meccanica:</b> inverti ogni condizione, alza subito l'eccezione, togli un livello di indentazione a tutto il resto. Il percorso valido cade in fondo, da solo.</p>
+  <p class="cap">Aggiungere una quinta regola: <b>a sinistra</b> — trovare il livello di annidamento giusto e infilare un altro <code>else</code> nel punto corretto. <b>A destra</b> — aggiungere due righe ovunque nella lista. Quella differenza <em>è</em> la manutenibilità; non è una virtù astratta, è quanto durerà il prossimo ticket.</p>
+</section>
+
+<section class="slide" data-level="1" data-topic="l1-flat" data-name="Appiattisci il flusso">
+  <div class="tag"><b>L1</b> · Appiattisci il flusso</div>
+  <h2>Due trappole con fix da un carattere</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>trappola</b> parametri booleani</figcaption>
+<pre><code><span class="c"># Cosa fa questa chiamata? Non puoi saperlo.</span>
+post_invoice(order, <span class="k">True</span>, <span class="k">False</span>)
+
+<span class="c"># Per leggerla devi aprire un altro file</span>
+<span class="c"># e contare gli argomenti. Ogni volta. Per sempre.</span>
+
+<span class="c"># FIX: un * nudo obbliga a nominarli</span>
+<span class="k">def</span> <span class="f">_post_invoice</span>(self, *, send_mail=<span class="k">False</span>,
+                   force_date=<span class="k">None</span>):
+    ...
+
+order._post_invoice(send_mail=<span class="k">True</span>)   <span class="c"># è una frase</span>
+order._post_invoice(<span class="k">True</span>)             <span class="c"># TypeError ✓</span></code></pre></figure>
+    <figure class="code before"><figcaption><b>trappola</b> default mutabile</figcaption>
+<pre><code><span class="k">def</span> <span class="f">add_tag</span>(name, tags=[]):   <span class="c"># [] creata UNA volta,</span>
+    tags.append(name)            <span class="c"># all'import,</span>
+    <span class="k">return</span> tags                  <span class="c"># condivisa da tutte le chiamate</span>
+
+add_tag(<span class="s">"a"</span>)   <span class="c"># ['a']        ok</span>
+add_tag(<span class="s">"b"</span>)   <span class="c"># ['a', 'b']   bug in produzione</span>
+
+<span class="c"># PERCHÉ: `def` viene eseguito una volta, all'import.</span>
+<span class="k">def</span> <span class="f">add_tag</span>(name, tags=<span class="k">None</span>):
+    tags = <span class="k">list</span>(tags <span class="k">or</span> [])   <span class="c"># nuova a ogni chiamata</span>
+    tags.append(name)
+    <span class="k">return</span> tags</code></pre></figure>
+  </div>
+  <p class="cap">Se un flag fa fare alla funzione due cose davvero diverse, non è un parametro: sono due funzioni in un trench coat. Separale. &nbsp;·&nbsp; La seconda trappola te la becca il linter da solo (<code>B006</code>) — ma impara il meccanismo, perché "eseguito una volta all'import" spiega parecchie altre sorprese di Python che incontrerai più avanti.</p>
+</section>
+
+<section class="slide" data-level="1" data-topic="l1-extract" data-name="Estrai e verifica">
+  <div class="tag"><b>L1</b> · Estrai e verifica</div>
+  <h2>Un commento sopra un blocco è quel blocco che chiede di diventare una funzione</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>il commento è l'indizio</b></figcaption>
+<pre><code><span class="k">def</span> <span class="f">action_confirm</span>(self):
+    ...
+    <span class="c"># controlla il fido del cliente</span>
+    limit = self.partner_id.credit_limit
+    <span class="k">if</span> limit:
+        total = <span class="k">sum</span>(l.price_unit * l.qty
+                    <span class="k">for</span> l <span class="k">in</span> self.line_ids)
+        <span class="k">if</span> total &gt; limit:
+            <span class="k">raise</span> UserError(...)
+    ...</code></pre></figure>
+    <figure class="code after"><figcaption><b>il commento è diventato il nome</b></figcaption>
+<pre><code><span class="k">def</span> <span class="f">action_confirm</span>(self):
+    ...
+    self._check_credit_limit()
+    ...
+
+<span class="k">def</span> <span class="f">_check_credit_limit</span>(self):
+    limit = self.partner_id.credit_limit
+    <span class="k">if</span> limit <span class="k">and</span> self.amount_total &gt; limit:
+        <span class="k">raise</span> UserError(...)</code></pre></figure>
+  </div>
+  <p class="sub">La parte difficile l'hai già fatta tu: hai individuato un pezzo con uno scopo unico e l'hai nominato in italiano. Promuovi il commento a nome di metodo e il commento sparisce, perché adesso lo dice il codice.</p>
+  <p class="cap"><b>I passi:</b> seleziona il blocco → le variabili che legge diventano parametri, quello che produce diventa il valore di ritorno → taglia dentro un <code>_verbo_sostantivo()</code> → sostituisci con la chiamata → esegui. &nbsp;·&nbsp; <b>"Ma saltare a un altro metodo non è più faticoso da leggere?"</b> Per un metodo di due righe con un nome brutto, sì. Per un blocco di quindici righe con un buon nome, no — la maggior parte dei lettori i dettagli non li vuole proprio, e quel lettore è il caso comune.</p>
+</section>
+
+<section class="slide" data-level="1" data-topic="l1-extract" data-name="Estrai e verifica">
+  <div class="tag"><b>L1</b> · Estrai e verifica</div>
+  <h2><code>self</code> è un insieme. Dichiara quanti te ne aspetti.</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>funziona nel test, esplode in produzione</b></figcaption>
+<pre><code><span class="k">def</span> <span class="f">_build_payload</span>(self):
+    <span class="k">return</span> {<span class="s">'ref'</span>: self.name}
+
+<span class="c"># il tuo test:    1 ordine    → tutto bene</span>
+<span class="c"># il cron notturno: 400 ordini → ValueError</span>
+<span class="c">#                   "Expected singleton"</span>
+
+<span class="c"># perché "il nome" di 400 record</span>
+<span class="c"># è una domanda senza senso</span></code></pre></figure>
+    <figure class="code after"><figcaption><b>dichiara la cardinalità alla prima riga</b></figcaption>
+<pre><code><span class="k">def</span> <span class="f">_build_payload</span>(self):
+    self.ensure_one()      <span class="c"># fallisce QUI, non 40 righe più giù</span>
+    <span class="k">return</span> {<span class="s">'ref'</span>: self.name}
+
+<span class="k">def</span> <span class="f">action_export</span>(self):    <span class="c"># API pubblica: qualsiasi numero</span>
+    <span class="k">for</span> record <span class="k">in</span> self:
+        record._build_payload()</code></pre></figure>
+  </div>
+  <p class="sub">In Odoo <code>self</code> non è mai un record singolo. È un <strong>recordset</strong> che contiene zero, uno o cinquemila record — e lo stesso metodo viene invocato con tutti e tre i casi, da codice che non hai scritto tu.</p>
+  <p class="cap"><code>ensure_one()</code> non è paranoia difensiva. È <b>documentazione che il computer verifica</b>: dice al prossimo lettore cosa il metodo dà per scontato, e trasforma un errore confuso in fondo allo stack in un errore chiaro sulla soglia.</p>
+</section>
+
+<section class="slide" data-level="1" data-topic="l1-super" data-name="Non spezzare la catena">
+  <div class="tag"><b>L1</b> · Non spezzare la catena</div>
+  <h2>Chiama sempre <code>super()</code>. Restituisci sempre quello che ti ha dato.</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>spezza la catena</b></figcaption>
+<pre><code><span class="k">def</span> <span class="f">write</span>(self, vals):
+    <span class="k">if</span> vals.get(<span class="s">'state'</span>) == <span class="s">'done'</span>:
+        self._do_stuff()
+    <span class="c"># manca il return!</span>
+    <span class="k">super</span>().write(vals)
+
+<span class="n">@api</span>.model_create_multi
+<span class="k">def</span> <span class="f">create</span>(self, vals_list):
+    <span class="k">for</span> vals <span class="k">in</span> vals_list:
+        vals[<span class="s">'code'</span>] = self._next_code()  <span class="c"># calpesta il chiamante</span>
+    <span class="k">return</span> <span class="k">super</span>().create(vals_list)</code></pre></figure>
+    <figure class="code after"><figcaption><b>corretto</b></figcaption>
+<pre><code><span class="k">def</span> <span class="f">write</span>(self, vals):
+    result = <span class="k">super</span>().write(vals)
+    <span class="k">if</span> <span class="s">'state'</span> <span class="k">in</span> vals:
+        self._on_state_changed(vals[<span class="s">'state'</span>])
+    <span class="k">return</span> result
+
+<span class="n">@api</span>.model_create_multi
+<span class="k">def</span> <span class="f">create</span>(self, vals_list):
+    <span class="k">for</span> vals <span class="k">in</span> vals_list:
+        vals.setdefault(<span class="s">'code'</span>, self._next_code())
+    <span class="k">return</span> <span class="k">super</span>().create(vals_list)</code></pre></figure>
+  </div>
+  <div class="grid3">
+    <div class="card"><h4>Senza super()</h4><p>Cancelli in silenzio il comportamento di tutti gli altri addon — incluso quello di Odoo core. La segnalazione arriva settimane dopo, da un'altra funzionalità, e sembra scollegata.</p></div>
+    <div class="card"><h4>Senza return</h4><p>I chiamanti ricevono <code>None</code>. Si rompe lontano dal tuo file, e nessuno lo collegherà a te.</p></div>
+    <div class="card"><h4>Assegnazione vs setdefault</h4><p><code>vals['code'] = ...</code> sovrascrive quello che ha passato il chiamante. <code>setdefault</code> riempie solo se manca. Uno dei due rompe un import dati.</p></div>
+  </div>
+  <p class="cap"><span class="chip ver">versione</span> <code>@api.model_create_multi</code> con <code>vals_list</code> è obbligatorio sulle versioni moderne. Gli esempi con <code>vals</code> singolo che trovi online sono deprecati. <em>Perché</em> esista la catena è argomento da Livello 3 — per adesso, fai sempre entrambe le cose.</p>
+</section>
+
+<section class="slide" data-level="1" data-topic="l1-tools" data-name="Fai fare ai tool">
+  <div class="tag"><b>L1</b> · Fai fare ai tool</div>
+  <h2>Cancella l'intera categoria "discussione sullo stile"</h2>
+  <div class="pair">
+    <figure class="code after"><figcaption>pyproject.toml — copialo, committalo, fine</figcaption>
+<pre><code>[tool.ruff]
+line-length = <span class="n">100</span>
+target-version = <span class="s">"py311"</span>       <span class="c"># allinea al runtime Odoo</span>
+
+[tool.ruff.lint]
+select = [
+  <span class="s">"E"</span>, <span class="s">"F"</span>,   <span class="c"># le basi: errori evidenti</span>
+  <span class="s">"I"</span>,        <span class="c"># ordinamento degli import</span>
+  <span class="s">"UP"</span>,       <span class="c"># sintassi vecchia copiata da addon datati</span>
+  <span class="s">"B"</span>,        <span class="c"># default mutabili e affini</span>
+  <span class="s">"SIM"</span>,      <span class="c"># rami semplificabili</span>
+  <span class="s">"RET"</span>,      <span class="c"># igiene di return e guard clause</span>
+]
+ignore = [<span class="s">"E501"</span>]           <span class="c"># la lunghezza riga è del formatter</span>
+
+[tool.ruff.lint.per-file-ignores]
+<span class="s">"__init__.py"</span> = [<span class="s">"F401"</span>]   <span class="c"># i re-export sono il senso del file</span></code></pre></figure>
+    <div>
+      <div class="card"><h4>1 · ruff</h4><p>Linter <b>e</b> formatter in uno, abbastanza veloce da girare a ogni salvataggio. Sostituisce flake8, isort, pyupgrade e black con un solo file di config. <b>Se adotti una cosa sola da tutta questa presentazione, è questa.</b> <span class="chip inf">dedotto</span></p></div>
+      <div class="card" style="margin-top:.7rem"><h4>2 · pre-commit</h4><p>Lo esegue in automatico prima di ogni commit. Nessuno deve ricordarselo; nessuno deve essere ripreso in review.</p></div>
+      <div class="card" style="margin-top:.7rem"><h4>3 · .editorconfig</h4><p>Un file piccolo che chiude la questione tab/spazi e fine riga tra editor diversi.</p></div>
+      <div class="note" style="margin-top:.7rem"><p>Nota cosa <b>manca</b> da questa config: il gate sulla complessità. Quello richiede una strategia di rollout, ed è nel Livello 2.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-level="1" data-topic="l1-recap" data-name="Riepilogo livello 1">
+  <div class="tag"><b>L1</b> · Riepilogo</div>
+  <h2>Tutto quello che puoi fare prima di pranzo</h2>
+  <div class="grid3">
+    <div class="card"><h4>Struttura</h4><p><b>Spezza models.py</b> in un model per file, col nome del model.<br><b>Copia il blocco</b> con l'ordine delle sezioni nei model nuovi.</p></div>
+    <div class="card"><h4>Nomi</h4><p><b>Underscore davanti a ogni metodo</b> se non sai indicare il chiamante esterno.<br><b>Niente parametri booleani</b> — usa un <code>*</code> nudo.</p></div>
+    <div class="card"><h4>Flusso di controllo</h4><p><b>Inverti gli if annidati</b> in guard clause che alzano subito.<br><b>Mai</b> un default mutabile.</p></div>
+    <div class="card"><h4>Estrazione</h4><p><b>Ogni commento sopra un blocco</b> diventa il nome di un metodo.</p></div>
+    <div class="card"><h4>Sicurezza</h4><p><b><code>ensure_one()</code></b> in ogni metodo che legge <code>self.campo</code>.<br><b>Chiama e restituisci <code>super()</code></b> in ogni override.</p></div>
+    <div class="card"><h4>Automazione</h4><p><b>Aggiungi ruff + pre-commit</b> al repo. Una PR, una volta, per sempre.</p></div>
+  </div>
+  <div class="skippy">
+    <p>Nota una cosa su quella lista: nemmeno una voce ti ha richiesto di capire un concetto nuovo. Niente teoria. Nessuna scelta di design. Nessuna architettura. Solo nove abitudini meccaniche che potrebbe applicare una monkey adeguatamente addestrata — e lo intendo come un complimento, perché <b>le abitudini meccaniche sono le uniche che sopravvivono a una scadenza.</b></p>
+    <p>Vai a usarle per due settimane. Usarle davvero, su ticket veri, finché l'underscore non compare senza che tu decida di batterlo. <b>Poi</b> torna per il Livello 2, che ti chiederà di iniziare a fare scelte di giudizio, ed è parecchio meno indulgente se le basi non sono ancora automatiche.</p>
+  </div>
+</section>
+
+<!-- ================= LIVELLO 2 ================= -->
+<section class="slide divider" data-level="2" data-topic="l2-start" data-name="Inizio livello 2">
+  <div class="tag">Livello due</div>
+  <div class="lvnum">02</div>
+  <h1>Costruisci l'abitudine</h1>
+  <div class="demand">
+    <p><b>Cosa pretende da te: giudizio.</b> Il Livello 1 erano regole da applicare sempre. Da qui in poi ogni regola ha un <b>confine</b> — condizioni oltre le quali smette di rendere e inizia a costare — quindi devi decidere caso per caso.</p>
+    <p>Qui arriva anche il vocabolario: accoppiamento, coesione, incapsulamento, astrazione. Non per fare gli spiritosi, ma perché un commento di review che nomina il problema è azionabile, mentre "questo è brutto" non lo è.</p>
+  </div>
+  <div class="pills">
+    <span class="pill">Come deriva il codice</span><span class="pill">Incapsulamento</span><span class="pill">Astrazione e contratti</span>
+    <span class="pill">Il layer services</span><span class="pill">Disciplina del refactoring</span><span class="pill">Scegliere l'ereditarietà</span>
+    <span class="pill">Query e recordset</span><span class="pill">Test</span><span class="pill">Gate e checklist</span>
+  </div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-drift" data-name="Come deriva il codice">
+  <div class="tag"><b>L2</b> · Come deriva il codice</div>
+  <h2>Nessuno ha deciso di scrivere un file da 900 righe</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Crescita del file ticket dopo ticket">
+      <line x1="40" y1="150" x2="690" y2="150" class="d-ln"/>
+      <rect x="50" y="138" width="46" height="12" class="d-box-g"/>
+      <rect x="160" y="128" width="46" height="22" class="d-box-g"/>
+      <rect x="270" y="112" width="46" height="38" class="d-box"/>
+      <rect x="380" y="86" width="46" height="64" class="d-box"/>
+      <rect x="490" y="52" width="46" height="98" class="d-box-w"/>
+      <rect x="600" y="16" width="46" height="134" class="d-box-w"/>
+      <text x="50" y="166" class="d-lbl-b">giorno 1</text><text x="50" y="180" class="d-lbl">40 righe</text><text x="50" y="192" class="d-lbl">davvero pulito</text>
+      <text x="160" y="166" class="d-lbl-b">ticket 4</text><text x="160" y="180" class="d-lbl">+1 condizione</text><text x="160" y="192" class="d-lbl">non vale un refactor</text>
+      <text x="270" y="166" class="d-lbl-b">ticket 9</text><text x="270" y="180" class="d-lbl">if annidato</text><text x="270" y="192" class="d-lbl">ancora non vale</text>
+      <text x="380" y="166" class="d-lbl-b">ticket 17</text><text x="380" y="180" class="d-lbl">copia 15 righe</text><text x="380" y="192" class="d-lbl">è giovedì</text>
+      <text x="490" y="166" class="d-lbl-b">ticket 31</text><text x="490" y="180" class="d-lbl">fix su una copia</text><text x="490" y="192" class="d-lbl">non sull'altra</text>
+      <text x="600" y="166" class="d-lbl-b">mese 18</text><text x="600" y="180" class="d-lbl">900 righe</text><text x="600" y="192" class="d-lbl">stime triplicate</text>
+    </svg>
+  </div>
+  <p class="sub"><strong>Ogni singolo passo era localmente ragionevole.</strong> È esattamente per questo che servono regole esplicite: il buon giudizio locale, applicato ripetutamente, produce in modo affidabile questo risultato. Non esiste mai un ticket "riorganizza il file": nessun valore di business visibile, primo a saltare dallo sprint.</p>
+  <dl class="term"><dt>Debito tecnico</dt><dd>Il costo accumulato di scelte veloci da fare e lente da subire. In piccole dosi è uno strumento legittimo. Il problema sono gli <b>interessi</b>: ogni modifica futura in quella zona costa di più, per sempre, finché qualcuno non ripaga il capitale. Il debito preso di proposito e messo per iscritto è una decisione. Quello preso per caso è una perdita.</dd></dl>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-drift" data-name="Come deriva il codice">
+  <div class="tag"><b>L2</b> · Come deriva il codice</div>
+  <h2>Quattro forze che ti spingono lì</h2>
+  <div class="grid2">
+    <div class="card"><h4>Il framework possiede i punti d'ingresso</h4><p>Non scrivi mai il punto di partenza: scrivi metodi che Odoo chiama. Il tuo codice non <b>compone</b> mai niente, quindi comporre non diventa mai un'abitudine che hai.</p></div>
+    <div class="card"><h4>Il model è una calamita</h4><p><code>self</code> ti dà il record, il cursore, l'utente, il contesto e ogni altro model. Tutta la logica è <b>raggiungibile</b> dal model, quindi tutta la logica finisce <b>sul</b> model.</p></div>
+    <div class="card"><h4>Niente fallisce a build time</h4><p>Un metodo di 200 righe compila benissimo. Il feedback arriva otto mesi dopo come incidente che nessuno collega alla causa. <b>Le conseguenze tardive non insegnano.</b></p></div>
+    <div class="card"><h4>Hai imparato dagli addon core</h4><p>15 anni di patch scritte sotto la regola di Odoo stessa: <em>non ristrutturare mai un file stabile, tieni i diff minimi.</em> <span class="chip est">assodato</span></p></div>
+  </div>
+  <div class="note"><p>Leggi gli addon core per capire <b>come funziona il framework</b>. Non leggerli per capire <b>come dovrebbe essere fatto il codice</b> — copieresti uno stile prodotto da un vincolo che a te non si applica.</p></div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-drift" data-name="Come deriva il codice">
+  <div class="tag"><b>L2</b> · Come deriva il codice</div>
+  <h2>Due parole che nominano tutto il problema</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Accoppiamento e coesione">
+      <text x="10" y="16" class="d-lbl-b">ALTO ACCOPPIAMENTO — cambi A, rompi B C D</text>
+      <circle cx="40" cy="60" r="15" class="d-box-w"/><text x="34" y="64" class="d-lbl">A</text>
+      <circle cx="130" cy="40" r="15" class="d-box"/><text x="124" y="44" class="d-lbl">B</text>
+      <circle cx="130" cy="80" r="15" class="d-box"/><text x="124" y="84" class="d-lbl">C</text>
+      <circle cx="220" cy="60" r="15" class="d-box"/><text x="214" y="64" class="d-lbl">D</text>
+      <line x1="55" y1="55" x2="115" y2="42" class="d-ln-a"/><line x1="55" y1="66" x2="115" y2="78" class="d-ln-a"/>
+      <line x1="145" y1="45" x2="205" y2="57" class="d-ln-a"/><line x1="145" y1="76" x2="205" y2="64" class="d-ln-a"/>
+      <text x="10" y="122" class="d-lbl">Ogni storia del tipo "ho sistemato una cosa e</text>
+      <text x="10" y="136" class="d-lbl">se ne sono rotte due" è una storia di accoppiamento.</text>
+      <line x1="330" y1="0" x2="330" y2="150" class="d-ln"/>
+      <text x="360" y="16" class="d-lbl-b">BASSA COESIONE — un file, nove argomenti</text>
+      <rect x="360" y="30" width="300" height="62" class="d-box-w"/>
+      <text x="372" y="48" class="d-lbl">prezzi · email · PDF · magazzino · EDI</text>
+      <text x="372" y="66" class="d-lbl">cron · portale · IVA · migrazione</text>
+      <text x="372" y="84" class="d-lbl" style="fill:var(--warn)">models.py — 900 righe</text>
+      <text x="360" y="122" class="d-lbl">Vicini di casa per nessun motivo se non</text>
+      <text x="360" y="136" class="d-lbl">essere arrivati lo stesso giorno.</text>
+    </svg>
+  </div>
+  <p class="sub"><strong>L'obiettivo, sempre: basso accoppiamento, alta coesione.</strong> Quasi ogni regola di questa presentazione è una delle due travestita. Quando non ricordi perché una regola esista, chiediti quale delle due sta proteggendo — quella domanda risponde da sola a buona parte del Livello 2.</p>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-encap" data-name="Incapsulamento">
+  <div class="tag"><b>L2</b> · Incapsulamento</div>
+  <h2>Il Livello 1 ti ha dato l'underscore. Ecco a cosa serve davvero.</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>pubblico</b> una promessa a degli sconosciuti</figcaption>
+<pre><code><span class="k">def</span> <span class="f">build_payload</span>(self):
+    ...
+
+<span class="c"># chi lo chiama? non si sa.</span>
+<span class="c">#   - le tue viste            ✓ puoi fare grep</span>
+<span class="c">#   - un altro addon          ? forse</span>
+<span class="c">#   - uno script RPC cliente  ? forse</span>
+<span class="c">#   - un consulente nel 2021  ? probabilmente</span>
+
+<span class="c"># rinominarlo = breaking change</span></code></pre></figure>
+    <figure class="code after"><figcaption><b>privato</b> tuo, libero di cambiare</figcaption>
+<pre><code><span class="k">def</span> <span class="f">_build_payload</span>(self):
+    ...
+
+<span class="c"># chi lo chiama? esattamente un file.</span>
+<span class="c"># Odoo SI RIFIUTA di esporlo via RPC.</span>
+
+<span class="c"># rinominarlo → 5 minuti</span>
+<span class="c"># spezzarlo   → 5 minuti</span>
+<span class="c"># cancellarlo → 5 minuti</span></code></pre></figure>
+  </div>
+  <dl class="term"><dt>Incapsulamento</dt><dd>Decidere <b>di proposito</b> da quali parti del tuo codice il mondo esterno può dipendere, e tenere quell'insieme il più piccolo possibile. Più piccola è la superficie promessa, più liberamente può cambiare tutto ciò che ci sta dietro. Non è segretezza — è <b>libertà</b>. È l'idea più utile di tutta questa presentazione.</dd></dl>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-encap" data-name="Incapsulamento">
+  <div class="tag"><b>L2</b> · Incapsulamento</div>
+  <h2>Le parole dell'OOP, mappate su quello che già fai</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Dicono</th><th>Significato</th><th>Tu lo scrivi già come</th></tr></thead>
+    <tbody>
+      <tr><td><b>Classe</b></td><td>Modello: quali dati contiene, cosa sa fare</td><td><code>class SaleOrder(models.Model)</code> — i campi sono i dati, i metodi sono il fare</td></tr>
+      <tr><td><b>Oggetto / istanza</b></td><td>Una cosa concreta creata da quel modello</td><td>Un record — o un <em>recordset</em>, la variante di Odoo</td></tr>
+      <tr><td><b>Metodo</b></td><td>Funzione che appartiene a una classe e riceve l'oggetto come primo argomento</td><td>Ogni <code>def x(self)</code> che hai mai scritto. <code>self</code> = "la cosa su cui è stato chiamato"</td></tr>
+      <tr><td><b>Ereditarietà</b></td><td>Costruire su un'altra classe, riusarla e sovrascriverla</td><td><code>_inherit</code>, più altre tre varianti — più avanti in questo livello</td></tr>
+      <tr><td><b>Polimorfismo</b></td><td>Tante classi, stesso nome di metodo, al chiamante non interessa quale</td><td>Quasi assente negli addon. Il miglior upgrade disponibile — Livello 3</td></tr>
+    </tbody>
+  </table></div>
+  <p class="sub">"Qui dovresti usare l'OOP" non è una proposta di adottare una tecnologia nuova. <strong>Ci sei già dentro.</strong> Significa: metti questo comportamento sulla cosa che possiede i dati, e dagli un nome.</p>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-encap" data-name="Incapsulamento">
+  <div class="tag"><b>L2</b> · Incapsulamento</div>
+  <h2>La cassetta degli attrezzi Python, e cosa impone davvero</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Vuoi</th><th>Meccanismo</th><th>Imposto?</th></tr></thead>
+    <tbody>
+      <tr><td>Metodo interno</td><td><code>_underscore</code></td><td>Convenzione — <b>ma Odoo blocca le chiamate RPC.</b> Confine reale al bordo dell'API <span class="chip est">assodato</span></td></tr>
+      <tr><td>Nessuna collisione di nomi, mai</td><td><code>__doppio</code></td><td>Rinominato in <code>_Classe__attr</code>. <b>Mai nei model Odoo</b> — rompe le catene di ereditarietà <span class="chip inf">dedotto</span></td></tr>
+      <tr><td>Valore derivato che sembra un attributo</td><td><code>@property</code></td><td><b>Sì.</b> Senza setter, assegnare solleva un errore</td></tr>
+      <tr><td>Piccolo blocco di dati non modificabile</td><td><code>@dataclass(frozen=True)</code></td><td><b>Sì.</b> In più uguaglianza gratis e un repr leggibile in debug</td></tr>
+      <tr><td>"Le sottoclassi DEVONO implementarlo"</td><td><code>abc.ABC</code> + <code>@abstractmethod</code></td><td><b>Sì.</b> Se lo dimentichi, la classe non è nemmeno istanziabile</td></tr>
+      <tr><td>Contratto senza una classe base comune</td><td><code>typing.Protocol</code></td><td>Solo per i tool, costo zero a runtime</td></tr>
+      <tr><td>Dichiarare cosa entra e cosa esce</td><td>Type hint</td><td>Non a runtime — ma editor e CI li usano</td></tr>
+    </tbody>
+  </table></div>
+  <p class="cap">Non ti servono tutti oggi. Sappi che esistono, così quando senti il bisogno di uno non lo reinventi male. <code>@dataclass(frozen=True)</code> e <code>abc.ABC</code> tornano entrambi nel Livello 3.</p>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-abstract" data-name="Astrazione e contratti">
+  <div class="tag"><b>L2</b> · Astrazione e contratti</div>
+  <h2>Un solo livello di astrazione per funzione</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Analogia della ricetta">
+      <text x="4" y="16" class="d-lbl-b">UNA RICETTA, LIVELLO ALTO</text>
+      <rect x="4" y="24" width="150" height="26" class="d-box-g"/><text x="18" y="41" class="d-lbl">fai il sugo</text>
+      <rect x="162" y="24" width="150" height="26" class="d-box-g"/><text x="176" y="41" class="d-lbl">cuoci la pasta</text>
+      <rect x="320" y="24" width="150" height="26" class="d-box-g"/><text x="334" y="41" class="d-lbl">manteca</text>
+      <text x="4" y="80" class="d-lbl-b">ADESSO MESCOLA I LIVELLI</text>
+      <rect x="4" y="88" width="120" height="26" class="d-box"/><text x="18" y="105" class="d-lbl">fai il sugo</text>
+      <rect x="132" y="88" width="260" height="26" class="d-box-w"/><text x="146" y="105" class="d-lbl">gira 30s per non bruciare l'aglio</text>
+      <rect x="400" y="88" width="100" height="26" class="d-box"/><text x="414" y="105" class="d-lbl">manteca</text>
+      <text x="512" y="105" class="d-lbl" style="fill:var(--warn)">← stavi pianificando,</text>
+      <text x="512" y="118" class="d-lbl" style="fill:var(--warn)">   e ti ritrovi nella padella</text>
+    </svg>
+  </div>
+  <p class="sub">Una funzione o <strong>orchestra passi con un nome</strong> o <strong>esegue un passo</strong>. Mai entrambe le cose. Quando vedi <code>self._notify_partner()</code> due righe sotto una concatenazione di stringhe, quello è lo strattone. Estrai.</p>
+  <dl class="term"><dt>Astrazione</dt><dd>Scegliere un livello di dettaglio e restarci. Una buona astrazione ti fa usare una cosa correttamente <b>senza</b> conoscerne le viscere — guidi senza sapere niente dell'iniezione. Una che perde colpi ti costringe a impararle lo stesso, e quindi non ti ha comprato nulla.</dd></dl>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-abstract" data-name="Astrazione e contratti">
+  <div class="tag"><b>L2</b> · Astrazione e contratti</div>
+  <h2>La docstring dichiara il contratto, non il nome</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>rumore</b> ribatte il nome del metodo</figcaption>
+<pre><code><span class="k">def</span> <span class="f">_allocate_stock</span>(self, quantity):
+    <span class="s">"""Alloca lo stock."""</span>
+    ...
+
+<span class="c"># Il chiamante deve comunque leggere il corpo per sapere:</span>
+<span class="c">#   - serve un record solo o più di uno?</span>
+<span class="c">#   - cosa succede se la giacenza non basta?</span>
+<span class="c">#   - cosa restituisce?</span>
+<span class="c">#   - su cosa scrive?</span>
+<span class="c">#   - quantity in che unità di misura è?</span></code></pre></figure>
+    <figure class="code after"><figcaption><b>si guadagna le righe</b></figcaption>
+<pre><code><span class="k">def</span> <span class="f">_allocate_stock</span>(self, quantity):
+    <span class="s">"""Riserva `quantity` (UoM prodotto) su questa riga.
+
+    Richiede un singleton. Alloca parzialmente se la
+    giacenza non basta. Restituisce la quantità
+    effettivamente riservata. Alza UserError se la riga
+    è già consegnata. Scrive su stock.move — chiamalo
+    dentro la transazione del chiamante.
+    """</span></code></pre></figure>
+  </div>
+  <p class="cap">Il test: <b>qualcuno riuscirebbe a chiamarlo correttamente avendo letto solo la docstring?</b> Scrivi quello che il chiamante non può vedere dalla firma — precondizioni, cosa solleva, cosa modifica, le unità di misura. Tutto il resto è rumore, e il rumore insegna alla gente a saltare le docstring del tutto.</p>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-abstract" data-name="Astrazione e contratti">
+  <div class="tag"><b>L2</b> · Astrazione e contratti</div>
+  <h2>Rilevatori di fumo, non leggi</h2>
+  <p class="sub">Superarne uno non significa automaticamente avere un problema: significa avere <strong>una domanda a cui rispondere nella descrizione della PR</strong>. Numeri scelti per essere leggermente scomodi, non ottimali. <span class="chip unt">non verificato</span></p>
+  <div class="grid4">
+    <div class="num"><b>25</b><span>righe in una funzione → giustifica o estrai</span></div>
+    <div class="num"><b>3</b><span>livelli di annidamento → guard clause</span></div>
+    <div class="num"><b>300</b><span>righe in un model → dentro si nasconde un service</span></div>
+    <div class="num"><b>4</b><span>parametri → alcuni sono un oggetto solo</span></div>
+  </div>
+  <div class="note"><p><b>E il quinto: le stesse 3 righe in 3 posti.</b> Estraile, e <em>poi</em> decidi dove deve vivere la cosa estratta.</p>
+  <p>Ma attenzione: <b>la duplicazione è un segnale, non automaticamente un peccato.</b> Due blocchi identici oggi ma destinati a cambiare per motivi diversi devono restare separati; unirli crea accoppiamento tra due cose che non c'entrano nulla l'una con l'altra. Estrai quando cambiano <b>insieme</b>. Questa è la tua prima vera scelta di giudizio.</p></div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-services" data-name="Il layer services">
+  <div class="tag"><b>L2</b> · Il layer services</div>
+  <h2>Il ciclo che uccide ogni tentativo di refactoring</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Il ciclo vizioso">
+      <rect x="4" y="20" width="128" height="46" class="d-box"/><text x="16" y="40" class="d-lbl-b">1 · logica sul model</text><text x="16" y="56" class="d-lbl">serve DB + utente</text>
+      <rect x="146" y="20" width="128" height="46" class="d-box"/><text x="158" y="40" class="d-lbl-b">2 · testare costa</text><text x="158" y="56" class="d-lbl">20 righe di fixture</text>
+      <rect x="288" y="20" width="128" height="46" class="d-box"/><text x="300" y="40" class="d-lbl-b">3 · test non scritti</text><text x="300" y="56" class="d-lbl">la scadenza è vera</text>
+      <rect x="430" y="20" width="128" height="46" class="d-box-w"/><text x="442" y="40" class="d-lbl-b">4 · nessuna rete</text><text x="442" y="56" class="d-lbl">nessuno osa toccarlo</text>
+      <rect x="572" y="20" width="124" height="46" class="d-box-w"/><text x="584" y="40" class="d-lbl-b">5 · cresce</text><text x="584" y="56" class="d-lbl">vedi "come deriva"</text>
+      <path d="M132 43 L146 43 M274 43 L288 43 M416 43 L430 43 M558 43 L572 43" class="d-ln-a"/>
+      <path d="M634 66 L634 96 L66 96 L66 66" class="d-ln-a" stroke-dasharray="4 3"/>
+      <text x="290" y="112" class="d-lbl" style="fill:var(--accent)">e da capo, ogni sprint</text>
+      <line x1="4" y1="132" x2="696" y2="132" class="d-ln"/>
+      <text x="4" y="154" class="d-lbl-b">IL TAGLIO: sposta le regole in Python puro e il punto 1 smette di essere vero.</text>
+      <text x="4" y="172" class="d-lbl">Non per eleganza — per rendere i test abbastanza economici da essere scritti davvero,</text>
+      <text x="4" y="188" class="d-lbl">che è ciò che rende possibile tutto il resto di questa presentazione.</text>
+    </svg>
+  </div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-services" data-name="Il layer services">
+  <div class="tag"><b>L2</b> · Il layer services</div>
+  <h2>Due cartelle che Odoo non nomina mai</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>accoppiato</b> serve un database anche solo per girare</figcaption>
+<pre><code><span class="k">def</span> <span class="f">_compute_amount</span>(self):
+    <span class="k">for</span> order <span class="k">in</span> self:
+        total = <span class="n">0.0</span>
+        <span class="k">for</span> line <span class="k">in</span> order.line_ids:
+            sub = line.qty * line.price_unit
+            <span class="k">if</span> line.qty &gt;= <span class="n">100</span>:
+                sub *= <span class="n">0.9</span>
+            <span class="k">elif</span> line.qty &gt;= <span class="n">50</span>:
+                sub *= <span class="n">0.95</span>
+            total += sub
+        <span class="k">if</span> order.partner_id.is_vip:
+            total *= <span class="n">0.97</span>
+        order.amount_total = total</code></pre></figure>
+    <figure class="code after"><figcaption><b>separato</b> services/pricing.py — zero import Odoo</figcaption>
+<pre><code><span class="n">@dataclass</span>(frozen=<span class="k">True</span>)
+<span class="k">class</span> <span class="f">LineInput</span>:
+    qty: <span class="f">float</span>
+    price_unit: <span class="f">float</span>
+
+VOLUME_TIERS = ((<span class="n">100</span>, <span class="n">0.90</span>), (<span class="n">50</span>, <span class="n">0.95</span>))
+
+<span class="k">def</span> <span class="f">line_subtotal</span>(line: LineInput) -&gt; <span class="f">float</span>:
+    <span class="k">for</span> threshold, factor <span class="k">in</span> VOLUME_TIERS:
+        <span class="k">if</span> line.qty &gt;= threshold:
+            <span class="k">return</span> line.qty * line.price_unit * factor
+    <span class="k">return</span> line.qty * line.price_unit</code></pre></figure>
+  </div>
+  <div class="grid3">
+    <div class="card"><h4>services/</h4><p>Regole di business come Python puro. Niente ereditarietà ORM, niente <code>self.env</code>. Test in millisecondi.</p></div>
+    <div class="card"><h4>tools/</h4><p>Helper senza stato: parsing, formattazione, aritmetica sulle date, validazione partita IVA.</p></div>
+    <div class="card"><h4>I tre guadagni qui</h4><p>Gli scaglioni diventano <b>dati</b> invece che flusso di controllo · i test non richiedono database · il commerciale cambia gli scaglioni e tu tocchi un file solo.</p></div>
+  </div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-services" data-name="Il layer services">
+  <div class="tag"><b>L2</b> · Il layer services</div>
+  <h2>Il confine — dove smette di rendere</h2>
+  <p class="sub">Il test: <strong>una persona del business saprebbe enunciare questa regola senza nominare Odoo?</strong></p>
+  <div class="grid2">
+    <div class="card" style="border-left:2px solid var(--sage)"><h4 style="color:var(--sage)">Sì → spostala in services/</h4><p>regole di prezzo · IVA · scaglioni di sconto · pianificazione · parsing di file · payload per API esterne · aritmetica sulle date</p></div>
+    <div class="card" style="border-left:2px solid var(--warn)"><h4 style="color:var(--warn)">No → lasciala sul model</h4><p>impostare un campo di stato · scrivere in chatter · costruire un domain · creare record collegati · tutto ciò che è fondamentalmente un'operazione ORM</p></div>
+  </div>
+  <div class="skippy">
+    <p>Adesso guarda bene, perché è qui che un monkey brain appena istruito sbaglia in modo prevedibile. Hai appena imparato un Concetto Potente, il concetto ti fa sentire <b>bene</b>, e quindi vorrai applicarlo a <b>tutto</b>. Entro una settimana avrai <code>services/state_setter.py</code>. Complimenti: hai reinventato il layer dei model, solo più lento e con più file.</p>
+    <p>Il segno di un ingegnere vero non è conoscere una tecnica. È conoscerne il <b>confine</b> — le condizioni esatte in cui smette di rendere e inizia a costare. Ogni regola di questo livello ne ha uno. Impara i confini con la stessa energia con cui impari le regole, o produrrai semplicemente un disastro di grado più sofisticato.</p>
+  </div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-refactor" data-name="Disciplina del refactoring">
+  <div class="tag"><b>L2</b> · Disciplina del refactoring</div>
+  <h2>Refactoring = cambia la struttura, non il comportamento</h2>
+  <p class="sub">Non "lo miglioro". Non "già che ci sono lo riscrivo". <strong>Solo struttura.</strong> La definizione sembra pedante ed è invece portante.</p>
+  <div class="dia">
+    <svg viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Commit misto contro commit separati">
+      <text x="4" y="16" class="d-lbl-b">UN COMMIT MISTO — non revisionabile</text>
+      <rect x="4" y="24" width="330" height="52" class="d-box-w"/>
+      <text x="18" y="44" class="d-lbl">+198 −186   codice spostato</text>
+      <text x="18" y="60" class="d-lbl" style="fill:var(--warn)">+2 −2       ...una regola cambiata, invisibile nel rumore</text>
+      <text x="4" y="98" class="d-lbl">Il revisore approva senza vedere le due righe</text>
+      <text x="4" y="112" class="d-lbl">che cambiano davvero cosa fa il software.</text>
+      <line x1="352" y1="0" x2="352" y2="140" class="d-ln"/>
+      <text x="376" y="16" class="d-lbl-b">DUE COMMIT — revisionabile</text>
+      <rect x="376" y="24" width="310" height="24" class="d-box-g"/>
+      <text x="390" y="40" class="d-lbl">commit 1  +198 −186  refactor, test invariati</text>
+      <rect x="376" y="52" width="310" height="24" class="d-box-g"/>
+      <text x="390" y="68" class="d-lbl">commit 2  +2 −2      comportamento, + test nuovo</text>
+      <text x="376" y="98" class="d-lbl">Il revisore legge il commit 2 in dieci secondi</text>
+      <text x="376" y="112" class="d-lbl">e ci ragiona davvero sopra.</text>
+    </svg>
+  </div>
+  <dl class="term"><dt>Code smell</dt><dd>Un sintomo di superficie che spesso — non sempre — indica un problema più profondo. "Odore", non "bug": il codice funziona. È l'equivalente software di un rumore che viene dal motore. Vai a controllare; a volte non è niente.</dd></dl>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-refactor" data-name="Disciplina del refactoring">
+  <div class="tag"><b>L2</b> · Disciplina del refactoring</div>
+  <h2>Quattro mosse con un nome che userai ogni settimana</h2>
+  <div class="pair">
+    <figure class="code after"><figcaption><b>Introduce Parameter Object</b> · smell: 4 argomenti viaggiano sempre insieme</figcaption>
+<pre><code><span class="n">@dataclass</span>(frozen=<span class="k">True</span>)
+<span class="k">class</span> <span class="f">ShipmentRequest</span>:
+    weight_kg: <span class="f">float</span>
+    country_code: <span class="f">str</span>
+    is_express: <span class="f">bool</span> = <span class="k">False</span>
+    insured_value: Decimal = Decimal(<span class="s">"0"</span>)
+
+    <span class="k">def</span> <span class="f">__post_init__</span>(self):
+        <span class="k">if</span> self.weight_kg &lt;= <span class="n">0</span>:
+            <span class="k">raise</span> ValueError(<span class="s">"il peso deve essere positivo"</span>)
+
+<span class="c"># prima: quote(2.5, "IE", True, Decimal("100"), None)</span>
+<span class="c"># dopo : quote(ShipmentRequest(weight_kg=2.5,</span>
+<span class="c">#                             country_code="IE"))</span></code></pre></figure>
+    <figure class="code after"><figcaption><b>Move Method</b> · smell: usa i campi di un altro record più dei propri</figcaption>
+<pre><code><span class="c"># models/sale_order.py — casa sbagliata</span>
+<span class="k">def</span> <span class="f">_get_partner_discount</span>(self):
+    <span class="k">if</span> self.partner_id.is_vip:
+        <span class="k">return</span> self.partner_id.vip_rate
+    <span class="k">return</span> self.partner_id.default_rate
+
+<span class="c"># models/res_partner.py — casa giusta</span>
+<span class="k">def</span> <span class="f">_get_discount</span>(self):
+    <span class="k">return</span> self.vip_rate <span class="k">if</span> self.is_vip <span class="k">else</span> self.default_rate
+
+<span class="c"># Il comportamento vive accanto ai dati che gli servono.</span>
+<span class="c"># Nome tradizionale dello smell: "feature envy".</span></code></pre></figure>
+  </div>
+  <div class="grid2">
+    <div class="card"><h4>Replace Temp with Query</h4><p><b>Smell:</b> una variabile impostata in cima e usata 40 righe dopo. Le variabili temporanee a lunga vita sono il motivo invisibile per cui le funzioni lunghe <b>restano</b> lunghe: provi a estrarre e scopri che il blocco ha bisogno di tre temporanee calcolate altrove, quindi lasci perdere. Elimina prima le temporanee: è una <b>mossa preparatoria</b>, serve a rendere possibili le altre.</p></div>
+    <div class="card"><h4>Split Loop</h4><p><b>Smell:</b> un ciclo che accumula quattro cose scollegate. Separalo: un ciclo, un compito, ciascuno estraibile. "Ma così itera quattro volte!" — sì, e non ha importanza, i dati sono già in memoria. <b>Eccezione:</b> se il corpo del ciclo tocca il database, non separare — <b>raggruppa</b>.</p></div>
+  </div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-inherit" data-name="Scegliere l'ereditarietà">
+  <div class="tag"><b>L2</b> · Scegliere l'ereditarietà</div>
+  <h2>I quattro meccanismi. Impara questa tabella.</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Meccanismo</th><th>Dichiarazione</th><th>Cosa succede</th><th>Usalo quando</th></tr></thead>
+    <tbody>
+      <tr><td><b>Estensione</b><br>(classica)</td><td><code>_inherit = 'sale.order'</code><br>senza <code>_name</code></td><td>Aggiunge al model <em>esistente</em> e alla sua tabella. Tutto ciò che già usa <code>sale.order</code> riceve le tue modifiche.</td><td><b>Il tuo default.</b> Stai aggiungendo comportamento a qualcosa che esiste già.</td></tr>
+      <tr><td><b>Prototipo</b><br>(copia)</td><td><code>_inherit = 'x'</code><br><code>_name = 'y'</code></td><td>Nuovo model, nuova tabella, campi copiati. <em>Nessun legame</em> — le modifiche successive a monte non ti arrivano mai.</td><td>Raramente. Nove volte su dieci volevi un mixin.</td></tr>
+      <tr><td><b>Delega</b></td><td><code>_inherits = {...}</code><br><span class="dim">occhio alla <b>s</b></span></td><td>Composizione con inoltro automatico dei campi. Il tuo record <em>ha un</em> partner, e i campi del partner compaiono come tuoi. Due tabelle.</td><td>"Un tipo di X con vita propria" — come <code>res.users</code> → <code>res.partner</code>. Costoso da annullare.</td></tr>
+      <tr><td><b>Mixin</b></td><td><code>models.AbstractModel</code><br>poi elencalo in <code>_inherit</code></td><td>Nessuna tabella propria. Inietta campi e comportamento in qualsiasi model lo elenchi.</td><td>Comportamento condiviso da 2+ model non imparentati. È così che <code>mail.thread</code> dà il chatter a mezzo sistema.</td></tr>
+    </tbody>
+  </table></div>
+  <p class="cap"><b>Memorizza questa insidia:</b> <code>_inherit</code> e <code>_inherits</code> differiscono per una lettera e fanno cose completamente diverse. Il plurale prende un dizionario e crea un legame di delega. In review leggilo due volte. &nbsp;·&nbsp; <em>Perché</em> il mixin sia il più sicuro dei quattro è argomento da Livello 3.</p>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-inherit" data-name="Scegliere l'ereditarietà">
+  <div class="tag"><b>L2</b> · Scegliere l'ereditarietà</div>
+  <h2>Più economico di un override di <code>create</code></h2>
+  <p class="sub">Gli override CRUD girano su <strong>ogni</strong> percorso, per sempre: la tua UI, gli import, gli altri addon, gli script di migrazione, l'RPC. Prima di scriverne uno, controlla se Odoo ha già un meccanismo più stretto.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Cosa vuoi</th><th>Usa questo invece</th><th>Perché è meglio</th></tr></thead>
+    <tbody>
+      <tr><td>Un valore iniziale</td><td><code>default=</code> o un metodo <code>_default_*</code></td><td>Gira solo in creazione, e solo se non è stato passato nulla</td></tr>
+      <tr><td>Un valore derivato da altri campi</td><td>Un campo computed — <code>store=True</code> se devi cercarci sopra</td><td>Odoo lo ricalcola per te, nei momenti giusti</td></tr>
+      <tr><td>Una regola che deve valere sempre</td><td><code>@api.constrains</code></td><td>Scatta in create <em>e</em> in write, e si legge come una regola invece di nascondersi in un metodo</td></tr>
+      <tr><td>Una reazione mentre l'utente compila la form</td><td><code>@api.onchange</code></td><td>Solo form — e nota che <b>non</b> scatta su import o write via RPC, che è un bug frequente</td></tr>
+      <tr><td>Un effetto collaterale che deve davvero seguire la persistenza</td><td><em>Adesso</em> sovrascrivi <code>create</code>/<code>write</code></td><td>Te lo sei guadagnato</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><p><b>La scelta di giudizio:</b> la gente sovrascrive <code>create</code> perché è il meccanismo che già conosce, non perché sia quello adatto. Ognuna delle quattro righe qui sopra è più stretta, il che significa meno percorsi in cui il tuo codice può sorprendere qualcuno. <span class="chip inf">dedotto</span></p></div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-perf" data-name="Query e recordset">
+  <div class="tag"><b>L2</b> · Query e recordset</div>
+  <h2>N+1: il ciclo che interroga</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Costo delle query N+1">
+      <text x="4" y="16" class="d-lbl-b">SEARCH DENTRO UN CICLO · 2000 ORDINI</text>
+      <g fill="none" stroke="var(--warn)" stroke-width="1">
+        <path d="M60 26 L60 40 M75 26 L75 40 M90 26 L90 40 M105 26 L105 40 M120 26 L120 40 M135 26 L135 40 M150 26 L150 40 M165 26 L165 40 M180 26 L180 40 M195 26 L195 40 M210 26 L210 40 M225 26 L225 40 M240 26 L240 40 M255 26 L255 40 M270 26 L270 40 M285 26 L285 40 M300 26 L300 40 M315 26 L315 40 M330 26 L330 40 M345 26 L345 40 M360 26 L360 40 M375 26 L375 40 M390 26 L390 40 M405 26 L405 40 M420 26 L420 40 M435 26 L435 40 M450 26 L450 40 M465 26 L465 40 M480 26 L480 40"/>
+      </g>
+      <text x="496" y="38" class="d-lbl" style="fill:var(--warn)">… ×2000 round trip ≈ 2 s di pura attesa</text>
+      <text x="4" y="70" class="d-lbl-b">RAGGRUPPATO UNA VOLTA</text>
+      <line x1="60" y1="78" x2="60" y2="92" stroke="var(--sage)" stroke-width="1"/>
+      <text x="76" y="90" class="d-lbl" style="fill:var(--sage)">1 query ≈ 1 ms</text>
+      <text x="4" y="112" class="d-lbl">Niente nella sintassi suggerisce che ogni iterazione è un giro di rete verso PostgreSQL. Per questo è facile da scrivere.</text>
+    </svg>
+  </div>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>1 + N query</b></figcaption>
+<pre><code><span class="k">for</span> order <span class="k">in</span> orders:
+    lines = self.env[<span class="s">'sale.order.line'</span>].search([
+        (<span class="s">'order_id'</span>, <span class="s">'='</span>, order.id),
+    ])
+    order.line_count = <span class="k">len</span>(lines)</code></pre></figure>
+    <figure class="code after"><figcaption><b>1 query</b> — far contare al database</figcaption>
+<pre><code>counts = self.env[<span class="s">'sale.order.line'</span>]._read_group(
+    domain=[(<span class="s">'order_id'</span>, <span class="s">'in'</span>, orders.ids)],
+    groupby=[<span class="s">'order_id'</span>], aggregates=[<span class="s">'__count'</span>],
+)
+by_order = {order.id: n <span class="k">for</span> order, n <span class="k">in</span> counts}
+<span class="k">for</span> order <span class="k">in</span> orders:
+    order.line_count = by_order.get(order.id, <span class="n">0</span>)</code></pre></figure>
+  </div>
+  <p class="cap"><b>Come accorgersene senza profiler:</b> per ogni ciclo chiediti "qui dentro c'è qualcosa che parla col database?" — <code>search</code>, <code>create</code>, <code>write</code>, <code>unlink</code>, o la lettura di un campo relazionale su record non caricati insieme. &nbsp;<span class="chip ver">versione</span> l'API di raggruppamento ha cambiato forma nelle release recenti; copia la firma da un addon core del <em>tuo</em> sorgente, non da un blog.</p>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-perf" data-name="Query e recordset">
+  <div class="tag"><b>L2</b> · Query e recordset</div>
+  <h2>Parla recordset, non Python generico</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Invece di</th><th>Scrivi</th><th>Perché</th></tr></thead>
+    <tbody>
+      <tr><td><code>[l.product_id for l in lines]</code></td><td><code>lines.mapped('product_id')</code></td><td>Recordset deduplicato, caricato in una query invece di una per riga</td></tr>
+      <tr><td><code>[l for l in lines if l.qty &gt; 0]</code></td><td><code>lines.filtered(lambda l: l.qty &gt; 0)</code></td><td>Resta un recordset, quindi puoi continuare a concatenare</td></tr>
+      <tr><td><code>len(model.search(domain))</code></td><td><code>model.search_count(domain)</code></td><td>Conta nel database invece di caricare tutti i record per misurare una lista</td></tr>
+      <tr><td><code>search(domain)[0]</code></td><td><code>search(domain, limit=1)</code></td><td>Carica una riga invece di caricarle tutte e buttarne via 999</td></tr>
+      <tr><td>cicli manuali per combinare insiemi</td><td><code>recs_a | recs_b</code> &nbsp;<code>-</code>&nbsp; <code>&amp;</code></td><td>I recordset supportano unione, differenza e intersezione direttamente</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><p><b>Un'ultima cosa, e genera i bug più cattivi di questa pagina:</b> <code>@api.depends</code> deve elencare <b>ogni</b> campo che il compute legge, anche attraverso le relazioni (<code>'line_ids.price_unit'</code>). È così che Odoo sa quando ricalcolare. Dimenticane uno e il campo conserva in silenzio un valore vecchio — solo in certi ordini di modifica, solo a volte. <b>Aggiorna il depends nello stesso momento in cui aggiungi il campo.</b> <span class="chip est">assodato</span></p></div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-tests" data-name="Test">
+  <div class="tag"><b>L2</b> · Test</div>
+  <h2>I test sono ciò che rende legale il refactoring</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 125" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Velocità del ciclo di feedback">
+      <text x="4" y="16" class="d-lbl-b">CICLO DI FEEDBACK · "ho rotto qualcosa?"</text>
+      <rect x="4" y="26" width="18" height="20" class="d-box-g"/>
+      <text x="32" y="41" class="d-lbl" style="fill:var(--sage)">2 s · lanci il test unitario</text>
+      <rect x="4" y="56" width="480" height="20" class="d-box-w"/>
+      <text x="494" y="71" class="d-lbl" style="fill:var(--warn)">3 min · clicchi nell'interfaccia</text>
+      <text x="4" y="102" class="d-lbl">Non è un 90× su un singolo compito. Cambia il modo in cui lavori:</text>
+      <text x="4" y="118" class="d-lbl">a 2 secondi sperimenti liberamente. A 3 minuti tiri a indovinare con prudenza.</text>
+    </svg>
+  </div>
+  <div class="grid3">
+    <div class="card"><h4>Permesso di cambiare</h4><p>Il vero motivo per cui quel file da 900 righe fa paura è che non sai dire se l'hai rotto. I test rispondono in secondi — la paura diventa un compito.</p></div>
+    <div class="card"><h4>Documentazione che non marcisce</h4><p>I commenti prima o poi mentono. Un test che mente <b>fallisce</b>.</p></div>
+    <div class="card"><h4>Una specifica con un nome</h4><p><code>test_tier_boundary_is_inclusive</code> è tutta la diagnostica che hai alle 2 di notte. <code>test_1</code> non dice niente a chi è di turno.</p></div>
+  </div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-tests" data-name="Test">
+  <div class="tag"><b>L2</b> · Test</div>
+  <h2>Due livelli — ed è per questo che serviva il layer services</h2>
+  <div class="pair">
+    <figure class="code after"><figcaption><b>unitario</b> tests/test_pricing.py · nessun database</figcaption>
+<pre><code><span class="k">from</span> odoo.addons.tk_plant_nursery.services <span class="k">import</span> pricing
+
+<span class="k">class</span> <span class="f">TestVolumeTiers</span>(unittest.TestCase):
+
+    <span class="k">def</span> <span class="f">test_no_discount_below_first_tier</span>(self):
+        line = pricing.LineInput(qty=<span class="n">49</span>, price_unit=<span class="n">10.0</span>)
+        self.assertEqual(pricing.line_subtotal(line), <span class="n">490.0</span>)
+
+    <span class="k">def</span> <span class="f">test_tier_boundary_is_inclusive</span>(self):
+        line = pricing.LineInput(qty=<span class="n">50</span>, price_unit=<span class="n">10.0</span>)
+        self.assertEqual(pricing.line_subtotal(line), <span class="n">475.0</span>)</code></pre></figure>
+    <div>
+      <div class="tw"><table>
+        <thead><tr><th>Livello</th><th>Velocità</th><th>Quanti scriverne</th></tr></thead>
+        <tbody>
+          <tr><td><b>Unitario</b><br><span class="dim">TestCase puro, importa services/</span></td><td>ms, senza DB</td><td><b>Molti.</b> Ogni caso limite, ogni confine, ogni input strano</td></tr>
+          <tr><td><b>Integrazione</b><br><span class="dim">TransactionCase</span></td><td>secondi, con rollback</td><td><b>Pochi.</b> Percorso felice + ogni modalità di fallimento reale</td></tr>
+        </tbody>
+      </table></div>
+      <div class="note" style="margin-top:.9rem"><p><b>Regola di squadra: un bugfix viaggia con un test che fallisce prima del fix.</b> Sembra lavoro in più; di solito non lo è. Il test che fallisce ti dà una riproduzione con un comando, quindi smetti di cliccare nell'interfaccia per verificare — ed è l'unica cosa che impedisce al bug di tornare fra otto mesi.</p></div>
+    </div>
+  </div>
+  <p class="cap">I casi interessanti — esattamente 50 unità, zero, un prezzo negativo — sono quelli che nessuno scrive quando ogni test costa una fixture su database. A un millisecondo l'uno ne scrivi quindici e trovi due bug che non stavi cercando.</p>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-gates" data-name="Gate e checklist">
+  <div class="tag"><b>L2</b> · Gate e checklist</div>
+  <h2>Aggiungi il gate sulla complessità — lentamente</h2>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>complessità 9</b> — nove percorsi da tenere a mente</figcaption>
+<pre><code><span class="k">def</span> <span class="f">_state_label</span>(self):        <span class="c"># 1 (la funzione)</span>
+    <span class="k">if</span> self.state == <span class="s">'draft'</span>:   <span class="c"># 2</span>
+        <span class="k">if</span> self.is_late:         <span class="c"># 3</span>
+            <span class="k">return</span> <span class="s">'late draft'</span>
+        <span class="k">return</span> <span class="s">'draft'</span>
+    <span class="k">elif</span> self.state == <span class="s">'sent'</span>:  <span class="c"># 4</span>
+        <span class="k">for</span> l <span class="k">in</span> self.line_ids:    <span class="c"># 5</span>
+            <span class="k">if</span> l.blocked <span class="k">and</span> l.qty:  <span class="c"># 6, 7</span>
+                <span class="k">return</span> <span class="s">'blocked'</span>
+        <span class="k">return</span> <span class="s">'sent'</span>
+    <span class="k">elif</span> self.state == <span class="s">'done'</span>:  <span class="c"># 8</span>
+        <span class="k">return</span> <span class="s">'done'</span>
+    <span class="k">elif</span> self.late_flag:        <span class="c"># 9</span>
+        <span class="k">return</span> <span class="s">'??'</span></code></pre></figure>
+    <div>
+      <p><b>Cosa conta <code>C90</code>:</b> il numero di percorsi indipendenti dentro una funzione — grosso modo uno, più ogni <code>if</code>, <code>elif</code>, <code>for</code>, <code>while</code>, <code>and</code>, <code>or</code>.</p>
+      <p>È un discreto indicatore di "quanti casi deve tenere a mente il lettore", ed è un ottimo indicatore di "quanti test servirebbero per coprirla davvero". Quando protesta, la soluzione è quasi sempre guard clause o estrazione.</p>
+      <figure class="code after" style="margin-top:.8rem"><figcaption>aggiungi a pyproject.toml</figcaption>
+<pre><code>[tool.ruff.lint]
+select = [..., <span class="s">"C90"</span>]
+
+[tool.ruff.lint.mccabe]
+max-complexity = <span class="n">12</span>   <span class="c"># appena sopra la peggiore di oggi</span></code></pre></figure>
+      <div class="note trap" style="margin-top:.8rem"><p><b>A cricchetto, non col big bang.</b> Impostalo appena sopra la funzione peggiore di oggi, poi abbassalo di uno ogni volta che la CI è verde. Un gate che fallisce 400 volte il primo giorno viene disattivato il secondo — e a quel punto non hai né il gate <b>né</b> una squadra motivata. <span class="chip inf">dedotto</span></p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-level="2" data-topic="l2-gates" data-name="Gate e checklist">
+  <div class="tag"><b>L2</b> · Gate e checklist</div>
+  <h2>L'artefatto quotidiano <span class="sm">tocca una voce per spuntarla</span></h2>
+  <div class="chkbar">
+    <span id="chkcount">0 / 15 spuntate</span>
+    <button class="navbtn" style="padding:.3rem .6rem;font-size:var(--f-mono)" onclick="resetChk()">azzera</button>
+  </div>
+  <ul class="chk" id="chklist">
+    <li><span><b>So dire cosa fa ogni metodo in una frase?</b> Se la frase ha bisogno di una "e", fa due cose</span></li>
+    <li><span><b>Ogni metodo non-API ha l'underscore davanti?</b> I nomi pubblici sono promesse a degli sconosciuti</span></li>
+    <li><span><b>C'è un metodo che decide ed esegue insieme?</b> Separa la regola dall'azione</span></li>
+    <li><span><b>C'è logica di business che starebbe in <code>services/</code>?</b> Regole che una persona del business saprebbe enunciare</span></li>
+    <li><span><b>Query dentro un ciclo?</b> <code>search</code>, <code>create</code>, <code>write</code>, o la lettura di un relazionale su record non caricati</span></li>
+    <li><span><b>Ogni metodo su record singolo inizia con <code>ensure_one()</code>?</b></span></li>
+    <li><span><b>I <code>@api.depends</code> corrispondono a ciò che il compute legge davvero?</b> Anche attraverso le relazioni</span></li>
+    <li><span><b>Ogni override chiama <code>super()</code> e ne restituisce il risultato?</b></span></li>
+    <li><span><b>È il meccanismo più economico?</b> Poteva essere un default, un computed o un constraint?</span></li>
+    <li><span><b><code>sudo()</code> è limitato a una sola espressione, con un commento che spiega perché?</b></span></li>
+    <li><span><b>Le stringhe rivolte all'utente sono dentro <code>_()</code>?</b> E la variante lazy a livello di classe</span></li>
+    <li><span><b>Un nuovo if/elif su un campo Selection esistente?</b> Verifica se quella scala esiste già altrove</span></li>
+    <li><span><b>C'è un test che fallisce senza questa modifica?</b></span></li>
+    <li><span><b>I commit di refactoring sono separati da quelli di comportamento?</b> Un diff misto non è revisionabile</span></li>
+    <li><span><b>Un nuovo assunto troverebbe questo codice?</b> File col nome del model, nessuna logica in <code>__init__.py</code></span></li>
+  </ul>
+  <div class="note"><p><b>Passala sulla tua PR prima di chiedere la review.</b> È lì che si impara davvero: ti accorgi dei tuoi schemi ricorrenti. E un commento sul tuo codice non è un commento su di te: chi fa la review è la prima persona che legge quello che hai scritto, quindi è un test di usabilità gratuito sul tuo modo di ragionare. Se ha frainteso, il codice era ambiguo. Quello è un dato, ed è il più economico che avrai mai.</p></div>
+</section>
+
+<!-- ================= LIVELLO 3 ================= -->
+<section class="slide divider" data-level="3" data-topic="l3-start" data-name="Inizio livello 3">
+  <div class="tag">Livello tre</div>
+  <div class="lvnum">03</div>
+  <h1>Vai a fondo</h1>
+  <div class="demand">
+    <p><b>Cosa pretende da te: pratica, e sbagliare una o due volte.</b> Queste sono decisioni di design, non regole. Nessuno le assorbe da una slide: leggerai, penserai di aver capito, applicherai la cosa nel posto sbagliato e <em>allora</em> capirai. È il percorso previsto, non un suo fallimento.</p>
+    <p>Ogni argomento qui ha anche una bibliografia allegata, perché una presentazione è il mezzo sbagliato per materiale di questa mole e far finta del contrario sarebbe disonesto.</p>
+  </div>
+  <div class="pills">
+    <span class="pill">Composizione vs ereditarietà</span><span class="pill">Polimorfismo</span><span class="pill">Chirurgia maggiore</span>
+    <span class="pill">Design pattern</span><span class="pill">ORM in profondità</span><span class="pill">Perché funziona</span><span class="pill">Continua</span>
+  </div>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-compose" data-name="Composizione vs ereditarietà">
+  <div class="tag"><b>L3</b> · Composizione vs ereditarietà</div>
+  <h2>"è un" contro "ha un"</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ereditarietà contro composizione">
+      <text x="4" y="16" class="d-lbl-b">EREDITARIETÀ — "è un"</text>
+      <rect x="40" y="24" width="140" height="24" class="d-box"/><text x="54" y="40" class="d-lbl">Conto</text>
+      <rect x="40" y="70" width="140" height="24" class="d-box"/><text x="54" y="86" class="d-lbl">ContoDeposito</text>
+      <path d="M110 70 L110 48" class="d-ln-a"/>
+      <text x="196" y="42" class="d-lbl">prende tutto, può sovrascrivere</text>
+      <text x="196" y="58" class="d-lbl" style="fill:var(--warn)">accoppiato agli INTERNI del padre —</text>
+      <text x="196" y="74" class="d-lbl" style="fill:var(--warn)">il padre cambia, la tua sottoclasse si rompe</text>
+      <text x="196" y="92" class="d-lbl">e in Odoo il padre è di un'altra azienda,</text>
+      <text x="196" y="108" class="d-lbl">attraverso versioni maggiori</text>
+      <line x1="0" y1="120" x2="700" y2="120" class="d-ln"/>
+    </svg>
+  </div>
+  <div class="dia" style="margin-top:.6rem">
+    <svg viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Composizione">
+      <text x="4" y="16" class="d-lbl-b">COMPOSIZIONE — "ha un"</text>
+      <rect x="40" y="26" width="140" height="24" class="d-box-g"/><text x="54" y="42" class="d-lbl">Ordine</text>
+      <rect x="230" y="26" width="150" height="24" class="d-box-g"/><text x="244" y="42" class="d-lbl">CalcolatorePrezzi</text>
+      <path d="M180 38 L226 38" class="d-ln-a"/>
+      <text x="400" y="42" class="d-lbl">tiene un riferimento e delega</text>
+      <text x="40" y="70" class="d-lbl" style="fill:var(--sage)">più lasco: sostituisci il calcolatore, o lo riusi altrove</text>
+      <text x="40" y="88" class="d-lbl">In Odoo si presenta come MIXIN, e come le classi semplici in services/</text>
+    </svg>
+  </div>
+  <p class="sub"><strong>"Preferisci la composizione all'ereditarietà"</strong> non è una moda. L'ereditarietà ti accoppia agli <em>interni</em> del padre, non solo alla sua interfaccia — e in Odoo il padre è mantenuto da qualcun altro, sul suo calendario di release. Ecco perché, dei quattro meccanismi del Livello 2, il <strong>mixin</strong> è quello a cui appoggiarsi quando sei indeciso.</p>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-compose" data-name="Composizione vs ereditarietà">
+  <div class="tag"><b>L3</b> · Composizione vs ereditarietà</div>
+  <h2>Cosa fa davvero <code>super()</code></h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 155" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Catena di ereditarietà a runtime fra addon">
+      <text x="4" y="16" class="d-lbl-b">ODOO COSTRUISCE UNA SOLA CLASSE A RUNTIME DA OGNI ADDON CHE ESTENDE sale.order</text>
+      <rect x="4" y="30" width="130" height="34" class="d-box-g"/><text x="16" y="51" class="d-lbl">il tuo addon</text>
+      <rect x="154" y="30" width="130" height="34" class="d-box"/><text x="166" y="51" class="d-lbl">sale_margin</text>
+      <rect x="304" y="30" width="130" height="34" class="d-box"/><text x="316" y="51" class="d-lbl">un addon cliente</text>
+      <rect x="454" y="30" width="130" height="34" class="d-box"/><text x="466" y="51" class="d-lbl">sale core</text>
+      <path d="M134 47 L150 47 M284 47 L300 47 M434 47 L450 47" class="d-ln-a"/>
+      <text x="600" y="51" class="d-lbl">→ database</text>
+      <text x="4" y="88" class="d-lbl">super() significa "chiama il prossimo della fila". La tua posizione NON la decidi tu —</text>
+      <text x="4" y="104" class="d-lbl">dipende da quali moduli ha installato quel particolare cliente.</text>
+      <text x="4" y="130" class="d-lbl" style="fill:var(--warn)">Senza super()  → cancelli in silenzio il comportamento di tutti gli altri addon, core incluso.</text>
+      <text x="4" y="146" class="d-lbl" style="fill:var(--warn)">Senza return   → i chiamanti ricevono None, lontano dal tuo file, settimane dopo.</text>
+    </svg>
+  </div>
+  <p class="sub">Il Livello 1 ti ha detto di chiamarlo sempre e restituirlo sempre. Questo è il <strong>perché</strong>: non stai sovrascrivendo un metodo, stai inserendo un anello in una catena assemblata a runtime con codice che non hai mai letto, il cui ordine cambia da installazione a installazione.</p>
+  <p class="cap">Conseguenza su cui vale la pena fermarsi: il tuo override deve funzionare correttamente <b>qualunque cosa giri prima o dopo di lui</b>. È il vero argomento a favore di override minuscoli che delegano subito a un metodo privato tuo.</p>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-poly" data-name="Polimorfismo">
+  <div class="tag"><b>L3</b> · Polimorfismo</div>
+  <h2>Replace Conditional with Polymorphism <span class="sm">smell: lo stesso if/elif in più metodi</span></h2>
+  <p class="sub">Odoo è pieno di campi <code>Selection</code>, e ogni selection prima o poi fa crescere una scala di <code>if/elif</code> gemella in cinque metodi. Aggiungi un'opzione, trovali tutti e cinque. Sbagliane uno → un bug che si manifesta solo per quell'opzione, che il QA non incontra mai.</p>
+  <div class="pair">
+    <figure class="code before"><figcaption><b>scala</b> ripetuta in 5 metodi</figcaption>
+<pre><code><span class="k">def</span> <span class="f">_send</span>(self):
+    <span class="k">if</span> self.channel == <span class="s">'email'</span>:
+        payload = {<span class="s">'to'</span>: self.partner_id.email, ...}
+        self.env[<span class="s">'mail.mail'</span>].create(payload).send()
+    <span class="k">elif</span> self.channel == <span class="s">'sms'</span>:
+        <span class="k">if</span> <span class="k">not</span> self.partner_id.mobile:
+            <span class="k">raise</span> UserError(...)
+        self.env[<span class="s">'sms.api'</span>]._send(...)
+    <span class="k">elif</span> self.channel == <span class="s">'edi'</span>:
+        <span class="c"># 30 righe di costruzione XML</span>
+        ...
+    <span class="k">else</span>:
+        <span class="k">raise</span> UserError(_(<span class="s">"Canale sconosciuto"</span>))</code></pre></figure>
+    <figure class="code after"><figcaption><b>strategy</b> una classe per canale</figcaption>
+<pre><code><span class="c"># services/channels.py</span>
+<span class="k">class</span> <span class="f">Channel</span>(abc.ABC):
+    code: <span class="f">str</span>
+    <span class="n">@abc</span>.abstractmethod
+    <span class="k">def</span> <span class="f">send</span>(self, env, record) -&gt; <span class="k">None</span>: ...
+
+<span class="k">class</span> <span class="f">EmailChannel</span>(Channel):
+    code = <span class="s">'email'</span>
+    <span class="k">def</span> <span class="f">send</span>(self, env, record):
+        env[<span class="s">'mail.mail'</span>].create(self._payload(record)).send()
+
+REGISTRY = {c.code: c <span class="k">for</span> c <span class="k">in</span> (EmailChannel(), SmsChannel(), EdiChannel())}
+
+<span class="c"># models/notification.py</span>
+<span class="k">def</span> <span class="f">_send</span>(self):
+    <span class="k">for</span> rec <span class="k">in</span> self:
+        channels.REGISTRY[rec.channel].send(self.env, rec)</code></pre></figure>
+  </div>
+  <p class="cap"><b>Polimorfismo, in parole povere:</b> invece che il chiamante chieda "di che tipo è questo?" e si ramifichi, ogni tipo ha la sua piccola classe che offre lo stesso nome di metodo. È il <em>tipo</em> a scegliere. È la tecnica che il Livello 2 ha continuato a rimandare.</p>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-poly" data-name="Polimorfismo">
+  <div class="tag"><b>L3</b> · Polimorfismo</div>
+  <h2>Il guadagno, espresso come diff</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Aggiungere un canale: scala contro registry">
+      <text x="4" y="16" class="d-lbl-b">AGGIUNGERE UN CANALE WHATSAPP — CON LA SCALA</text>
+      <rect x="4" y="24" width="80" height="22" class="d-box-w"/><text x="14" y="39" class="d-lbl">_send()</text>
+      <rect x="92" y="24" width="80" height="22" class="d-box-w"/><text x="102" y="39" class="d-lbl">_preview()</text>
+      <rect x="180" y="24" width="80" height="22" class="d-box-w"/><text x="190" y="39" class="d-lbl">_validate()</text>
+      <rect x="268" y="24" width="80" height="22" class="d-box-w"/><text x="278" y="39" class="d-lbl">_retry()</text>
+      <rect x="356" y="24" width="80" height="22" class="d-box-w"/><text x="366" y="39" class="d-lbl">_report()</text>
+      <text x="450" y="39" class="d-lbl" style="fill:var(--warn)">5 file modificati · 5 occasioni di rompere l'email</text>
+      <text x="4" y="80" class="d-lbl-b">CON IL REGISTRY</text>
+      <rect x="4" y="88" width="150" height="22" class="d-box-g"/><text x="14" y="103" class="d-lbl">+ WhatsAppChannel</text>
+      <rect x="162" y="88" width="150" height="22" class="d-box-g"/><text x="172" y="103" class="d-lbl">+ 1 voce nel registry</text>
+      <text x="326" y="103" class="d-lbl" style="fill:var(--sage)">0 file esistenti toccati · l'email non può rompersi</text>
+      <text x="4" y="136" class="d-lbl">Estendere senza modificare. Questa proprietà ha un nome: principio Open/Closed.</text>
+    </svg>
+  </div>
+  <p class="mini">Qui <code>abc.ABC</code> fa lavoro vero: se in un canale nuovo dimentichi <code>send()</code>, la classe non è nemmeno creabile. L'errore emerge all'import, non in produzione alle 2 di notte. <span class="chip est">assodato</span></p>
+  <div class="note trap"><p><b>Il confine:</b> questo costa indirezione — il lettore deve saltare a un altro file. Con due rami che non cambiano mai, l'<code>if</code> semplice è meglio. Applicalo quando la scala compare in più di un metodo, o quando arriva la terza opzione. <b>Due è una coincidenza; tre è un pattern.</b></p></div>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-surgery" data-name="Chirurgia maggiore">
+  <div class="tag"><b>L3</b> · Chirurgia maggiore</div>
+  <h2>Extract Class <span class="sm">smell: un gruppo di metodi tocca solo un gruppo di campi</span></h2>
+  <p class="sub">Apri un model grosso e guarda quali campi usa ogni metodo. Se otto metodi toccano solo cinque campi, e gli altri venti quei cinque non li toccano mai — sono due classi che condividono un file per caso. <strong>Bassa coesione, resa misurabile.</strong></p>
+  <div class="grid3">
+    <div class="card"><h4>Destinazione 1 · classe service</h4><p>Python puro in <code>services/</code>. La più economica. Giusta quando la cosa estratta sono <b>regole</b>.</p></div>
+    <div class="card"><h4>Destinazione 2 · mixin AbstractModel</h4><p>Quando serve l'ORM <b>e</b> viene riusata da più model.</p></div>
+    <div class="card"><h4>Destinazione 3 · nuovo model</h4><p>La più costosa — tabella, viste, regole di accesso. Solo quando la cosa ha identità e ciclo di vita propri nel database.</p></div>
+  </div>
+  <div class="note"><p><b>I passi, e l'ordine conta più della destinazione:</b></p>
+  <p>dai un nome al concetto → crea la classe nuova → sposta <b>un solo</b> metodo → fai in modo che il vecchio deleghi al nuovo → esegui i test → ripeti → cancella i metodi-delega quando non li chiama più nessuno.</p>
+  <p>In nessun momento il sistema è rotto. Se ti interrompono per tre giorni, quello che c'è sul branch funziona ancora e si può ancora mergiare. Quella proprietà <em>è</em> la tecnica; tutto il resto è contabilità.</p></div>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-surgery" data-name="Chirurgia maggiore">
+  <div class="tag"><b>L3</b> · Chirurgia maggiore</div>
+  <h2>Strangler: modificare codice che ti fa paura</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 165" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Migrazione strangler fig">
+      <rect x="4" y="26" width="118" height="30" class="d-box-w"/><text x="16" y="46" class="d-lbl">vecchio · 100%</text>
+      <rect x="144" y="26" width="118" height="30" class="d-box-w"/><text x="156" y="46" class="d-lbl">vecchio · 99%</text>
+      <rect x="144" y="60" width="118" height="16" class="d-box-g"/><text x="156" y="72" class="d-lbl">nuovo · 1 azienda</text>
+      <rect x="284" y="26" width="118" height="22" class="d-box-w"/><text x="296" y="42" class="d-lbl">vecchio · 60%</text>
+      <rect x="284" y="52" width="118" height="24" class="d-box-g"/><text x="296" y="68" class="d-lbl">nuovo · 40%</text>
+      <rect x="424" y="26" width="118" height="14" class="d-box-w"/><text x="436" y="37" class="d-lbl">vecchio · 5%</text>
+      <rect x="424" y="44" width="118" height="32" class="d-box-g"/><text x="436" y="64" class="d-lbl">nuovo · 95%</text>
+      <rect x="564" y="26" width="122" height="50" class="d-box-g"/><text x="576" y="55" class="d-lbl">nuovo · 100%</text>
+      <path d="M126 45 L140 45 M266 45 L280 45 M406 45 L420 45 M546 45 L560 45" class="d-ln-a"/>
+      <text x="4" y="96" class="d-lbl-b">1 · costruisci a fianco</text><text x="144" y="96" class="d-lbl-b">2 · devia un caso</text>
+      <text x="284" y="96" class="d-lbl-b">3 · verifica, allarga</text><text x="424" y="96" class="d-lbl-b">4 · verifica ancora</text>
+      <text x="564" y="96" class="d-lbl-b">5 · cancella il vecchio</text>
+      <line x1="4" y1="112" x2="696" y2="112" class="d-ln"/>
+      <text x="4" y="132" class="d-lbl">Ogni passo è annullabile da solo — l'unica proprietà che rende sopravvivibile toccare legacy spaventoso.</text>
+      <text x="4" y="150" class="d-lbl">Dal fico strangolatore, che cresce attorno all'albero ospite e resta in piedi da solo quando l'albero non c'è più.</text>
+    </svg>
+  </div>
+  <p class="cap">Entrambi gli istinti sono sbagliati: lasciar stare per sempre è decadimento lento; la riscrittura eroica del weekend è un diff non revisionabile che porta in produzione ogni bug che hai introdotto <em>più</em> ogni comportamento non documentato di cui ignoravi l'esistenza. <span class="chip est">assodato</span> — tecnica industriale documentata, non una nostra invenzione.</p>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-surgery" data-name="Chirurgia maggiore">
+  <div class="tag"><b>L3</b> · Chirurgia maggiore</div>
+  <h2>Cosa hanno in comune tutte le mosse di questa presentazione</h2>
+  <div class="grid3">
+    <div class="card"><h4>Piccole</h4><p>Ognuna sta in una seduta. Nessuna richiede di tenere in testa l'intero sistema — cosa che, come da introduzione, non puoi fare comunque.</p></div>
+    <div class="card"><h4>Verificabili</h4><p>Test verdi dopo ciascuna. Sai sempre se sei ancora su terreno solido.</p></div>
+    <div class="card"><h4>Reversibili</h4><p>Interrotto per tre giorni? Quello che c'è sul branch funziona. <code>git revert</code> è sempre disponibile.</p></div>
+  </div>
+  <div class="skippy">
+    <p>La riscrittura eroica del weekend <i>sembra</i> ingegneria perché sembra <b>difficile</b>, e il tuo monkey brain ha la sfortunata abitudine di scambiare la fatica per valore. Non è ingegneria. È una scommessa, piazzata con l'uptime della tua squadra, da qualcuno che ha confuso l'adrenalina con la competenza.</p>
+    <p>L'ingegneria vera è noiosa apposta: dieci passi banali, ognuno verificato, che arrivano dove non avresti potuto saltare. <b>Se il tuo refactoring è emozionante, fermati: hai fatto i passi troppo grandi.</b></p>
+  </div>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-patterns" data-name="Design pattern">
+  <div class="tag"><b>L3</b> · Design pattern</div>
+  <h2>Un pattern è un <em>nome</em>, non una tecnologia</h2>
+  <p class="sub">Qualcuno ha notato la stessa forma comparire in migliaia di programmi, l'ha messa per iscritto e le ha dato un nome, così se ne può parlare in tre parole invece che in trenta. È tutto qui — e significa che ne hai già inventati diversi per caso.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Pattern</th><th>Problema che risolve</th><th>In Odoo</th><th>Costo</th></tr></thead>
+    <tbody>
+      <tr><td><b>Template Method</b></td><td>Passi fissi, dettagli variabili</td><td>Lo usi ogni giorno — ogni override con <code>super()</code> è uno di questi. Formalizzalo estraendo metodi <code>_hook_*</code>, così gli addon futuri si innestano invece di copiare il tuo metodo.</td><td>~zero</td></tr>
+      <tr><td><b>Strategy + Registry</b></td><td>Scala di if/elif su una Selection</td><td>Dizionario <code>codice → handler</code> in <code>services/</code>. Esempio completo due slide fa.</td><td>1 indirezione</td></tr>
+      <tr><td><b>Adapter / Gateway</b></td><td>Un sistema esterno che trasuda ovunque</td><td>Una classe per sistema esterno. Traduce il vocabolario <em>loro</em> nel <em>nostro</em>; è l'unico file che importa <code>requests</code>. La loro API cambia → modifichi un file. Nei test simuli un oggetto.</td><td>1 classe</td></tr>
+      <tr><td><b>Value Object</b></td><td>Significato trasportato da float e stringhe nudi</td><td><code>@dataclass(frozen=True)</code> per importi, intervalli di date, payload. Stessa idea del Parameter Object, altro punto d'ingresso.</td><td>~zero</td></tr>
+      <tr><td><b>Null Object</b></td><td><code>if not partner:</code> venti volte</td><td>Gratis in Odoo e nessuno se ne accorge: un <b>recordset vuoto è sicuro</b> da iterare, filtrare e valutare. Togli la guardia.</td><td>zero</td></tr>
+    </tbody>
+  </table></div>
+  <p class="cap"><b>I pattern sono vocabolario, non architettura.</b> "Qui dovremmo usare un pattern" non è un progetto. I pattern descrivono un progetto dopo che hai deciso qual è il problema.</p>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-patterns" data-name="Design pattern">
+  <div class="tag"><b>L3</b> · Design pattern</div>
+  <h2>Quattro che non vogliamo vedere qui</h2>
+  <div class="grid2">
+    <div class="card"><h4>Container di dependency injection</h4><p>Python ha gli import di modulo e gli argomenti di default. Un container aggiunge configurazione e indirezione per risolvere un problema che non hai.</p></div>
+    <div class="card"><h4>Layer repository sopra l'ORM</h4><p>L'ORM <b>è</b> il repository. Incapsularlo ti regala un secondo ORM, peggiore, da mantenere.</p></div>
+    <div class="card"><h4>Classi singleton</h4><p>Un modulo Python è già un singleton. Usa un modulo.</p></div>
+    <div class="card"><h4>Getter/setter che non fanno nulla</h4><p><code>get_name()</code> che restituisce <code>self.name</code> è cerimoniale. Usa l'attributo — promuovilo a <code>@property</code> il giorno in cui serve un comportamento, e nessun chiamante cambia.</p></div>
+  </div>
+  <div class="skippy">
+    <p>Un avvertimento su quello che succede adesso, e lo dico col più profondo affetto per la vostra specie. Circa tre giorni dopo aver imparato la parola "pattern", un monkey brain entra in una fase in cui <b>tutto</b> è un'occasione da pattern. Factory che producono factory. Un'interfaccia con esattamente una implementazione, "per flessibilità". Sei file dove c'era una funzione.</p>
+    <p>L'indizio è che ti sembra sofisticato. La sofisticazione vera è un'altra cosa: qualcuno legge il tuo codice, lo capisce subito e non si accorge che sia successo niente di intelligente. <b>Se un lettore deve ammirare il tuo design prima di poterlo usare, non gli hai costruito uno strumento: ti sei costruito un monumento, e adesso tocca a lui spolverarlo per sempre.</b></p>
+  </div>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-ormdepth" data-name="ORM in profondità">
+  <div class="tag"><b>L3</b> · ORM in profondità</div>
+  <h2>Tre casi in cui il costo è la correttezza, non la velocità</h2>
+  <div class="grid3">
+    <div class="card"><h4><code>@api.depends</code></h4><p>Deve elencare <b>ogni</b> campo che il compute legge, anche attraverso le relazioni. Dimenticane uno → valore vecchio, solo in certi ordini di modifica, solo a volte. <b>La classe di bug più difficile da riprodurre di tutta la presentazione</b> — per questo sta qui e non nel Livello 1. <span class="chip est">assodato</span></p></div>
+    <div class="card"><h4><code>sudo()</code></h4><p>Disattiva i diritti di accesso. Limitalo a una sola espressione, mai a un intero metodo, e <b>mai</b> a una search il cui domain contiene input dell'utente — è così che si costruisce una fuga di dati per sbaglio. Ogni uso si porta dietro un commento che spiega perché.</p></div>
+    <div class="card"><h4>SQL grezzo</h4><p>Richiede una giustificazione scritta nella PR, e sempre parametrizzato: <code>cr.execute(q, (a, b))</code>, mai una f-string. Salta cache, record rule e campi computed. A volte è esattamente quello che vuoi — non è mai quello che vuoi <b>per caso</b>.</p></div>
+  </div>
+  <div class="note trap">
+    <p><b>Cosa lega tutti e tre:</b> l'ORM sta facendo un'enorme quantità di lavoro al posto tuo — tracciamento delle dipendenze, filtro dei permessi, cache, raggruppamento. Ognuno di questi tre <b>esce da quella macchina</b>, e la modalità di fallimento non è mai un crash. È un dato silenziosamente sbagliato, scoperto da un commercialista, fra un trimestre.</p>
+    <p>Il principio generale da portarsi via: quando aggiri le garanzie di un framework, ne erediti la responsabilità. Scrivi quale ti sei preso, nella PR, dove la prossima persona la vedrà.</p>
+  </div>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-why" data-name="Perché funziona">
+  <div class="tag"><b>L3</b> · Perché funziona</div>
+  <h2>Il vero motivo per scrivere i test</h2>
+  <div class="skippy">
+    <p>So bene che "scrivi i test" arriva a un monkey brain indaffarato come "fai lavoro in più senza ricompensa visibile", e che quando arriva la scadenza i test sono la prima cosa buttata a mare. Quindi lasciate che lo riformuli in termini che il vostro istinto di sopravvivenza sappia elaborare.</p>
+    <p>I test non sono una tassa sul rilascio. I test sono <b>il meccanismo con cui smetti di avere paura del tuo stesso codice.</b></p>
+    <p>Ogni sviluppatore che ti è sembrato irragionevolmente veloce nel modificare sistemi complessi non era più intelligente di te. Ne ho conosciuti di più intelligenti, e non era quello. Aveva semplicemente un modo di verificare il proprio lavoro in meno di dieci secondi — così ha provato sei cose nel tempo che ti serviva per trovare il coraggio di provarne una.</p>
+  </div>
+  <p class="sub">Ed è il filo che attraversa tutti e tre i livelli: <strong>ogni tecnica qui dentro converte la paura in una procedura.</strong> Dividi il file per trovare le cose. Metti l'underscore per poter rinominare. Estrai per poter testare. Testa per poter cambiare. Strangola per poter sostituire senza scommettere il trimestre.</p>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-next" data-name="Continua">
+  <div class="tag"><b>L3</b> · Continua</div>
+  <h2>Quattro settimane. Ogni passo rende più facile il successivo.</h2>
+  <div class="dia">
+    <svg viewBox="0 0 700 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Piano di pratica di quattro settimane">
+      <rect x="4" y="24" width="164" height="44" class="d-box-g"/><text x="16" y="42" class="d-lbl-b">SETT. 1 · dividi un file</text><text x="16" y="58" class="d-lbl">zero modifiche di logica</text>
+      <rect x="180" y="24" width="164" height="44" class="d-box-g"/><text x="192" y="42" class="d-lbl-b">SETT. 2 · estrai 10 funzioni</text><text x="192" y="58" class="d-lbl">ogni commento → un metodo</text>
+      <rect x="356" y="24" width="164" height="44" class="d-box"/><text x="368" y="42" class="d-lbl-b">SETT. 3 · un service</text><text x="368" y="58" class="d-lbl">+ test unitari sui limiti</text>
+      <rect x="532" y="24" width="164" height="44" class="d-box"/><text x="544" y="42" class="d-lbl-b">SETT. 4 · uccidi una scala</text><text x="544" y="58" class="d-lbl">Selection → registry</text>
+      <path d="M168 46 L176 46 M344 46 L352 46 M520 46 L528 46" class="d-ln-a"/>
+      <text x="4" y="96" class="d-lbl">Settimana 1: imparerai cosa fa l'ordine degli import in __init__.py sbagliandolo una volta — il modo corretto di impararlo.</text>
+      <text x="4" y="112" class="d-lbl">Settimana 3: fai caso a quanto sono veloci i test. Quella sensazione è tutto il senso dell'esercizio.</text>
+    </svg>
+  </div>
+  <div class="note"><p><b>Poi, in modo continuativo: passa la checklist del Livello 2 su ogni PR, a partire dalle tue.</b> È facendo review che si forma il riconoscimento degli schemi — vedi le conseguenze delle scelte invece di limitarti a farle.</p></div>
+  <p class="cap">Non assorbirai tutto questo leggendolo. Nessuno lo fa. Leggere produce la <em>sensazione</em> di aver capito, che è una sostanza diversa dalla capacità di farlo un giovedì sotto pressione.</p>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-next" data-name="Continua">
+  <div class="tag"><b>L3</b> · Continua</div>
+  <h2>Cosa leggere, in quest'ordine</h2>
+  <div class="grid2">
+    <div class="card"><h4>1 · Refactoring — Martin Fowler (2ª ed.)</h4><p>Il catalogo che ha dato il nome a quasi tutte le mosse viste qui. Leggi bene i primi tre capitoli, poi usa il resto come consultazione. Gli esempi sono in JavaScript; si traducono senza difficoltà.</p></div>
+    <div class="card"><h4>2 · A Philosophy of Software Design — Ousterhout</h4><p>Breve e schierato. Il miglior trattamento disponibile di <b>dove</b> tracciare i confini: moduli profondi, interfacce strette. Leggilo secondo — cambia il modo in cui leggi Fowler.</p></div>
+    <div class="card"><h4>3 · Linee guida Odoo</h4><p><a href="https://www.odoo.com/documentation/19.0/contributing/development/coding_guidelines.html">La pagina ufficiale</a> per nomi, struttura e idiomi ORM, più la guida OCA per i repository condivisi.</p></div>
+    <div class="card"><h4>4 · Il tuo sorgente Odoo</h4><p><code>addons/sale</code> e <code>addons/account</code>, per capire come il framework vuole essere esteso. Materiale di consultazione — <b>non</b> modello di stile, per il motivo spiegato nel Livello 2.</p></div>
+  </div>
+  <div class="note"><p><b>Deliberatamente non trattati:</b> convenzioni XML e OWL sul frontend · progettazione di sicurezza e regole di accesso · migrazione dei moduli tra versioni Odoo · profiling delle prestazioni. Ognuno merita una presentazione propria invece di un paragrafo in quella di qualcun altro.</p></div>
+</section>
+
+<section class="slide" data-level="3" data-topic="l3-next" data-name="Continua">
+  <div class="tag"><b>L3</b> · Continua</div>
+  <h2>Un'ultima cosa</h2>
+  <div class="skippy">
+    <p>Tutto quello che c'è in questi tre livelli è una tecnica per aggirare un cervello che tiene quattro cose alla volta, dimentica le proprie decisioni nel giro di settimane e scambia sistematicamente la familiarità per comprensione.</p>
+    <p>Non è un insulto. È la scheda tecnica con cui lavori. È la stessa con cui ha lavorato ogni grande ingegnere della storia, e i grandi erano semplicemente quelli che hanno smesso di discuterci e hanno iniziato a costruirci attorno.</p>
+    <p>Gli sviluppatori che consideri geniali non tengono in testa più cose di te. Hanno solo passato anni ad accumulare piccole abitudini per non doverlo fare. A te quella lista di abitudini è appena stata consegnata in circa un'ora, il che francamente è un vantaggio considerevole, e mi aspetto la dovuta gratitudine.</p>
+    <p><b>Vai a dividere un file.</b></p>
+  </div>
+</section>
+
+<!-- ================= CREDITI ================= -->
+<section class="slide" data-level="0" data-topic="credits" data-name="Crediti">
+  <div class="tag">Crediti e fonti</div>
+  <h2>Sulle spalle dei giganti, a sfotterli da lassù</h2>
+  <div class="grid2">
+    <div class="card" style="border-left:2px solid var(--amber)">
+      <h4 style="color:var(--amber)">La voce</h4>
+      <p><b>Skippy the Magnificent</b> è un personaggio creato da <b>Craig Alanson</b>, dalla serie di fantascienza <em>Expeditionary Force</em> (2016– ). Un'IA Elder antichissima, di potenza sconcertante e insopportabilmente arrogante, che chiama gli esseri umani "monkeys" e ha, irritantemente, quasi sempre ragione.</p>
+      <p>Usato qui affettuosamente come espediente retorico, senza alcuna affiliazione né approvazione da parte dell'autore o dell'editore. Se la voce vi è piaciuta, i libri sono parecchio meglio di questa presentazione — e gli audiolibri, letti da <b>R.C. Bray</b>, sono il modo in cui la maggior parte delle persone lo incontra.</p>
+    </div>
+    <div class="card">
+      <h4>La sostanza tecnica</h4>
+      <p><b>Martin Fowler</b> — <em>Refactoring</em> (2ª ed.): Extract Function, Replace Conditional with Polymorphism, Introduce Parameter Object, Replace Temp with Query, Move Method, Split Loop, Extract Class e lo Strangler Fig.</p>
+      <p><b>John Ousterhout</b> — <em>A Philosophy of Software Design</em>: moduli profondi e interfacce strette, dietro buona parte del Livello 2.</p>
+      <p><b>Bertrand Meyer</b> — il principio Open/Closed, Livello 3.</p>
+      <p><b>Nelson Cowan</b> (2001) — <em>The magical number 4 in short-term memory</em>, il dato sulla capienza nell'introduzione.</p>
+      <p><b>Odoo S.A.</b> — Coding Guidelines ufficiali, e le linee guida di contribuzione <b>OCA</b>.</p>
+    </div>
+  </div>
+  <div class="note">
+    <p><b>Le correzioni sono benvenute e vengono integrate.</b> Tre voci sono marcate <span class="chip ver">versione</span> perché cambiano tra release Odoo — l'API di raggruppamento, <code>@api.model_create_multi</code> e la dichiarazione dei vincoli SQL. Verifica sulla versione del tuo branch prima di copiare qualsiasi cosa, inclusa questa.</p>
+  </div>
+  <p class="mini dim" style="font-family:var(--mono);font-size:var(--f-mono);line-height:1.9">
+    Code Craft per Python in Odoo · Teksistemi Software · newsletter di ingegneria · v4<br>
+    Scritta per le nostre squadre. Documento vivo — mandate correzioni.
+  </p>
+  <div style="margin-top:1.1rem;display:flex;gap:.6rem;flex-wrap:wrap">
+    <button class="navbtn" onclick="goTopic('l1-start')">Livello 1</button>
+    <button class="navbtn" onclick="goTopic('l2-start')">Livello 2</button>
+    <button class="navbtn" onclick="goTopic('l3-start')">Livello 3</button>
+    <button class="navbtn primary" onclick="go(0)">Torna all'inizio</button>
+  </div>
+</section>
+
+</div><!-- /stage -->
+
+<div id="bar">
+  <button class="navbtn" id="prev" onclick="step(-1)">&larr; Indietro</button>
+  <button class="navbtn primary" id="next" onclick="step(1)">Avanti &rarr;</button>
+  <div class="where"><b id="lvlabel"></b> <span id="sname"></span></div>
+  <div id="count">1 / 1</div>
+</div>
+
+<script>
+window.DECK = {
+  lang: 'it',
+  ui: { start: 'Inizia \u2192', next: 'Avanti \u2192', checked: 'spuntate' },
+  lvname: {
+    '0': 'Introduzione',
+    '1': 'Livello 1 \u00b7 Fallo adesso',
+    '2': 'Livello 2 \u00b7 Costruisci l\u2019abitudine',
+    '3': 'Livello 3 \u00b7 Vai a fondo'
+  },
+  tree: [
+    { lvl: '0', cls: 'lv0', label: 'Introduzione', note: '3 slide', topics: [
+      { k: 'intro', t: 'Parti da qui' }
+    ]},
+    { lvl: '1', cls: 'lv1', label: 'Livello 1 \u00b7 Fallo adesso', note: '~15 min \u00b7 zero teoria', topics: [
+      { k: 'l1-files',   t: 'Dividi il file' },
+      { k: 'l1-names',   t: 'Marca cosa &egrave; privato' },
+      { k: 'l1-flat',    t: 'Appiattisci il flusso' },
+      { k: 'l1-extract', t: 'Estrai e verifica' },
+      { k: 'l1-super',   t: 'Non spezzare la catena' },
+      { k: 'l1-tools',   t: 'Fai fare ai tool' },
+      { k: 'l1-recap',   t: 'Riepilogo' }
+    ]},
+    { lvl: '2', cls: 'lv2', label: 'Livello 2 \u00b7 Costruisci l\u2019abitudine', note: '~25 min \u00b7 giudizio', topics: [
+      { k: 'l2-drift',    t: 'Come deriva il codice' },
+      { k: 'l2-encap',    t: 'Incapsulamento' },
+      { k: 'l2-abstract', t: 'Astrazione e contratti' },
+      { k: 'l2-services', t: 'Il layer services' },
+      { k: 'l2-refactor', t: 'Disciplina del refactoring' },
+      { k: 'l2-inherit',  t: 'Scegliere l&rsquo;ereditariet&agrave;' },
+      { k: 'l2-perf',     t: 'Query e recordset' },
+      { k: 'l2-tests',    t: 'Test' },
+      { k: 'l2-gates',    t: 'Gate e checklist' }
+    ]},
+    { lvl: '3', cls: 'lv3', label: 'Livello 3 \u00b7 Vai a fondo', note: '~25 min \u00b7 pratica', topics: [
+      { k: 'l3-compose',  t: 'Composizione vs ereditariet&agrave;' },
+      { k: 'l3-poly',     t: 'Polimorfismo' },
+      { k: 'l3-surgery',  t: 'Chirurgia maggiore' },
+      { k: 'l3-patterns', t: 'Design pattern' },
+      { k: 'l3-ormdepth', t: 'ORM in profondit&agrave;' },
+      { k: 'l3-why',      t: 'Perch&eacute; funziona' },
+      { k: 'l3-next',     t: 'Continua' }
+    ]},
+    { lvl: '0', cls: 'lv0', label: 'Crediti', note: 'fonti', topics: [
+      { k: 'credits', t: 'Crediti e fonti' }
+    ]}
+  ]
+};
+</script>
+<script>
+/* Code Craft deck — shared navigation.
+   Each page defines window.DECK = { tree, lvname, ui, lang } before loading this file. */
+(function () {
+  var D = window.DECK || {};
+  var UI = D.ui || {};
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var LVSTART = { '1': 'l1-start', '2': 'l2-start', '3': 'l3-start' };
+  var idx = 0;
+
+  /* ---- build the tree rail ---- */
+  var tv = document.getElementById('tree');
+  (D.tree || []).forEach(function (grp) {
+    var h = document.createElement('button');
+    h.className = 'lvhead ' + grp.cls;
+    h.innerHTML = '<span class="dot"></span>' + grp.label + '<small>' + grp.note + '</small>';
+    h.onclick = function () {
+      var start = LVSTART[grp.lvl];
+      goTopic(start && document.querySelector('[data-topic="' + start + '"]') ? start : grp.topics[0].k);
+    };
+    tv.appendChild(h);
+    grp.topics.forEach(function (tp) {
+      var b = document.createElement('button');
+      b.className = 'topic';
+      b.innerHTML = tp.t;
+      b.setAttribute('data-key', tp.k);
+      b.onclick = function () { goTopic(tp.k); };
+      tv.appendChild(b);
+    });
+  });
+
+  function render() {
+    slides.forEach(function (s, i) { s.classList.toggle('active', i === idx); });
+    var cur = slides[idx];
+    var lvl = cur.getAttribute('data-level');
+    var key = cur.getAttribute('data-topic');
+    document.body.setAttribute('data-level', lvl);
+    document.getElementById('lvlabel').textContent = (D.lvname || {})[lvl] || '';
+    document.getElementById('sname').textContent = '· ' + (cur.getAttribute('data-name') || '');
+    document.getElementById('count').textContent = (idx + 1) + ' / ' + slides.length;
+    document.getElementById('prog').style.width = (idx / (slides.length - 1) * 100) + '%';
+    document.getElementById('prev').disabled = (idx === 0);
+    var nx = document.getElementById('next');
+    nx.disabled = (idx === slides.length - 1);
+    nx.textContent = idx === 0 ? (UI.start || 'Start →') : (UI.next || 'Next →');
+    Array.prototype.forEach.call(tv.querySelectorAll('.topic'), function (b) {
+      b.classList.toggle('on', b.getAttribute('data-key') === key);
+    });
+    document.getElementById('stage').scrollTop = 0;
+    if (history.replaceState) history.replaceState(null, '', '#' + (idx + 1));
+    syncLangLinks();
+  }
+
+  /* keep the slide position when switching language */
+  function syncLangLinks() {
+    Array.prototype.forEach.call(document.querySelectorAll('.langsw a[data-base]'), function (a) {
+      a.href = a.getAttribute('data-base') + '#' + (idx + 1);
+    });
+  }
+
+  window.go = function (i) { idx = Math.max(0, Math.min(slides.length - 1, i)); render(); };
+  window.step = function (d) { window.go(idx + d); };
+  window.goTopic = function (key) {
+    for (var i = 0; i < slides.length; i++) {
+      if (slides[i].getAttribute('data-topic') === key) { window.go(i); return; }
+    }
+  };
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') { window.step(1); e.preventDefault(); }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { window.step(-1); e.preventDefault(); }
+    if (e.key === ' ') { window.step(1); e.preventDefault(); }
+    if (e.key === 'Home') { window.go(0); }
+    if (e.key === 'End') { window.go(slides.length - 1); }
+  });
+
+  var x0 = null, stage = document.getElementById('stage');
+  stage.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+  stage.addEventListener('touchend', function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 70) window.step(dx < 0 ? 1 : -1);
+    x0 = null;
+  }, { passive: true });
+
+  /* ---- interactive checklist ---- */
+  var list = document.getElementById('chklist');
+  function countChk() {
+    if (!list) return;
+    document.getElementById('chkcount').textContent =
+      list.querySelectorAll('.done').length + ' / ' + list.children.length + ' ' + (UI.checked || 'checked');
+  }
+  if (list) {
+    Array.prototype.forEach.call(list.children, function (li) {
+      li.addEventListener('click', function () { li.classList.toggle('done'); countChk(); });
+    });
+  }
+  window.resetChk = function () {
+    Array.prototype.forEach.call(list.children, function (li) { li.classList.remove('done'); });
+    countChk();
+  };
+
+  /* An explicit choice beats detection, and is what the router in index.html reads.
+     Only seed the key when it is unset: merely opening an issue is not a choice. */
+  Array.prototype.forEach.call(document.querySelectorAll('.langsw a[data-lang]'), function (a) {
+    a.addEventListener('click', function () {
+      try { localStorage.setItem('tks-lang', a.getAttribute('data-lang')); } catch (e) {}
+    });
+  });
+  try { if (!localStorage.getItem('tks-lang')) localStorage.setItem('tks-lang', D.lang || 'it'); } catch (e) {}
+
+  var h = parseInt((location.hash || '').replace('#', ''), 10);
+  if (h && h >= 1 && h <= slides.length) idx = h - 1;
+  render();
+})();
+</script>
+</body>
+</html>
