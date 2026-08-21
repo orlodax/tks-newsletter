@@ -17,6 +17,7 @@ Written by **orlodax**. Italian is the source language; every issue has an en-US
 | 004 | [La finestra rotta](004-finestra-rotta.html) · [The broken window](en/004-the-broken-window.html) | Deck, 9 slides | 2 Aug 2026 |
 | 005 | [Errori di fabbrica](005-errori-di-fabbrica.html) · [Factory settings](en/005-factory-settings.html) | Deck, 23 slides | 7 Aug 2026 |
 | 006 | [Code Craft per Python in Odoo](006-code-craft-python-odoo.html) · [Code Craft for Odoo Python](en/006-code-craft-for-odoo-python.html) | Deck, 53 slides | 21 Aug 2026 |
+| 007 | [Il Triangolo Impossibile](007-triangolo-impossibile.html) · [The Impossible Triangle](en/007-the-impossible-triangle.html) | Note, ~12 min | 21 Aug 2026 |
 
 ## How this is built
 
