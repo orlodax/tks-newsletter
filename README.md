@@ -18,6 +18,7 @@ Written by **orlodax**. Italian is the source language; every issue has an en-US
 | 005 | [Errori di fabbrica](005-errori-di-fabbrica.html) · [Factory settings](en/005-factory-settings.html) | Deck, 23 slides | 7 Aug 2026 |
 | 006 | [Code Craft per Python in Odoo](006-code-craft-python-odoo.html) · [Code Craft for Odoo Python](en/006-code-craft-for-odoo-python.html) | Deck, 53 slides | 21 Aug 2026 |
 | 007 | [Il Triangolo Impossibile](007-triangolo-impossibile.html) · [The Impossible Triangle](en/007-the-impossible-triangle.html) | Note, ~12 min | 21 Aug 2026 |
+| 008 | [Claustrum](008-claustrum.html) · [Claustrum](en/008-claustrum.html) | Deck, 14 slides | 12 Sep 2026 |
 
 ## How this is built
 

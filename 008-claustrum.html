@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claustrum — un direttore, qualunque sia il podio · Teksistemi 008</title>
+<meta name="description" content="Perché una squadra divisa fra Claude, Cursor, opencode e Copilot ha bisogno di un solo direttore d'orchestra, e come Claustrum lo costruisce: un nucleo, due porte, qualunque harness.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05070a; --bg-2:#090d12; --panel:#0b1118;
+  --line:#153826; --line-hi:#1f6a3f;
+  --ink:#b9c8bd; --ink-hi:#e6f2e8; --dim:#5f7366;
+  --g:#39ff88; --g-2:#21c55d; --g-dim:#0f3d24;
+  --amber:#ffb454; --amber-dim:#5a3d12;
+  --red:#ff5d5d; --cyan:#5fd7ff;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --topbar:38px; --navbar:46px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);font-family:var(--mono);
+  font-size:clamp(14px,1.05vw,17.5px);line-height:1.55;
+  -webkit-font-smoothing:antialiased;overflow:hidden;
+}
+a{color:var(--g);text-decoration:none}
+a:hover{text-decoration:underline}
+::selection{background:var(--g);color:#031008}
+
+/* CRT ------------------------------------------------------------------ */
+.scan{position:fixed;inset:0;pointer-events:none;z-index:50;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);
+  mix-blend-mode:multiply}
+.vig{position:fixed;inset:0;pointer-events:none;z-index:49;
+  background:radial-gradient(120% 90% at 50% 45%,transparent 55%,rgba(0,0,0,.55) 100%)}
+canvas#rain{position:fixed;inset:0;z-index:0;opacity:0;transition:opacity .9s ease}
+canvas#rain.on{opacity:.55}
+
+/* top bar -------------------------------------------------------------- */
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--topbar);z-index:40;
+  display:flex;align-items:center;gap:18px;padding:0 18px;
+  background:rgba(5,7,10,.92);border-bottom:1px solid var(--line);
+  font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+.topbar .doc{color:var(--g-2)}
+.topbar .part{color:var(--ink);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .lang a{padding:2px 7px;border:1px solid var(--line);margin-left:4px;color:var(--dim)}
+.topbar .lang a.on{color:var(--g);border-color:var(--g-2)}
+.topbar .live i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--g);margin-right:7px;
+  box-shadow:0 0 8px var(--g);animation:pulse 2.2s infinite}
+@keyframes pulse{50%{opacity:.35}}
+
+/* deck ----------------------------------------------------------------- */
+.deck{position:fixed;top:var(--topbar);bottom:var(--navbar);left:0;right:0;z-index:1}
+.slide{position:absolute;inset:0;overflow-y:auto;display:none;padding:34px 28px}
+.slide.on{display:flex;flex-direction:column}
+.wrap{width:100%;max-width:1200px;margin:auto}
+.slide.wide .wrap{max-width:1360px}
+
+.prompt{font-size:.86rem;color:var(--dim);margin:0 0 14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prompt .ps1{color:var(--g-2)}
+.prompt .cmd{color:var(--ink-hi)}
+.cur{display:inline-block;width:.6em;height:1.05em;background:var(--g);vertical-align:-.15em;margin-left:2px;
+  animation:blink 1.05s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+h1{font-size:clamp(1.9rem,4.4vw,3.6rem);line-height:1.05;font-weight:800;color:var(--ink-hi);margin:0 0 18px;letter-spacing:-.01em}
+h2{font-size:clamp(1.35rem,2.6vw,2.15rem);line-height:1.15;font-weight:700;color:var(--ink-hi);margin:0 0 20px;letter-spacing:-.01em;max-width:30ch}
+h2 em,h1 em{font-style:normal;color:var(--g)}
+h3{font-size:.95rem;font-weight:700;color:var(--g);margin:0 0 8px;text-transform:uppercase;letter-spacing:.08em}
+p{margin:0 0 14px;max-width:72ch}
+p.lead{font-size:1.1rem;color:var(--ink-hi);max-width:64ch}
+strong{color:var(--ink-hi);font-weight:700}
+.g{color:var(--g)} .am{color:var(--amber)} .dim{color:var(--dim)} .red{color:var(--red)} .cy{color:var(--cyan)}
+small,.small{font-size:.8rem;color:var(--dim)}
+code{color:var(--amber);font-size:.93em}
+kbd{font-family:inherit;font-size:.78em;padding:1px 6px;border:1px solid var(--line-hi);border-radius:3px;color:var(--ink-hi)}
+
+.box{position:relative;border:1px solid var(--line);padding:18px 20px;background:rgba(9,13,18,.72);margin:0 0 16px}
+.box[data-label]::before{content:attr(data-label);position:absolute;top:-.7em;left:12px;padding:0 6px;
+  background:var(--bg);color:var(--g-2);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase}
+.box.am{border-color:var(--amber-dim)} .box.am[data-label]::before{color:var(--amber)}
+.box.red{border-color:#5a1f1f} .box.red[data-label]::before{color:var(--red)}
+.box > :last-child{margin-bottom:0}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.grid2 > .box,.grid3 > .box{margin:0}
+
+pre{margin:0;font-family:inherit;white-space:pre;overflow-x:auto}
+pre.ascii{color:var(--g);font-size:clamp(.58rem,.95vw,.92rem);line-height:1.22;text-shadow:0 0 6px rgba(57,255,136,.25)}
+pre.ascii .d{color:var(--dim)} pre.ascii .a{color:var(--amber)} pre.ascii .w{color:var(--ink-hi)}
+pre.code{font-size:.84rem;line-height:1.5;color:var(--ink);padding:14px 16px;border:1px solid var(--line);background:var(--bg-2)}
+pre.code .c{color:var(--dim)} pre.code .k{color:var(--g)} pre.code .s{color:var(--amber)} pre.code .n{color:var(--cyan)}
+
+table{border-collapse:collapse;width:100%;font-size:.88rem;margin:0 0 12px}
+th{text-align:left;color:var(--g-2);font-weight:700;padding:8px 10px;border-bottom:1px solid var(--line-hi);
+  font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px dashed var(--line);vertical-align:top;color:var(--ink)}
+td.k{color:var(--ink-hi);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right;white-space:nowrap}
+
+ul.ls{list-style:none;padding:0;margin:0 0 14px}
+ul.ls li{padding:4px 0 4px 1.6em;position:relative;max-width:70ch}
+ul.ls li::before{content:'>';position:absolute;left:.3em;color:var(--g)}
+ul.ls li.x::before{content:'x';color:var(--red)}
+ul.ls li.ok::before{content:'✓';color:var(--g)}
+ul.ls li.q::before{content:'?';color:var(--amber)}
+
+/* cover ---------------------------------------------------------------- */
+.cover{text-align:left}
+.cover .kick{color:var(--g-2);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;margin:0 0 22px}
+.logo{color:var(--g);font-size:clamp(.42rem,1.28vw,1.14rem);line-height:1.15;text-shadow:0 0 10px rgba(57,255,136,.35);margin:0 0 26px;letter-spacing:0}
+.logo .r{color:var(--g-dim)}
+.tag{font-size:clamp(.95rem,1.5vw,1.25rem);color:var(--ink-hi);margin:0 0 22px;min-height:1.6em}
+.hint{color:var(--dim);font-size:.78rem;margin-top:26px}
+
+/* chart ---------------------------------------------------------------- */
+svg.plot{width:100%;height:auto;display:block;overflow:visible}
+.plot .grid{stroke:#102418;stroke-width:1}
+.plot .ax{stroke:var(--line-hi);stroke-width:1}
+.plot text{font-family:var(--mono);fill:var(--dim);font-size:11.5px}
+.plot text.lab{fill:var(--ink);font-size:12px;font-weight:700}
+.plot .ser{fill:none;stroke-width:2.4;stroke-linecap:round}
+@media (prefers-reduced-motion:no-preference){
+  .plot .ser{stroke-dasharray:1400;stroke-dashoffset:1400;animation:draw 1.4s cubic-bezier(.22,.8,.3,1) forwards}
+  .plot .ser:nth-of-type(2){animation-delay:.15s}.plot .ser:nth-of-type(3){animation-delay:.3s}
+  .plot .mk{opacity:0;animation:fadein .5s ease 1.5s forwards}
+}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fadein{to{opacity:1}}
+
+/* roles ---------------------------------------------------------------- */
+.role{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:baseline;padding:10px 0;border-bottom:1px dashed var(--line)}
+.role:last-child{border-bottom:0}
+.role b{color:var(--ink-hi)} .role span{display:block;color:var(--dim);font-size:.82rem;max-width:56ch}
+.role .m{color:var(--g);font-weight:700;white-space:nowrap}
+.role .m.am{color:var(--amber)}
+
+/* steps / status --------------------------------------------------------- */
+.ms{display:grid;grid-template-columns:auto 1fr auto;gap:10px 16px;font-size:.86rem;align-items:baseline}
+.ms .n{color:var(--g);font-weight:700}.ms .st{color:var(--dim);white-space:nowrap}
+.ms .st.ok{color:var(--g)}.ms .st.now{color:var(--amber)}
+
+/* nav ------------------------------------------------------------------ */
+.nav{position:fixed;left:0;right:0;bottom:0;height:var(--navbar);z-index:40;display:flex;align-items:center;gap:14px;padding:0 16px;
+  background:rgba(5,7,10,.94);border-top:1px solid var(--line);font-size:.76rem;color:var(--dim)}
+.prog{flex:1;display:flex;gap:3px;height:6px}
+.prog b{flex:1;background:var(--g-dim);cursor:pointer;transition:background .2s}
+.prog b.done{background:var(--g-2)}
+.prog b:hover{background:var(--g)}
+.nav button{font-family:inherit;font-size:.8rem;background:transparent;color:var(--g);border:1px solid var(--line-hi);padding:4px 10px;cursor:pointer}
+.nav button:disabled{opacity:.3;cursor:default}
+.nav button:hover:not(:disabled){background:var(--g-dim)}
+.count{color:var(--ink);min-width:7ch;text-align:center}
+
+/* rail ----------------------------------------------------------------- */
+.rail{position:fixed;top:var(--topbar);bottom:var(--navbar);left:0;width:min(360px,88vw);z-index:45;transform:translateX(-102%);
+  transition:transform .25s ease;background:var(--panel);border-right:1px solid var(--line);padding:18px 16px;overflow-y:auto;font-size:.84rem}
+.rail.on{transform:none}
+.rail .rh{color:var(--dim);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;margin:0 0 10px}
+.rail .part{color:var(--g-2);margin:14px 0 4px;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase}
+.rail button{display:block;width:100%;text-align:left;font-family:inherit;font-size:.84rem;background:none;border:0;color:var(--ink);padding:5px 6px;cursor:pointer}
+.rail button em{font-style:normal;color:var(--dim);display:inline-block;width:2.6em}
+.rail button.here{color:var(--g);background:var(--g-dim)}
+.rail button:hover{color:var(--ink-hi)}
+.back{position:fixed;inset:0;z-index:44;background:rgba(0,0,0,.5);display:none}
+.back.on{display:block}
+
+@media (max-width:820px){
+  .grid2,.grid3{grid-template-columns:1fr}
+  .slide{padding:22px 16px}
+  .topbar .live,.topbar .arch{display:none}
+  .role{grid-template-columns:1fr}
+  h2{max-width:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .cur,.topbar .live i{animation:none}
+  canvas#rain{display:none}
+}
+</style>
+</head>
+<body>
+
+<canvas id="rain" aria-hidden="true"></canvas>
+<div class="scan" aria-hidden="true"></div>
+<div class="vig" aria-hidden="true"></div>
+
+<header class="topbar">
+  <span class="doc">TEKSISTEMI // NEWSLETTER TECNICA</span>
+  <a class="arch" href="index.html">← Archivio</a>
+  <span class="part" id="tbpart">008 · CLAUSTRUM</span>
+  <span class="lang"><a href="008-claustrum.html" class="on">IT</a><a href="en/008-claustrum.html">EN</a></span>
+  <span class="live"><i></i>tty1 · online</span>
+</header>
+
+<nav class="rail" id="rail" aria-label="Indice">
+  <p class="rh">$ ls slides/</p>
+  <div id="railbody"></div>
+</nav>
+<div class="back" id="back"></div>
+
+<main class="deck" id="deck">
+
+<!-- 00 · copertina -->
+<section class="slide on cover" data-part="Copertina" data-title="Copertina">
+  <div class="wrap">
+    <p class="kick">Teksistemi · Newsletter tecnica · numero 008 · 12 settembre 2026</p>
+<pre class="logo" id="logo" aria-label="CLAUSTRUM">
+ ██████╗██╗      █████╗ ██╗   ██╗███████╗████████╗██████╗ ██╗   ██╗███╗   ███╗
+██╔════╝██║     ██╔══██╗██║   ██║██╔════╝╚══██╔══╝██╔══██╗██║   ██║████╗ ████║
+██║     ██║     ███████║██║   ██║███████╗   ██║   ██████╔╝██║   ██║██╔████╔██║
+██║     ██║     ██╔══██║██║   ██║╚════██║   ██║   ██╔══██╗██║   ██║██║╚██╔╝██║
+╚██████╗███████╗██║  ██║╚██████╔╝███████║   ██║   ██║  ██║╚██████╔╝██║ ╚═╝ ██║
+ ╚═════╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝
+</pre>
+    <p class="tag" id="tag"><span class="g">$</span> <span id="typed"></span><span class="cur"></span></p>
+    <p class="lead">Una squadra divisa fra Claude, Cursor, opencode e Copilot. Una pipeline di agenti che funzionava solo dentro uno di quei quattro. E un conto della spesa che diceva di smettere di scegliere il modello per fornitore.</p>
+    <p class="lead">Questo numero racconta il bisogno, poi lo strumento nato per rispondergli: <strong>un nucleo, due porte, qualunque harness.</strong></p>
+    <p class="hint">Frecce <kbd>←</kbd> <kbd>→</kbd> per navigare · <kbd>m</kbd> apre l'indice · tocco laterale su mobile</p>
+  </div>
+</section>
+
+<!-- ============================ PARTE I · IL BISOGNO ============================ -->
+
+<!-- 01 -->
+<section class="slide" data-part="Parte I · Il bisogno" data-title="La squadra è divisa">
+  <div class="wrap">
+    <p class="prompt"><span class="ps1">orlodax@tks:~/claustrum$</span> <span class="cmd">cat team.txt</span><span class="cur"></span></p>
+    <h2>Quattro harness, <em>una</em> disciplina — e la disciplina vive in uno solo</h2>
+    <div class="grid2">
+      <div class="box" data-label="chi usa cosa">
+        <table>
+          <tr><th>Persona</th><th>Harness</th><th>Modelli</th></tr>
+          <tr><td class="k">Dario</td><td>Claude Code, desktop app, opencode</td><td>Fable / Opus / Sonnet + OpenRouter</td></tr>
+          <tr><td class="k">collega A</td><td>Cursor</td><td>quel che Cursor offre</td></tr>
+          <tr><td class="k">collega B</td><td>opencode soltanto</td><td>DeepSeek via OpenRouter</td></tr>
+          <tr><td class="k">collega C</td><td>Copilot CLI, VS Code</td><td>Copilot</td></tr>
+        </table>
+        <p class="small">Nessuno è nel torto: ogni scelta è un abbonamento, un'abitudine, un cliente che impone lo strumento.</p>
+      </div>
+      <div class="box" data-label="la pipeline che avevamo">
+<pre class="ascii">
+ <span class="w">architetto</span>
+     │  progetta, delega, triagia
+     ▼
+ <span class="w">builder</span> ×N ──► <span class="w">revisore cieco</span> ‖ <span class="w">ui-reviewer</span>
+                      │  vede solo task + diff
+                      ▼
+                   <span class="w">tester</span>
+</pre>
+        <p>Ordine fisso, revisione <strong>alla cieca</strong>, report onesto del builder: tre regole che in un mese ci hanno risparmiato più di quanto siano costate.</p>
+        <p class="am">Il problema: la delega è il tool <code>Agent</code> di Claude Code, e i ruoli sono file in formato Claude. Fuori da lì, la pipeline non esiste.</p>
+      </div>
+    </div>
+    <p>Chi è su Cursor lavora <em>bene</em>, ma da solo. Chi è su opencode ha il modello più economico del mercato e nessuna revisione cieca. La disciplina è di uno, non della squadra — e una disciplina di uno non è una disciplina.</p>
+  </div>
+</section>
+
+<!-- 02 -->
+<section class="slide wide" data-part="Parte I · Il bisogno" data-title="Diciotto minuti">
+  <div class="wrap">
+    <p class="prompt"><span class="ps1">orlodax@tks:~/claustrum$</span> <span class="cmd">./cost --per-solved-task --with-cleanup</span><span class="cur"></span></p>
+    <h2>I token economici smettono di essere economici a <em>diciotto minuti</em></h2>
+    <div class="grid2" style="grid-template-columns:1.35fr 1fr">
+      <div class="box" data-label="costo totale per task risolto · un agente, retry inclusi">
+        <svg class="plot" viewBox="0 0 880 350" role="img" aria-label="Grafico a linee: il costo per task risolto cresce con il costo umano di pulizia per run fallito. DeepSeek V4 Pro parte più basso ma sale più in fretta; supera Sonnet 5 a 6,75 dollari di pulizia e Opus 5 a 17,60.">
+          <line class="grid" x1="70" y1="300" x2="820" y2="300"/><line class="grid" x1="70" y1="232.5" x2="820" y2="232.5"/>
+          <line class="grid" x1="70" y1="165" x2="820" y2="165"/><line class="grid" x1="70" y1="97.5" x2="820" y2="97.5"/><line class="grid" x1="70" y1="30" x2="820" y2="30"/>
+          <text x="58" y="304" text-anchor="end">$0</text><text x="58" y="236.5" text-anchor="end">$9</text><text x="58" y="169" text-anchor="end">$18</text><text x="58" y="101.5" text-anchor="end">$27</text><text x="58" y="34" text-anchor="end">$36</text>
+          <line class="ax" x1="70" y1="300" x2="820" y2="300"/>
+          <text x="70" y="320" text-anchor="middle">$0</text><text x="257.5" y="320" text-anchor="middle">$10</text><text x="445" y="320" text-anchor="middle">$20</text><text x="632.5" y="320" text-anchor="middle">$30</text><text x="820" y="320" text-anchor="middle">$40</text>
+          <text x="445" y="343" text-anchor="middle">costo umano di pulizia per run fallito (c)</text>
+          <line class="mk" x1="400" y1="175.5" x2="400" y2="300" stroke="#ffb454" stroke-width="1" stroke-dasharray="3 4" opacity=".6"/>
+          <path class="ser" stroke="#ffb454" d="M70,283.8 L820,37.8"/>
+          <path class="ser" stroke="#39ff88" d="M70,271.7 L820,97.7"/>
+          <path class="ser" stroke="#c8ffd9" d="M70,235.0 L820,100.0"/>
+          <g class="mk">
+            <circle cx="196.6" cy="242.3" r="4.5" fill="#05070a" stroke="#39ff88" stroke-width="2.2"/>
+            <text class="lab" x="206" y="262" fill="#39ff88">$6.75 — Sonnet 5 passa in testa</text>
+            <circle cx="400" cy="175.5" r="5.5" fill="#ffb454" stroke="#05070a" stroke-width="2"/>
+            <text class="lab" x="412" y="163" fill="#ffb454">$17.60 — Opus 5 passa in testa</text>
+          </g>
+          <g transform="translate(600,40)"><rect x="0" y="0" width="14" height="3" fill="#ffb454"/><text x="20" y="4">DeepSeek V4 Pro</text>
+            <rect x="0" y="16" width="14" height="3" fill="#39ff88"/><text x="20" y="20">Claude Sonnet 5</text>
+            <rect x="0" y="32" width="14" height="3" fill="#c8ffd9"/><text x="20" y="36">Claude Opus 5</text></g>
+        </svg>
+      </div>
+      <div>
+        <div class="box am" data-label="l'aritmetica">
+<pre class="code"><span class="c">// costo per task risolto, c = pulizia umana per fallimento</span>
+<span class="k">Opus 5</span>    = 8.67 + 0.45·c
+<span class="k">Sonnet 5</span>  = 3.78 + 0.58·c
+<span class="k">V4 Pro</span>    = 2.16 + 0.82·c
+
+<span class="c">// pareggio Opus ↔ V4 Pro</span>
+c ≈ <span class="s">$17.60</span>  <span class="c">≈ 18 min a 60 €/h</span></pre>
+        </div>
+        <p>Sul solo prezzo dei token DeepSeek vince per quattro a uno. Ma un run fallito non costa solo il retry: costa <strong>una persona che capisce cosa è andato storto</strong>. Sopra i diciotto minuti di triage, il modello caro è quello che costa meno.</p>
+        <p class="small">Tassi di successo da SWE-bench Pro (V4 Pro 55,4 % · Sonnet 5 63,2 % · Opus 69,2 %). I volumi di token sono ipotesi da sostituire con misure. Analisi completa: nota interna «Claude vs DeepSeek», settembre 2026.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 -->
+<section class="slide" data-part="Parte I · Il bisogno" data-title="Per ruolo, non per fornitore">
+  <div class="wrap">
+    <p class="prompt"><span class="ps1">orlodax@tks:~/claustrum$</span> <span class="cmd">route --by role</span><span class="cmd dim"> # non --by vendor</span><span class="cur"></span></p>
+    <h2>L'errore si propaga in modo <em>asimmetrico</em>: instradare per ruolo</h2>
+    <div class="grid2" style="grid-template-columns:1.2fr 1fr">
+      <div class="box" data-label="chi può permettersi di sbagliare">
+        <div class="role"><div><b>Architetto</b><span>Un piano sbagliato lo ereditano tutti i builder a valle; non si recupera senza rifare tutto. Pochi token, premio economico in assoluto.</span></div><div class="m">Opus 5</div></div>
+        <div class="role"><div><b>Revisore cieco</b><span>Deve essere <em>più</em> capace di ciò che revisiona, o timbra. Mai un modello più economico di quello che ha scritto il codice.</span></div><div class="m">Opus 5 / Sonnet 5</div></div>
+        <div class="role"><div><b>Builder ×N</b><span>Alto volume, output verificato a valle, errori contenuti localmente. È qui che l'instradamento paga.</span></div><div class="m am">Sonnet 5 · DeepSeek V4</div></div>
+        <div class="role"><div><b>Tester</b><span>Output controllabile meccanicamente, il volume più alto di tutti. Vince il modello più economico che ce la fa.</span></div><div class="m am">V4 Flash</div></div>
+      </div>
+      <div>
+        <div class="box red" data-label="il modo di fallire da sorvegliare">
+          <p>Mettere il modello economico <strong>nel posto del revisore</strong>. Un revisore meno capace del builder produce approvazioni sicure di lavoro rotto: trasforma il livello di verifica in un generatore di fluenza, e il registro mostrerà un tasso di divergenza in calo che significa l'opposto di ciò che sembra.</p>
+        </div>
+        <p>Da qui la conclusione della nota: <strong>ibrido, instradato per ruolo</strong>. Cattura circa l'80 % del risparmio disponibile e tiene i ruoli con errore irrecuperabile sul modello capace.</p>
+        <p class="am">Ed è qui che il conto si scontra con la squadra: instradare per ruolo richiede che <em>un solo direttore</em> possa parlare a tutti i modelli, da qualunque podio stia dirigendo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 -->
+<section class="slide" data-part="Parte I · Il bisogno" data-title="Cosa serviva">
+  <div class="wrap">
+    <p class="prompt"><span class="ps1">orlodax@tks:~/claustrum$</span> <span class="cmd">diff desiderio realtà</span><span class="cur"></span></p>
+    <h2>Il capitolato, prima di scrivere una riga</h2>
+    <div class="grid2">
+      <div class="box" data-label="deve">
+        <ul class="ls">
+          <li class="ok">Funzionare <strong>da qualunque posto</strong>: app desktop di Claude, VS Code, Cursor, e le CLI — Claude Code, opencode, Copilot CLI.</li>
+          <li class="ok">Delegare a <strong>qualunque backend</strong>: Claude, DeepSeek via opencode/OpenRouter, Cursor, Copilot, o una chiamata API nuda.</li>
+          <li class="ok">Conservare le tre regole: <strong>revisione cieca</strong>, <strong>report onesto</strong>, <strong>ordine fisso</strong>.</li>
+          <li class="ok">Un tetto di spesa — <em>disattivabile</em>.</li>
+          <li class="ok">N builder in parallelo senza che si calpestino.</li>
+        </ul>
+      </div>
+      <div class="box am" data-label="non deve">
+        <ul class="ls">
+          <li class="x">Essere un plugin per un IDE. Ne servirebbero quattro, e resterebbero indietro.</li>
+          <li class="x">Fidarsi della disciplina del prompt. Ciò che conta si <em>impone</em>, non si chiede.</li>
+          <li class="x">Tradurre percorsi fra Windows e WSL. Ogni copia lancia i backend del proprio sistema.</li>
+          <li class="x">Essere una macchina a stati in C#. Il pipeline è il prompt dell'architetto.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="box" data-label="l'osservazione che ha deciso la forma">
+      <p>Ogni host dell'elenco — desktop, IDE, CLI — offre a un agente in chat esattamente <strong>due ganci universali</strong>: un tool di shell e <strong>MCP</strong>. Nient'altro è comune a tutti. Quindi lo strumento ha due porte, e nient'altro.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ PARTE II · LO STRUMENTO ============================ -->
+
+<!-- 05 -->
+<section class="slide" data-part="Parte II · Lo strumento" data-title="man claustrum">
+  <div class="wrap">
+    <p class="prompt"><span class="ps1">orlodax@tks:~/claustrum$</span> <span class="cmd">man claustrum</span><span class="cur"></span></p>
+    <div class="grid2" style="grid-template-columns:1.1fr 1fr;align-items:start">
+      <div>
+        <h2><em>Claustrum</em> — delega di agenti indipendente dall'harness</h2>
+        <p class="lead">Un «architetto» in qualunque host delega build, revisioni e test ad agenti che girano su <strong>qualunque altro</strong> harness e modello, e riceve indietro un solo risultato normalizzato.</p>
+        <p>Il nome viene da una lamina sottile di neuroni sotto la corteccia, connessa a quasi ogni regione del cervello. Nel loro ultimo lavoro insieme, Crick e Koch la proposero come il <em>direttore d'orchestra</em> che lega le aree specializzate in un unico atto coerente. È esattamente il lavoro: non suona nessuno strumento, fa suonare gli altri insieme.</p>
+        <p class="small">Crick &amp; Koch, «What is the function of the claustrum?», Phil. Trans. R. Soc. B, 2005.</p>
+      </div>
+      <div class="box" data-label="synopsis">
+<pre class="code"><span class="k">claustrum</span> run &lt;ruolo&gt; --brief-file &lt;md&gt; [--cast &lt;nome&gt;] [--json]
+<span class="k">claustrum</span> cast new | questions | create | list | use
+<span class="k">claustrum</span> coordinate --cast &lt;nome&gt; --issues 12,13
+<span class="k">claustrum</span> sync [--only claude,opencode] [--global] [--check]
+<span class="k">claustrum</span> backends list | doctor
+<span class="k">claustrum</span> jobs list | show | logs | clean
+<span class="k">claustrum</span> mcp                      <span class="c"># server MCP su stdio</span>
+
+<span class="c">Binario singolo, .NET 10 NativeAOT: Windows, macOS, Linux.
+Nessun runtime da installare. ~3 MB.</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 -->
+<section class="slide" data-part="Parte II · Lo strumento" data-title="Due porte, una stanza">
+  <div class="wrap">
+    <p class="prompt"><span class="ps1">orlodax@tks:~/claustrum$</span> <span class="cmd">claustrum --help | head</span><span class="cur"></span></p>
+    <h2>Come gli si parla: <em>due porte</em>, una stanza sola</h2>
+    <p class="lead">Qualunque assistente con cui state chattando sa fare due cose, sempre: <strong>eseguire un comando</strong> nel terminale, e <strong>usare uno strumento</strong> tramite MCP — la presa standard con cui un assistente aggancia programmi esterni. Claustrum si offre in entrambi i modi. Da qualunque porta si entri, si finisce nella stessa stanza.</p>
+<pre class="ascii">
+   voi, in chat ─────► «delega questo a un builder economico»
+                                     │
+                 ┌───────────────────┴───────────────────┐
+                 │ <span class="w">porta 1</span>: un comando     <span class="w">porta 2</span>: uno strumento MCP │
+                 └───────────────────┬───────────────────┘
+                                     ▼
+                              [ <span class="a">claustrum</span> ]
+             prepara · fotografa · lancia · rifotografa · legge il rapporto
+                                     ▼
+                          <span class="w">una ricevuta, sempre uguale</span>
+</pre>
+    <div class="grid3">
+      <div class="box" data-label="porta 1 · il comando"><p>L'assistente scrive una riga nel terminale e aspetta che finisca. Funziona in ogni host già oggi, senza installare nulla nell'IDE.</p></div>
+      <div class="box" data-label="porta 2 · lo strumento"><p>L'assistente chiama <em>delegate</em> come chiamerebbe una calcolatrice. Più comodo, ma dipende dall'host che sappia parlare MCP — e ormai lo sanno tutti.</p></div>
+      <div class="box" data-label="la stanza · cosa fa davvero">
+        <ul class="ls">
+          <li><strong>prepara</strong> le istruzioni per l'agente delegato: chi è, cosa può toccare, come deve riferire</li>
+          <li><strong>fotografa</strong> il repository con git</li>
+          <li><strong>lancia</strong> l'agente sull'harness scelto e aspetta</li>
+          <li><strong>rifotografa</strong>: la differenza è ciò che ha cambiato davvero</li>
+          <li><strong>legge il rapporto</strong> finale e consegna la ricevuta</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 -->
+<section class="slide" data-part="Parte II · Lo strumento" data-title="L'ordine di lavoro e la ricevuta">
+  <div class="wrap">
+    <p class="prompt"><span class="ps1">orlodax@tks:~/claustrum$</span> <span class="cmd">claustrum run builder --brief-file ordine.md</span><span class="cur"></span></p>
+    <h2>Cosa si dà, cosa si riceve: l'<em>ordine di lavoro</em> e la <em>ricevuta</em></h2>
+    <div class="grid2">
+      <div class="box" data-label="quello che si dà · l'ordine di lavoro">
+        <p>Come il foglio che si lascia a un artigiano. Quattro voci fisse, sempre le stesse:</p>
+        <table>
+          <tr><td class="k">Compito</td><td>le parole di chi lo chiede, tali e quali</td></tr>
+          <tr><td class="k">Perimetro</td><td>quali cartelle e file può toccare</td></tr>
+          <tr><td class="k">Non rompere</td><td>cosa deve continuare a funzionare</td></tr>
+          <tr><td class="k">Le modifiche</td><td>come vederle, per chi dovrà giudicarle</td></tr>
+        </table>
+        <p class="small">Chi ha scritto il piano può aggiungere una voce «Contesto». Il revisore cieco, no: la sua copia dell'ordine non ha quella riga, per costruzione.</p>
+      </div>
+      <div class="box" data-label="quello che torna · la ricevuta">
+<pre class="code"><span class="k">RICEVUTA</span> · lavoro 20260912-1403
+esito ............ <span class="s">riuscito</span>
+chi .............. builder su DeepSeek V4 Flash, via opencode
+file cambiati .... 2    <span class="c">← lo dice git, non l'agente</span>
+   + Backends/OpencodeBackend.cs
+   ~ Backends/Registry.cs
+rapporto dell'agente
+   cosa ho fatto ...... aggiunto il backend opencode
+   da testare ......... la lettura degli eventi JSONL
+   deciso da solo ..... niente, il foglio bastava
+   traballante ........ i nomi degli eventi non sono confermati
+costo ............ $0.012 · 41 s</pre>
+        <p class="small">In realtà è JSON, per le macchine. Questa è la traduzione — ma le voci sono esattamente quelle.</p>
+      </div>
+    </div>
+    <p>Due dettagli fanno la differenza. <strong>«File cambiati» lo dice git</strong>, fotografando prima e dopo: l'agente non può dimenticarsene, né inventarli. E il rapporto ha <strong>quattro righe obbligatorie</strong> — l'ultima, «traballante», è quella che nessuno scriverebbe spontaneamente ed è quella che vale di più: è lì che chi coordina guarda per prima.</p>
+  </div>
+</section>
+
+<!-- 08 -->
+<section class="slide" data-part="Parte II · Lo strumento" data-title="Il cast">
+  <div class="wrap">
+    <p class="prompt"><span class="ps1">orlodax@tks:~/claustrum$</span> <span class="cmd">/claustrum</span><span class="cmd dim">   # in qualunque chat</span><span class="cur"></span></p>
+    <h2>Il <em>cast</em>: chi recita quale ruolo, deciso una volta</h2>
+    <div class="grid2" style="grid-template-columns:1fr 1.15fr">
+      <div>
+        <p>Si dice «<em>usa claustrum per coordinare le issue 12 e 13 con un architetto Opus, tre builder DeepSeek, revisione Opus, tester Flash</em>», oppure semplicemente <code>/claustrum</code>. In entrambi i casi lo strumento fa <strong>sette domande</strong>, sempre le stesse, in qualunque host:</p>
+        <ul class="ls">
+          <li>architetto: <em>host</em> (sei tu) oppure spawnato su…</li>
+          <li>builder: modello + <em>max in parallelo</em></li>
+          <li>revisore del codice · revisore UI · tester — o «non serve»</li>
+          <li>tetto di spesa — o «<strong>nessun tetto</strong>»</li>
+        </ul>
+        <div class="box am" data-label="perché le domande le fa lo strumento">
+          <p>Se vivessero nel prompt di ogni harness, derivano e ognuno le formula a modo suo. <code>claustrum cast questions --json</code> le restituisce con le <strong>opzioni reali</strong>: solo i backend installati e autenticati, solo gli alias configurati. La chat è l'interfaccia, non la fonte.</p>
+        </div>
+      </div>
+      <div class="box" data-label=".claustrum/casts/default.json · committabile">
+<pre class="code">{ <span class="n">"architect"</span>:     { <span class="n">"mode"</span>: <span class="s">"host"</span> },
+  <span class="n">"builder"</span>:       { <span class="n">"model"</span>: <span class="s">"opencode:openrouter/deepseek/deepseek-v4-pro"</span>,
+                     <span class="n">"max_parallel"</span>: 3 },
+  <span class="n">"code-reviewer"</span>: { <span class="n">"model"</span>: <span class="s">"claude:opus"</span>, <span class="n">"tier"</span>: <span class="s">"xhigh"</span> },
+  <span class="n">"ui-reviewer"</span>:   null,                       <span class="c">← non serve, stavolta</span>
+  <span class="n">"tester"</span>:        { <span class="n">"model"</span>: <span class="s">"opencode:openrouter/deepseek/deepseek-v4-flash"</span> },
+  <span class="n">"budget_usd"</span>:    10 }                         <span class="c">← null ⇒ nessun tetto</span></pre>
+        <p>Il cast è un <strong>file</strong>, non un ricordo della chat: sopravvive alla compattazione del contesto, si committa, si condivide. La mattina dopo <code>/claustrum</code> dice «cast <em>default</em> trovato — lo uso o rifacciamo?».</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 09 -->
+<section class="slide" data-part="Parte II · Lo strumento" data-title="I ruoli, una fonte sola">
+  <div class="wrap">
+    <p class="prompt"><span class="ps1">orlodax@tks:~/claustrum$</span> <span class="cmd">claustrum sync --only claude,opencode,cursor,copilot</span><span class="cur"></span></p>
+    <h2>I ruoli: <em>una</em> fonte, resa in ogni harness</h2>
+    <div class="grid2" style="grid-template-columns:1.1fr 1fr">
+      <div class="box" data-label="roles/ · nel binario">
+<pre class="code">roles/<span class="k">builder</span>/ROLE.md         <span class="c">corpo neutro, con {{token}}</span>
+roles/<span class="k">builder</span>/role.json       <span class="c">tier → classe di modello, permessi</span>
+roles/<span class="k">builder</span>/parts/delegation.claude.md
+roles/<span class="k">builder</span>/parts/delegation.default.md
+roles/_shared/house-rules.md   <span class="c">«AGENTS.md e CLAUDE.md sono legge»</span>
+roles/_shared/report/builder.md<span class="c">schema del report</span></pre>
+        <table style="margin-top:14px">
+          <tr><th>Harness</th><th>Reso in</th></tr>
+          <tr><td class="k">Claude Code</td><td><code>.claude/agents/*.md</code> + stub -xhigh/-max generati</td></tr>
+          <tr><td class="k">opencode</td><td><code>.opencode/agents/*.md</code></td></tr>
+          <tr><td class="k">Cursor</td><td><code>.cursor/agents/*.md</code></td></tr>
+          <tr><td class="k">Copilot / VS Code</td><td><code>.github/agents/*.agent.md</code></td></tr>
+        </table>
+      </div>
+      <div>
+        <p>I cinque ruoli che avevamo (<code>architect</code>, <code>builder</code>, <code>code-reviewer</code>, <code>ui-reviewer</code>, <code>tester</code>) diventano <strong>un solo testo</strong> ciascuno. L'unico contenuto davvero specifico di Claude era il meccanismo di delega — «usa il tool Agent con <code>subagent_type: builder</code>» — e diventa una parte per harness.</p>
+        <p>I ruoli non nominano modelli: nominano <strong>classi</strong> — <code>frontier-coding</code>, <code>cheap-coding</code>, <code>fast</code> — che ogni sviluppatore mappa sui propri modelli in <code>claustrum.json</code>. Lo stesso file di ruolo serve chi ha solo Claude e chi ha solo DeepSeek.</p>
+        <p>Ogni file generato porta un marcatore in prima riga; <code>sync --check</code> segnala in CI chi l'ha modificato a mano, e un file senza marcatore non viene mai sovrascritto. La cartella <code>~/.claude/agents/</code> di partenza diventa un <em>output</em> di <code>sync --global</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="slide wide" data-part="Parte II · Lo strumento" data-title="I backend">
+  <div class="wrap">
+    <p class="prompt"><span class="ps1">orlodax@tks:~/claustrum$</span> <span class="cmd">claustrum backends list</span><span class="cur"></span></p>
+    <h2>Cinque backend, un'interfaccia: <em>aggiungerne uno è una classe</em></h2>
+    <table>
+      <tr><th>Backend</th><th>Come entra il ruolo</th><th>Permessi «edit + shell, mai push»</th><th>Cosa legge</th></tr>
+      <tr><td class="k">claude</td><td><code>--append-system-prompt-file</code> (file, mai JSON inline attraverso lo shim <code>.cmd</code> di npm)</td><td><code>--permission-mode acceptEdits --permission-prompts none --disallowedTools "Bash(git push*)"</code></td><td><code>--output-format json</code>: result, session, costo</td></tr>
+      <tr><td class="k">opencode</td><td>agente inline in <code>OPENCODE_CONFIG_CONTENT</code>: non tocca il repo né <code>~/.config</code></td><td><code>permission: {"edit":"allow","bash":{"*":"allow","git push*":"deny"}}</code></td><td><code>--format json</code>, eventi JSONL</td></tr>
+      <tr><td class="k">cursor</td><td>nessun gancio di system prompt: il ruolo va <em>in testa</em> al prompt</td><td><code>-f</code> + regola nel prompt (<em>advisory</em>, e <code>doctor</code> lo dice)</td><td><code>--output-format json</code></td></tr>
+      <tr><td class="k">copilot</td><td>file agente per job (<code>COPILOT_HOME</code> dedicato)</td><td><code>--allow-all-tools --deny-tool "shell(git push)"</code></td><td><code>--output-format json</code>, JSONL</td></tr>
+      <tr><td class="k">api</td><td>system message = corpo del ruolo; nessun tool</td><td>n/a — solo ragionamento (revisore, pianificatore)</td><td>OpenRouter o Anthropic, per prefisso del modello</td></tr>
+    </table>
+    <div class="grid3">
+      <div class="box" data-label="IBackend"><pre class="code"><span class="k">interface</span> IBackend {
+  Task&lt;Doctor&gt; DetectAsync(…);
+  ProcessSpec  Build(ResolvedRun run);
+  ParsedOutput Parse(stdout, stderr, exit);
+}</pre></div>
+      <div class="box" data-label="una regola per il nucleo"><p>Il backend suggerisce quali file ha toccato; <strong>git decide</strong>. Snapshot prima e dopo lo spawn: <code>changed_files</code> e <code>diff</code> sono corretti anche per un harness il cui JSON non elenca le modifiche.</p></div>
+      <div class="box" data-label="due case, non una"><p>Claustrum lancia i backend <strong>sul sistema in cui gira</strong>: il binario Windows parla agli harness Windows, quello WSL a quelli Linux. Mai una traduzione <code>D:\</code> ↔ <code>/mnt/d</code>. <code>doctor</code> avvisa quando i due si mescolano.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="slide" data-part="Parte II · Lo strumento" data-title="Disciplina per costruzione">
+  <div class="wrap">
+    <p class="prompt"><span class="ps1">orlodax@tks:~/claustrum$</span> <span class="cmd">grep -rn "enforced" NOTES.md</span><span class="cur"></span></p>
+    <h2>Le regole che contano <em>si impongono</em>, non si chiedono</h2>
+    <div class="grid3">
+      <div class="box" data-label="revisione cieca">
+        <p>Il revisore deve vedere <strong>solo</strong> il task e il diff. Prima era una frase nel prompt dell'architetto, affidata alla sua disciplina.</p>
+        <p>Ora, per un ruolo <code>blind: true</code>, il runner <strong>rifiuta</strong> un brief che contenga <code>## Context</code>, <code>## Plan</code>, <code>## Rationale</code> o un blocco <code>claustrum-report</code> incollato — exit 2, «blind role: brief carries rationale».</p>
+      </div>
+      <div class="box" data-label="builder in parallelo">
+        <p>N builder nello stesso checkout si sovrascrivono a vicenda. Con <code>max_parallel &gt; 1</code> ogni job ha il proprio <code>git worktree</code> su un ramo <code>claustrum/&lt;job&gt;</code>; l'architetto integra con <em>rebase</em>, mai merge commit.</p>
+        <p>Il tetto di parallelismo è un semaforo nel job manager, condiviso da CLI e MCP: un architetto spawnato che esagera <strong>aspetta</strong>.</p>
+      </div>
+      <div class="box" data-label="tetto di spesa">
+        <p>Contabilizzato sull'<strong>intero albero</strong> di job: un figlio che sforerebbe il residuo viene rifiutato con <code>BudgetExceeded</code>, non lanciato.</p>
+        <p>Ed è disattivabile: <code>"budget_usd": null</code>, o «nessun tetto» al questionario. Quando è spento, <code>cast show</code> stampa <code>budget: unlimited</code> — la scelta resta visibile.</p>
+      </div>
+    </div>
+    <p class="small" style="margin-top:14px">La stessa filosofia di «Errori di fabbrica», parte V: un processo che regge non conta sulla vigilanza di chi lo esegue. Qui la membrana non è un prompt, è un <code>if</code>.</p>
+  </div>
+</section>
+
+<!-- 12 -->
+<section class="slide" data-part="Parte II · Lo strumento" data-title="Due modi di dirigere">
+  <div class="wrap">
+    <p class="prompt"><span class="ps1">orlodax@tks:~/claustrum$</span> <span class="cmd">claustrum coordinate --cast default --issues 12,13</span><span class="cur"></span></p>
+    <h2>Due modi di dirigere: dal <em>podio</em> o <em>spawnato</em></h2>
+    <div class="grid2">
+      <div class="box" data-label="architect: host">
+        <p>L'agente con cui stai parlando <strong>è</strong> l'architetto: adotta il ruolo sincronizzato ed emette lui le deleghe. Funziona in ogni host, usa l'abbonamento dell'host. È il caso normale: tu in chat, lui che chiama <code>delegate</code>.</p>
+      </div>
+      <div class="box" data-label="architect: spawned">
+        <p><code>claustrum coordinate</code> lancia <em>anche</em> l'architetto, in modalità headless, sul backend scelto dal cast — <code>claude -p</code> usa l'abbonamento Claude — con il cast iniettato e <code>Bash(claustrum *)</code> permesso. L'architetto chiama Claustrum ricorsivamente per builder, revisori, tester.</p>
+        <p class="am">Il pipeline <strong>è il prompt dell'architetto</strong>. Claustrum fornisce il cast, il gate cieco, il semaforo, il budget sull'albero, e il progresso via <code>job_status</code>. Nessuna macchina a stati.</p>
+      </div>
+    </div>
+    <div class="box" data-label="--issues">
+      <p><code>gh issue view &lt;n&gt; --json title,body</code> diventa il <code>## Task</code> del brief; il commit finale cita <code>Closes #n</code>. Un'issue che non sta sulla board non esiste — e questa la chiude chi l'ha risolta, nella stessa passata.</p>
+    </div>
+    <p>La frase-obiettivo, che è anche il test di accettazione: <em>«usa claustrum per coordinare queste issue con un architetto Opus dal mio abbonamento, che spawni tre builder DeepSeek V4 Pro da OpenRouter, poi revisione con Opus, e il tester su Flash».</em> Una riga in chat, il resto senza mani.</p>
+  </div>
+</section>
+
+<!-- 14 · chiusura -->
+<section class="slide cover" data-part="Chiusura" data-title="exit">
+  <div class="wrap">
+    <p class="prompt"><span class="ps1">orlodax@tks:~/claustrum$</span> <span class="cmd">exit</span><span class="cur"></span></p>
+    <h2>La misura che chiuderebbe la questione</h2>
+    <p class="lead">Non un'altra tabella di benchmark che si contraddicono. Il <strong>tasso di divergenza per ruolo</strong>, letto dal registro che i revisori ciechi già producono: Flash nei posti da builder, Opus in quello dell'architetto, e il livello di falsificazione che risponde al posto nostro.</p>
+    <p>Claustrum serve esattamente a poter fare quell'esperimento senza che ognuno debba cambiare strumento. Il cast è un file: la settimana prossima ne proviamo uno insieme, ciascuno dal proprio podio.</p>
+    <div class="grid2" style="margin-top:22px">
+      <div class="box" data-label="repo"><p><a href="https://github.com/orlodax/Claustrum">github.com/orlodax/Claustrum</a><br><span class="small">licenza MIT</span></p></div>
+      <div class="box" data-label="colophon"><p class="small">Testo e strumento di orlodax. Tema: terminale a fosfori, scanline CRT e pioggia di glifi; JetBrains Mono. Il logo è nel font «ANSI Shadow», lo stesso della copertina di <em>Kriss Journey</em>. Cifre di costo dalla nota interna «Claude vs DeepSeek», settembre 2026 — ipotesi da sostituire con misure.</p></div>
+    </div>
+    <p class="hint">Fine. <kbd>Home</kbd> torna alla copertina.</p>
+  </div>
+</section>
+
+</main>
+
+<nav class="nav" aria-label="Navigazione">
+  <button id="mtoggle" title="Indice (m)">≡</button>
+  <button id="prev" title="Precedente">←</button>
+  <div class="prog" id="prog"></div>
+  <span class="count" id="count">01 / 14</span>
+  <button id="next" title="Successiva">→</button>
+</nav>
+
+<script>
+(function(){
+  var slides = [].slice.call(document.querySelectorAll('.slide'));
+  var prog = document.getElementById('prog'), count = document.getElementById('count');
+  var prev = document.getElementById('prev'), next = document.getElementById('next');
+  var tbpart = document.getElementById('tbpart');
+  var rail = document.getElementById('rail'), back = document.getElementById('back'), railbody = document.getElementById('railbody');
+  var i = 0, reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function pad(n){ return (n<10?'0':'')+n; }
+  var items = [], lastPart = null;
+  slides.forEach(function(s,n){
+    if(s.dataset.part !== lastPart){
+      var p = document.createElement('p'); p.className='part'; p.textContent = s.dataset.part; railbody.appendChild(p); lastPart = s.dataset.part;
+    }
+    var b = document.createElement('button');
+    b.innerHTML = '<em>'+pad(n)+'</em>'+s.dataset.title;
+    b.addEventListener('click', function(){ go(n); closeRail(); });
+    railbody.appendChild(b); items.push(b);
+    var seg = document.createElement('b'); seg.title = s.dataset.title;
+    seg.addEventListener('click', function(){ go(n); }); prog.appendChild(seg);
+  });
+  var segs = [].slice.call(prog.children);
+
+  function openRail(){ rail.classList.add('on'); back.classList.add('on'); }
+  function closeRail(){ rail.classList.remove('on'); back.classList.remove('on'); }
+  document.getElementById('mtoggle').addEventListener('click', function(){ rail.classList.contains('on') ? closeRail() : openRail(); });
+  back.addEventListener('click', closeRail);
+
+  function go(n){
+    if(n<0 || n>=slides.length) return;
+    slides[i].classList.remove('on'); i = n; slides[i].classList.add('on'); slides[i].scrollTop = 0;
+    segs.forEach(function(b,k){ b.classList.toggle('done', k<=i); });
+    items.forEach(function(b,k){ b.classList.toggle('here', k===i); });
+    tbpart.textContent = '008 · ' + (slides[i].dataset.part||'').toUpperCase();
+    count.textContent = pad(i+1)+' / '+pad(slides.length);
+    prev.disabled = i===0; next.disabled = i===slides.length-1;
+    rain(slides[i].classList.contains('cover'));
+    if(i===0) decode();
+    try{ history.replaceState(null,'','#'+(i+1)); }catch(e){}
+  }
+  prev.addEventListener('click', function(){ go(i-1); });
+  next.addEventListener('click', function(){ go(i+1); });
+  document.addEventListener('keydown', function(e){
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){ e.preventDefault(); go(i+1); }
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); go(i-1); }
+    else if(e.key==='Home'){ e.preventDefault(); go(0); }
+    else if(e.key==='End'){ e.preventDefault(); go(slides.length-1); }
+    else if(e.key==='m'||e.key==='M'){ rail.classList.contains('on') ? closeRail() : openRail(); }
+    else if(e.key==='Escape'){ closeRail(); }
+  });
+  var tx=null, ty=null;
+  document.addEventListener('touchstart', function(e){ tx=e.touches[0].clientX; ty=e.touches[0].clientY; }, {passive:true});
+  document.addEventListener('touchend', function(e){
+    if(tx===null) return; var dx=e.changedTouches[0].clientX-tx, dy=e.changedTouches[0].clientY-ty; tx=ty=null;
+    if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)) go(dx<0 ? i+1 : i-1);
+  }, {passive:true});
+
+  /* --- matrix rain (cover + closing only) --- */
+  var cv = document.getElementById('rain'), ctx = cv.getContext('2d'), raf = null, cols = [], glyphs = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉ0123456789ABCDEFXZ<>/|=+*#@$%&';
+  function size(){ cv.width = innerWidth; cv.height = innerHeight; var n = Math.floor(cv.width/18); cols = []; for(var k=0;k<n;k++) cols.push(Math.random()*-cv.height/18); }
+  addEventListener('resize', size); size();
+  var last = 0;
+  function frame(t){
+    raf = requestAnimationFrame(frame);
+    if(t - last < 55) return; last = t;
+    ctx.fillStyle = 'rgba(5,7,10,.16)'; ctx.fillRect(0,0,cv.width,cv.height);
+    ctx.font = '15px "JetBrains Mono", monospace';
+    for(var k=0;k<cols.length;k++){
+      var ch = glyphs[Math.floor(Math.random()*glyphs.length)];
+      ctx.fillStyle = Math.random()<.08 ? '#c8ffd9' : '#21c55d';
+      ctx.fillText(ch, k*18, cols[k]*18);
+      if(cols[k]*18 > cv.height && Math.random() > .975) cols[k] = 0;
+      cols[k]++;
+    }
+  }
+  function rain(on){
+    if(reduced) return;
+    if(on && !raf){ cv.classList.add('on'); raf = requestAnimationFrame(frame); }
+    else if(!on && raf){ cancelAnimationFrame(raf); raf = null; cv.classList.remove('on'); }
+  }
+
+  /* --- logo decode + typed tagline --- */
+  var logo = document.getElementById('logo'), final = logo.textContent, typed = document.getElementById('typed');
+  var tagline = 'un nucleo · due porte · qualunque harness';
+  var decoding = false;
+  function decode(){
+    if(reduced || decoding){ typed.textContent = tagline; return; }
+    decoding = true;
+    var lines = final.replace(/^\n/,'').split('\n'), width = 78, start = performance.now(), dur = 1300;
+    var pool = '░▒▓█╔╗╚╝║═╬╦╩╠╣0101';
+    function step(now){
+      var p = Math.min(1,(now-start)/dur), lock = Math.floor(p*(width+12))-6;
+      var out = lines.map(function(ln){
+        var s=''; for(var c=0;c<width;c++){ var ch = ln[c]||' ';
+          if(c < lock || ch===' ') s += ch; else s += pool[Math.floor(Math.random()*pool.length)]; }
+        return s; }).join('\n');
+      logo.textContent = out;
+      if(p<1) requestAnimationFrame(step); else { logo.textContent = final; type(); }
+    }
+    requestAnimationFrame(step);
+  }
+  function type(){
+    typed.textContent = ''; var k = 0;
+    (function tick(){ if(k<=tagline.length){ typed.textContent = tagline.slice(0,k++); setTimeout(tick, 28+Math.random()*40); } else decoding = false; })();
+  }
+
+  var h = parseInt((location.hash||'').replace('#',''),10);
+  go(!isNaN(h) && h>=1 && h<=slides.length ? h-1 : 0);
+})();
+</script>
+</body>
+</html>
