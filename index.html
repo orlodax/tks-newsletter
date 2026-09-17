@@ -5,9 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Teksistemi · Newsletter tecnica</title>
 <meta name="description" content="Archivio della newsletter tecnica interna di Teksistemi.">
+<meta name="theme-color" content="#1C1B1E">
 <link rel="alternate" hreflang="it" href="https://orlodax.github.io/tks-newsletter/">
 <link rel="alternate" hreflang="en" href="https://orlodax.github.io/tks-newsletter/en/">
 <link rel="alternate" hreflang="x-default" href="https://orlodax.github.io/tks-newsletter/">
+<!-- Icona 3.2, variante canale sviluppo. Sotto i 64px il pixel non si vede: il tek va tutto verde. Vedi BRAND.md § 3.4. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='797.03 377.02 325.95 325.95'%3E%3Cpath d='M837.77,702.97c-22.5,0-40.74-18.24-40.74-40.74v-233.84c0-34.25,17.83-51.37,53.48-51.37h231.73c22.5,0,40.74,18.24,40.74,40.74v244.46c0,22.5-18.24,40.74-40.74,40.74h-244.46Z' fill='%232E2C30'/%3E%3Cpolygon points='875.38 586.1 898.4 586.1 898.4 508.74 922.01 508.74 922.01 493.27 898.4 493.27 898.4 462.33 875.38 462.33 875.38 493.27 859.64 493.27 859.64 508.74 875.38 508.74 875.38 586.1' fill='%2322C55E'/%3E%3Crect x='898.4' y='586.1' width='23.62' height='23.62' fill='%2322C55E'/%3E%3Cpath d='M1028.49,572.95l29.07-28.23h-24.16l-25.84,25.28v-76.73h-19.38v38.39c-1.69-3.57-3.7-6.81-6.05-9.69-5.05-6.01-11.3-10.1-18.77-12.26-7.47-2.15-15.5-1.88-24.1.83-5.73,1.81-10.72,4.52-14.95,8.13-4.24,3.62-7.57,7.76-10.01,12.44-2.44,4.68-3.87,9.8-4.29,15.36-.42,5.56.27,11.21,2.08,16.94,1.93,6.13,4.69,11.37,8.29,15.72,3.6,4.35,7.8,7.7,12.61,10.04,4.81,2.34,10.01,3.69,15.61,4.04,5.6.36,11.36-.4,17.29-2.27,4.25-1.34,8.13-3.16,11.64-5.46,3.51-2.3,6.56-5.02,9.15-8.18.53-.64,1.01-1.31,1.49-1.98v41.71h19.38v-25.7l7.02-6.88,22.61,32.59h22.61l-31.32-44.1ZM929.69,548.43c-.23-2.1-.14-4.33.26-6.68.4-2.35,1.15-4.54,2.25-6.57,1.1-2.03,2.61-3.86,4.54-5.5,1.93-1.64,4.37-2.92,7.34-3.86,2.86-.9,5.51-1.3,7.93-1.2,2.42.11,4.68.64,6.78,1.61,2.1.97,3.98,2.3,5.66,4,1.68,1.7,3.18,3.64,4.52,5.83l-39.28,12.37ZM976.24,559.67c-.46,4.06-2.09,7.5-4.89,10.34-2.8,2.84-6.33,4.92-10.57,6.26-3.16,1-6.12,1.36-8.86,1.08-2.75-.27-5.3-1.05-7.65-2.32-2.35-1.27-4.43-2.95-6.23-5.04-1.8-2.09-3.28-4.48-4.45-7.15l54.6-17.2v10.26l-11.94,3.76Z' fill='%2322C55E'/%3E%3C/svg%3E">
 <script>
 /* GitHub Pages non legge Accept-Language: il routing di lingua può avvenire
    solo qui, nel browser. Regole:
@@ -32,106 +35,147 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@400;600&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
 <style>
+/* Sistema visivo: Brand manual Teksistemi (4.1, 4.2, 5.1, 6.1) declinato sul
+   canale sviluppo. Regole, motivazioni e contrasti misurati: BRAND.md. */
 :root{
-  --notte:#151A21;--cemento:#1E242C;--cemento-alto:#272F39;
-  --vetro:#9AAAB7;--luce:#F3E7CE;--ambra:#E5B25D;--verde:#6BA88F;
-  --bordo:rgba(154,170,183,.18);
+  /* 4.2 — scala antracite */
+  --ink-900:#1C1B1E; --ink-800:#2E2C30; --ink-700:#46444A;
+  --ink-500:#726F76; --ink-300:#A6A3A9; --ink-150:#D4D2D6; --paper:#F7F5F3;
+  /* 4.1 — identità. Il rosso resta sul marchio: su fondo scuro regge 4.03:1, non è colore di testo. */
+  --rosso:#e13b4c;
+  /* 4.2 — segnale. Unico accento leggibile come testo sull'antracite (7.52:1). */
+  --verde:#22c55e;
+
+  --linea:rgba(167,163,169,.16);
   --sp:clamp(20px,5vw,64px);
-  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --mono:"Overpass Mono",ui-monospace,Consolas,monospace;
+  /* 6.1 — passo di pixel, un periodo esatto del divider ufficiale (103.93 × 8.15) */
+  --passo:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 103.93 8.15'%3E%3Cg fill='black'%3E%3Crect y='.09' width='4.03' height='4.03'/%3E%3Crect x='4.03' y='4.12' width='4.03' height='4.03'/%3E%3Crect x='24.19' width='4.03' height='4.03'/%3E%3Crect x='28.22' y='4.03' width='4.03' height='4.03'/%3E%3Crect x='52.62' y='.09' width='4.03' height='4.03'/%3E%3Crect x='56.65' y='4.12' width='4.03' height='4.03'/%3E%3Crect x='76.81' width='4.03' height='4.03'/%3E%3Crect x='80.84' y='4.03' width='4.03' height='4.03'/%3E%3C/g%3E%3C/svg%3E");
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{
-  background:
-    linear-gradient(var(--bordo) 1px,transparent 1px) 0 0 / 100% 28px,
-    linear-gradient(90deg,var(--bordo) 1px,transparent 1px) 0 0 / 28px 100%,
-    var(--notte);
-  color:var(--luce);
-  font-family:"Instrument Sans",system-ui,sans-serif;
+  background:var(--ink-900);
+  color:var(--ink-300);
+  font-family:"Space Grotesk",system-ui,sans-serif;
+  font-weight:400;
   -webkit-font-smoothing:antialiased;
+  overflow-x:clip;
   padding:0 var(--sp) clamp(56px,9vh,110px);
 }
-.wrap{max-width:940px;margin:0 auto}
+.wrap{max-width:960px;margin:0 auto;position:relative}
 
-/* ---- topbar ---- */
-.topbar{
-  display:flex;justify-content:space-between;align-items:baseline;gap:16px;
-  font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
-  color:var(--vetro);padding:26px 0 0;
+/* 6.1 — filigrana: il monogramma fuori scala che esce dal formato, come nel manuale */
+.filigrana{
+  position:absolute;top:1%;right:-13%;width:min(54vw,540px);height:auto;
+  color:#1F1E22;pointer-events:none;user-select:none;z-index:0;
 }
-.topbar .langs{display:flex;gap:12px;flex:none}
-.topbar a{color:var(--vetro);text-decoration:none;opacity:.75}
-.topbar a:hover{color:var(--verde);opacity:1}
-.topbar b{color:var(--ambra);font-weight:400}
+.wrap > *:not(.filigrana){position:relative;z-index:1}
 
-/* ---- masthead ---- */
-header{padding:clamp(46px,11vh,110px) 0 clamp(26px,4.5vh,44px)}
-.eyebrow{
-  font-family:var(--mono);font-size:clamp(9.5px,1.05vw,11.5px);
-  letter-spacing:.22em;text-transform:uppercase;color:var(--verde);
-  margin-bottom:clamp(14px,2.4vh,22px);
+/* ---- firma istituzionale ---- */
+.topbar{
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+  padding:26px 0 18px;border-bottom:1px solid var(--linea);
+}
+.tks-logo{display:block;height:21px;width:auto}
+.tks-logo .tek{fill:var(--rosso)}
+.tks-logo .word{fill:var(--paper)}
+.langs{
+  display:flex;gap:14px;flex:none;
+  font-family:var(--mono);font-size:11px;letter-spacing:.18em;
+}
+.langs a{color:var(--ink-300);text-decoration:none}
+.langs a:hover{color:var(--verde)}
+.langs b{color:var(--paper);font-weight:400}
+
+/* ---- testata di reparto ---- */
+header{padding:clamp(44px,10vh,96px) 0 clamp(24px,4vh,40px)}
+.lockup{display:flex;align-items:baseline;gap:20px;flex-wrap:wrap;margin-bottom:clamp(22px,4vh,38px)}
+.marchio{display:flex;align-items:baseline;gap:0;color:var(--paper)}
+/* Nel monogramma il fondo del box È la linea di base (la e+k ci appoggia), quindi
+   l'SVG inline si allinea da sé al testo accanto. Nessuna correzione verticale. */
+.marchio svg{height:38px;width:auto}
+.marchio .px{fill:var(--verde)}
+/* Descrittore in Overpass Mono, non in Space Grotesk: la "sistemi" del logotipo
+   ufficiale è ~22% più stretta e non si ricostruisce. Vedi BRAND.md § 2.3. */
+.marchio .reparto{
+  font-family:var(--mono);font-size:21px;font-weight:400;line-height:1;letter-spacing:-.01em;
+}
+.reparto-nota{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--ink-500);align-self:center;
 }
 h1{
-  font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 116,"wght" 800;
-  font-size:clamp(42px,9vw,104px);line-height:.9;letter-spacing:-.025em;text-transform:uppercase;
+  font-weight:700;font-size:clamp(44px,8.4vw,96px);line-height:.94;letter-spacing:-.038em;
+  color:var(--paper);
 }
 .lead{
-  font-size:clamp(15px,1.7vw,19px);line-height:1.5;color:var(--vetro);
-  max-width:56ch;margin-top:clamp(16px,2.6vh,26px);
+  font-size:clamp(15.5px,1.75vw,19.5px);line-height:1.52;color:var(--ink-150);
+  max-width:54ch;margin-top:clamp(18px,2.8vh,28px);font-weight:300;
 }
-.lead em{color:var(--ambra);font-style:normal;font-weight:500}
+.lead em{color:var(--verde);font-style:normal;font-weight:400}
 
-/* ---- lista numeri ---- */
+/* 6.1 — il passo di pixel come regola grafica */
+.passo{
+  height:8px;margin:clamp(28px,5vh,52px) 0 0;background:var(--verde);
+  -webkit-mask:var(--passo) repeat-x left center / 103px 8px;
+          mask:var(--passo) repeat-x left center / 103px 8px;
+}
+
+/* ---- indice ---- */
 .count-cap{
-  font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
-  color:var(--vetro);opacity:.6;padding-bottom:12px;border-bottom:1px solid var(--bordo);
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--ink-500);padding:18px 0 14px;
 }
-.issues{list-style:none;margin-top:2px}
+.issues{list-style:none}
 .issue a{
-  display:grid;grid-template-columns:78px 1fr;gap:0 clamp(16px,3vw,34px);
-  padding:clamp(20px,3.2vh,30px) 6px;
-  border-bottom:1px solid var(--bordo);
+  display:grid;grid-template-columns:82px 1fr;gap:0 clamp(16px,3vw,36px);
+  padding:clamp(20px,3.2vh,30px) clamp(10px,1.6vw,18px);
+  border-top:1px solid var(--linea);
   text-decoration:none;color:inherit;
-  transition:background .25s ease,padding-left .25s ease;
+  transition:background .22s ease;
 }
-.issue a:hover,.issue a:focus-visible{background:rgba(154,170,183,.05);padding-left:14px;outline:none}
-.issue a:focus-visible{box-shadow:inset 2px 0 0 var(--verde)}
+.issues .issue:last-child a{border-bottom:1px solid var(--linea)}
+.issue a:hover,.issue a:focus-visible{background:var(--ink-800);outline:none}
+.issue a:focus-visible{box-shadow:inset 3px 0 0 var(--verde)}
 .num{
-  font-family:var(--mono);font-size:clamp(20px,2.6vw,30px);
-  color:var(--cemento-alto);line-height:1;transition:color .25s ease;
+  font-family:var(--mono);font-size:clamp(20px,2.6vw,29px);
+  color:var(--ink-500);line-height:1.05;transition:color .22s ease;
 }
-.issue a:hover .num,.issue a:focus-visible .num{color:var(--ambra)}
+.issue a:hover .num,.issue a:focus-visible .num{color:var(--verde)}
 .meta{
-  font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--vetro);opacity:.7;display:flex;flex-wrap:wrap;gap:0 10px;margin-bottom:9px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-500);display:flex;flex-wrap:wrap;gap:0 9px;margin-bottom:10px;
 }
-.meta .kind{color:var(--verde);opacity:1}
+.meta .kind{color:var(--ink-150)}
 h2{
-  font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 104,"wght" 700;
-  font-size:clamp(21px,2.9vw,33px);line-height:1.1;letter-spacing:-.015em;max-width:22ch;
+  font-weight:500;font-size:clamp(21px,2.9vw,31px);line-height:1.12;letter-spacing:-.022em;
+  color:var(--paper);max-width:24ch;
 }
-.issue a:hover h2{color:#fff}
-.blurb{font-size:clamp(13.5px,1.35vw,15.5px);line-height:1.55;color:var(--vetro);max-width:60ch;margin-top:9px}
+.blurb{font-size:clamp(13.5px,1.35vw,15.5px);line-height:1.56;color:var(--ink-300);max-width:62ch;margin-top:10px;font-weight:300}
 .go{
-  font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--ambra);margin-top:13px;opacity:0;transform:translateX(-6px);
-  transition:opacity .25s ease,transform .25s ease;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--verde);margin-top:14px;opacity:0;transform:translateX(-6px);
+  transition:opacity .22s ease,transform .22s ease;
 }
 .issue a:hover .go,.issue a:focus-visible .go{opacity:1;transform:none}
 
 /* ---- colophon ---- */
 footer{
-  margin-top:clamp(38px,6vh,64px);padding-top:20px;border-top:1px solid var(--bordo);
-  font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--vetro);opacity:.7;line-height:2;
+  margin-top:clamp(38px,6vh,64px);padding-top:22px;border-top:1px solid var(--linea);
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-500);line-height:2.1;
 }
-footer b{color:var(--ambra);font-weight:400}
+footer b{color:var(--ink-300);font-weight:400}
 
 @media(max-width:620px){
   .issue a{grid-template-columns:1fr;gap:10px}
-  .num{font-size:16px}
+  .num{font-size:15px}
   h2{max-width:none}
+  .filigrana{width:84vw;top:2%;right:-30%}
+  .marchio svg{height:30px}
+  .marchio .reparto{font-size:17px}
 }
 @media(prefers-reduced-motion:reduce){
   *{transition:none!important}
@@ -141,22 +185,54 @@ footer b{color:var(--ambra);font-weight:400}
 <body>
 <div class="wrap">
 
+  <svg class="filigrana" viewBox="747.98 376.33 424.06 327.35" fill="currentColor" aria-hidden="true">
+    <rect x="780.8" y="376.33" width="48.82" height="262.56"/>
+    <rect x="829.63" y="638.89" width="50.09" height="50.09"/>
+    <rect x="747.98" y="441.97" width="131.74" height="32.82"/>
+    <path d="M1105.58,610.12l61.67-59.88h-51.24l-54.82,53.63v-162.75h-41.11v81.44c-3.58-7.58-7.84-14.45-12.83-20.56-10.7-12.75-23.97-21.42-39.81-26-15.84-4.57-32.88-3.99-51.11,1.76-12.16,3.83-22.73,9.58-31.72,17.25-8.99,7.67-16.07,16.46-21.24,26.39-5.17,9.92-8.2,20.79-9.09,32.58-.89,11.8.58,23.78,4.41,35.94,4.09,13,9.95,24.11,17.59,33.34,7.63,9.23,16.55,16.33,26.75,21.3,10.2,4.97,21.24,7.82,33.11,8.58,11.87.76,24.1-.85,36.67-4.81,9.01-2.84,17.24-6.7,24.69-11.58,7.45-4.88,13.92-10.66,19.42-17.35,1.12-1.36,2.15-2.77,3.17-4.19v88.47h41.11v-54.52l14.9-14.6,47.97,69.12h47.97l-66.44-93.55ZM896,558.11c-.48-4.45-.3-9.18.55-14.17.85-4.99,2.44-9.63,4.77-13.94,2.33-4.3,5.54-8.19,9.63-11.67,4.09-3.47,9.28-6.2,15.57-8.18,6.08-1.91,11.69-2.76,16.83-2.54,5.14.23,9.93,1.37,14.38,3.42,4.45,2.06,8.45,4.89,12,8.49,3.55,3.61,6.75,7.72,9.59,12.36l-83.32,26.24ZM994.75,581.96c-.98,8.6-4.44,15.91-10.37,21.93-5.94,6.02-13.42,10.45-22.43,13.28-6.71,2.11-12.98,2.88-18.8,2.29-5.83-.58-11.24-2.22-16.23-4.91-4.99-2.69-9.4-6.25-13.22-10.7-3.82-4.44-6.96-9.5-9.44-15.17l115.82-36.47v21.77l-25.32,7.97Z"/>
+  </svg>
+
   <nav class="topbar">
-    <span>Teksistemi · archivio</span>
+    <svg class="tks-logo" viewBox="652.81 458.95 614.68 162.12" role="img" aria-label="Teksistemi">
+      <polygon class="tek" points="669.09 586.95 692.9 586.95 692.9 506.95 717.32 506.95 717.32 490.95 692.9 490.95 692.9 458.95 669.09 458.95 669.09 490.95 652.81 490.95 652.81 506.95 669.09 506.95 669.09 586.95"/>
+      <rect class="tek" x="692.9" y="586.95" width="24.42" height="24.42"/>
+      <path class="tek" d="M827.42,573.34l30.07-29.19h-24.98l-26.72,26.14v-79.34h-20.04v39.7c-1.75-3.7-3.82-7.05-6.26-10.02-5.22-6.22-11.69-10.44-19.41-12.67-7.72-2.23-16.03-1.94-24.92.86-5.93,1.87-11.08,4.67-15.46,8.41-4.38,3.74-7.83,8.03-10.35,12.86-2.52,4.84-4,10.13-4.43,15.88-.44,5.75.28,11.59,2.15,17.52,2,6.34,4.85,11.75,8.57,16.25,3.72,4.5,8.07,7.96,13.04,10.38,4.97,2.42,10.35,3.81,16.14,4.18,5.79.37,11.75-.41,17.88-2.34,4.39-1.38,8.41-3.27,12.04-5.64,3.63-2.38,6.79-5.2,9.47-8.46.54-.66,1.05-1.35,1.54-2.04v43.13h20.04v-26.58l7.26-7.12,23.38,33.7h23.38l-32.39-45.61ZM725.25,547.99c-.24-2.17-.15-4.47.27-6.91.41-2.43,1.19-4.7,2.32-6.8,1.13-2.1,2.7-3.99,4.69-5.69,1.99-1.69,4.52-3.02,7.59-3.99,2.96-.93,5.7-1.34,8.2-1.24,2.5.11,4.84.67,7.01,1.67,2.17,1,4.12,2.38,5.85,4.14,1.73,1.76,3.29,3.77,4.68,6.02l-40.62,12.79ZM773.39,559.62c-.48,4.19-2.16,7.76-5.06,10.69-2.9,2.93-6.54,5.09-10.93,6.48-3.27,1.03-6.33,1.4-9.17,1.12-2.84-.28-5.48-1.08-7.91-2.39-2.43-1.31-4.58-3.05-6.44-5.21-1.86-2.17-3.4-4.63-4.6-7.4l56.46-17.78v10.61l-12.34,3.89Z"/>
+      <path class="word" d="M916.63,615.1c5.44-3.97,8.16-9.61,8.16-16.93,0-4.78-1.25-8.64-3.74-11.59-2.49-2.95-5.85-5.21-10.07-6.79-4.22-1.58-8.98-2.82-14.26-3.74l-6.25-1.07c-4.68-.81-8.42-2.06-11.21-3.74-2.8-1.68-4.2-4.3-4.2-7.86s1.47-6.43,4.42-8.31c2.95-1.88,6.96-2.82,12.05-2.82s9.36,1.09,12.81,3.28c3.46,2.19,5.64,5.98,6.56,11.37l11.29-2.9c-1.53-6.92-4.91-12.28-10.14-16.09-5.24-3.81-12.08-5.72-20.52-5.72s-15.41,1.88-20.59,5.65c-5.19,3.76-7.78,9-7.78,15.71,0,4.48,1.17,8.19,3.51,11.14,2.34,2.95,5.49,5.29,9.46,7.02,3.97,1.73,8.34,3,13.12,3.81l6.25,1.07c5.39,1.02,9.63,2.31,12.74,3.89,3.1,1.58,4.65,4.3,4.65,8.16s-1.63,6.77-4.88,9c-3.26,2.24-7.68,3.36-13.27,3.36-3.76,0-7.3-.58-10.6-1.75-3.31-1.17-6.08-3.15-8.31-5.95-2.24-2.8-3.76-6.64-4.58-11.52l-11.44,2.59c1.32,9.26,5.16,16.02,11.52,20.29,6.35,4.27,14.16,6.41,23.42,6.41s16.45-1.98,21.89-5.95Z"/>
+      <rect class="word" x="929.83" y="544.32" width="12.05" height="74.6"/>
+      <path class="word" d="M935.93,532.72c2.64,0,4.83-.86,6.56-2.59,1.73-1.73,2.59-3.91,2.59-6.56s-.87-4.98-2.59-6.71c-1.73-1.73-3.92-2.59-6.56-2.59s-4.86.87-6.64,2.59c-1.78,1.73-2.67,3.97-2.67,6.71s.89,4.83,2.67,6.56c1.78,1.73,3.99,2.59,6.64,2.59Z"/>
+      <path class="word" d="M1003.89,615.1c5.44-3.97,8.16-9.61,8.16-16.93,0-4.78-1.25-8.64-3.74-11.59-2.49-2.95-5.85-5.21-10.07-6.79-4.22-1.58-8.98-2.82-14.26-3.74l-6.25-1.07c-4.68-.81-8.42-2.06-11.21-3.74-2.8-1.68-4.19-4.3-4.19-7.86s1.47-6.43,4.42-8.31c2.95-1.88,6.97-2.82,12.05-2.82s9.36,1.09,12.81,3.28c3.46,2.19,5.64,5.98,6.56,11.37l11.29-2.9c-1.53-6.92-4.91-12.28-10.14-16.09-5.24-3.81-12.08-5.72-20.52-5.72s-15.41,1.88-20.59,5.65c-5.19,3.76-7.78,9-7.78,15.71,0,4.48,1.17,8.19,3.51,11.14,2.34,2.95,5.49,5.29,9.46,7.02,3.97,1.73,8.34,3,13.12,3.81l6.25,1.07c5.39,1.02,9.63,2.31,12.74,3.89,3.1,1.58,4.65,4.3,4.65,8.16s-1.63,6.77-4.88,9c-3.26,2.24-7.68,3.36-13.27,3.36-3.76,0-7.3-.58-10.6-1.75-3.31-1.17-6.08-3.15-8.31-5.95-2.24-2.8-3.76-6.64-4.58-11.52l-11.44,2.59c1.32,9.26,5.16,16.02,11.52,20.29,6.35,4.27,14.16,6.41,23.42,6.41s16.45-1.98,21.89-5.95Z"/>
+      <path class="word" d="M1039.74,608.54c-2.95,0-4.42-1.53-4.42-4.58v-49.12h24.41v-10.53h-24.41v-26.54h-12.05v26.54h-11.21v10.53h11.21v50.95c0,4.07,1.14,7.27,3.43,9.61,2.29,2.34,5.57,3.51,9.84,3.51h19.83v-10.37h-16.63Z"/>
+      <path class="word" d="M1111.97,617.85c4.32-2.14,7.83-4.78,10.53-7.93,2.69-3.15,4.81-6.3,6.33-9.46l-10.37-5.03c-1.83,4.07-4.48,7.58-7.93,10.53-3.46,2.95-8.39,4.42-14.8,4.42-7.32,0-13.42-2.26-18.31-6.79-4.88-4.52-7.47-10.8-7.78-18.84h60.87v-5.49c0-7.53-1.53-14.08-4.58-19.68-3.05-5.59-7.27-9.89-12.66-12.89-5.39-3-11.59-4.5-18.61-4.5s-13.63,1.6-19.22,4.81c-5.59,3.2-9.97,7.7-13.12,13.5-3.15,5.8-4.73,12.56-4.73,20.29v1.83c0,7.63,1.58,14.34,4.73,20.14,3.15,5.8,7.57,10.3,13.27,13.5,5.69,3.2,12.3,4.8,19.83,4.8,6.71,0,12.23-1.07,16.55-3.2ZM1077.88,558.66c4.37-3.86,9.97-5.8,16.78-5.8s12.23,1.93,16.55,5.8c4.32,3.87,6.69,9.25,7.09,16.17h-48.51c1.02-6.92,3.71-12.3,8.09-16.17Z"/>
+      <path class="word" d="M1239.65,554.77c-2.19-3.81-5.16-6.74-8.92-8.77-3.76-2.03-8.14-3.05-13.12-3.05-6.31,0-11.21,1.27-14.72,3.81-3.51,2.54-6.13,5.65-7.86,9.31h-2.14c-1.63-3.66-4.25-6.76-7.86-9.31-3.61-2.54-8.31-3.81-14.11-3.81s-10.48,1.12-13.73,3.36c-3.26,2.24-5.59,4.68-7.02,7.32h-2.14v-9.3h-11.75v74.6h12.05v-44.85c0-6.71,1.75-11.85,5.26-15.41,3.51-3.56,8.01-5.34,13.5-5.34,5.19,0,9.23,1.45,12.13,4.35,2.9,2.9,4.35,6.84,4.35,11.82v49.43h12.05v-44.85c0-6.71,1.75-11.85,5.26-15.41,3.51-3.56,8.01-5.34,13.5-5.34,5.19,0,9.23,1.45,12.13,4.35,2.9,2.9,4.35,6.84,4.35,11.82v49.43h12.05v-50.49c0-5.29-1.09-9.84-3.28-13.65Z"/>
+      <rect class="word" x="1252.24" y="544.32" width="12.05" height="74.6"/>
+      <path class="word" d="M1258.34,532.72c2.64,0,4.83-.86,6.56-2.59,1.73-1.73,2.59-3.91,2.59-6.56s-.86-4.98-2.59-6.71c-1.73-1.73-3.92-2.59-6.56-2.59s-4.86.87-6.64,2.59c-1.78,1.73-2.67,3.97-2.67,6.71s.89,4.83,2.67,6.56c1.78,1.73,3.99,2.59,6.64,2.59Z"/>
+    </svg>
     <span class="langs"><b>IT</b><a href="en/index.html" data-lang="en">EN</a></span>
   </nav>
 
   <header>
-    <div class="eyebrow">Teksistemi · note interne</div>
+    <div class="lockup">
+      <span class="marchio">
+        <svg viewBox="747.98 376.33 424.06 327.35" fill="currentColor" role="img" aria-label="tek">
+          <rect x="780.8" y="376.33" width="48.82" height="262.56"/>
+          <rect class="px" x="829.63" y="638.89" width="50.09" height="50.09"/>
+          <rect x="747.98" y="441.97" width="131.74" height="32.82"/>
+          <path d="M1105.58,610.12l61.67-59.88h-51.24l-54.82,53.63v-162.75h-41.11v81.44c-3.58-7.58-7.84-14.45-12.83-20.56-10.7-12.75-23.97-21.42-39.81-26-15.84-4.57-32.88-3.99-51.11,1.76-12.16,3.83-22.73,9.58-31.72,17.25-8.99,7.67-16.07,16.46-21.24,26.39-5.17,9.92-8.2,20.79-9.09,32.58-.89,11.8.58,23.78,4.41,35.94,4.09,13,9.95,24.11,17.59,33.34,7.63,9.23,16.55,16.33,26.75,21.3,10.2,4.97,21.24,7.82,33.11,8.58,11.87.76,24.1-.85,36.67-4.81,9.01-2.84,17.24-6.7,24.69-11.58,7.45-4.88,13.92-10.66,19.42-17.35,1.12-1.36,2.15-2.77,3.17-4.19v88.47h41.11v-54.52l14.9-14.6,47.97,69.12h47.97l-66.44-93.55ZM896,558.11c-.48-4.45-.3-9.18.55-14.17.85-4.99,2.44-9.63,4.77-13.94,2.33-4.3,5.54-8.19,9.63-11.67,4.09-3.47,9.28-6.2,15.57-8.18,6.08-1.91,11.69-2.76,16.83-2.54,5.14.23,9.93,1.37,14.38,3.42,4.45,2.06,8.45,4.89,12,8.49,3.55,3.61,6.75,7.72,9.59,12.36l-83.32,26.24ZM994.75,581.96c-.98,8.6-4.44,15.91-10.37,21.93-5.94,6.02-13.42,10.45-22.43,13.28-6.71,2.11-12.98,2.88-18.8,2.29-5.83-.58-11.24-2.22-16.23-4.91-4.99-2.69-9.4-6.25-13.22-10.7-3.82-4.44-6.96-9.5-9.44-15.17l115.82-36.47v21.77l-25.32,7.97Z"/>
+        </svg>
+        <span class="reparto">development</span>
+      </span>
+      <span class="reparto-nota">Note interne</span>
+    </div>
     <h1>Newsletter<br>tecnica</h1>
     <p class="lead">Appunti su come stiamo lavorando: cosa fanno gli agenti al codice, cosa fanno alla testa di chi lo scrive, e cosa conviene tenere d'occhio. Un numero ogni tanto, <em>senza calendario</em>.</p>
+    <div class="passo" aria-hidden="true"></div>
   </header>
 
   <div class="count-cap" id="countCap"></div>
   <ul class="issues" id="issues"></ul>
 
   <footer>
-    Teksistemi · newsletter tecnica interna<br>
+    Teksistemi · sviluppo software · newsletter tecnica interna<br>
     Scritta da <b>orlodax</b>
   </footer>
 
@@ -185,7 +261,7 @@ var ISSUES = [
       '<a href="' + esc(it.file) + '">' +
         '<span class="num">' + esc(it.n) + '</span>' +
         '<span>' +
-          '<span class="meta"><span class="kind">' + esc(it.kind) + '</span><span>' + esc(it.date) + '</span></span>' +
+          '<span class="meta"><span class="kind">' + esc(it.kind) + '</span><span>·</span><span>' + esc(it.date) + '</span></span>' +
           '<h2>' + esc(it.title) + '</h2>' +
           '<p class="blurb">' + esc(it.blurb) + '</p>' +
           '<span class="go">Leggi →</span>' +

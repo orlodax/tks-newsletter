@@ -32,6 +32,7 @@ index.html                 Italian archive + language router
 NNN-slug-italiano.html     issues, oldest to newest
 en/index.html              English archive
 en/NNN-english-slug.html   translations (matching numbers, translated slugs)
+BRAND.md                   visual system for the index pages and new issues
 ```
 
 ### Language routing
@@ -50,6 +51,14 @@ Italian archive simply renders, with the EN link in the top bar.
 2. Add one line to the `ISSUES` array at the bottom of `index.html`, and one to `en/index.html`.
 
 That's all. The indexes render newest first.
+
+### Visual identity
+
+Both index pages run the `tek·development` system described in [BRAND.md](BRAND.md):
+the Teksistemi palette and typefaces on a dark ground, with the brand green reserved for
+signal states. That document is an addendum to the corporate brand manual and is numbered
+to slot into it, and `assets/avatar/` holds the ready-made team avatars it specifies.
+Issues 001–008 predate it and keep their own palettes — see the rule below.
 
 ### One rule
 
