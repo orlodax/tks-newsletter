@@ -52,32 +52,36 @@ reconstruction in the masthead and this subsection goes away.
 
 ## 3.3 — Marks
 
-### The green pixel
+### The green `tek` (`2026-10-08`)
 
-The monogram's detached square — the dot under the `t` — is the department's signature.
-**On our channels that one square is green (`#22c55e`). Everything else in the mark is
-untouched.**
+**On our channels the department mark is the `tek` monogram entirely in green (`#22c55e`),
+with the descriptor `development` in off-white Overpass Mono.** That is the reference
+lockup the owner drew in `Teksistemi/_ Design Logo/footer.png` (2026-09-25), and it is the
+same mark at every size. Recolouring stays a fill change, never a redraw: the monogram
+SVG takes `fill="currentColor"`, so the whole mark follows one `color`.
 
-It is the smallest intervention that still reads, and it is the right one: a lone square
-pixel sitting on the baseline is a cursor. It is also a **one-element change** in every
-logo file we hold, which is why it is a rule and not a redraw:
+⚠ **Superseded the same day it was caught:** until 2026-10-08 this section prescribed an
+off-white `tek` with only the detached pixel green above 64px ("one pixel, one green").
+It contradicted the reference lockup, and it shipped on both index pages from `d80b72c`
+and in the first build of 009. Don't reintroduce it from the table below.
 
-| file | the element to recolour |
+The detached square of each file, for the day a single-element recolour is needed again:
+
+| file | the detached square |
 |---|---|
 | `Monogramma/Logo__monogramma_*.svg` | `<rect x="829.63" y="638.89" width="50.09" height="50.09">` |
 | `Esteso/Logo__extended_*.svg` | `<rect x="692.9" y="586.95" width="24.42" height="24.42">` |
 | `Icona/Logo__icon_*.svg` | `<rect x="898.4" y="586.1" width="23.62" height="23.62">` |
 
-**One pixel, one green.** No other part of any mark changes colour — *above the size
-threshold in §3.4.*
+The parent mark is untouched: red `tek`, off-white `sistemi`, red pixel.
 
 ### Which mark, where
 
 | context | mark |
 |---|---|
 | page signature (parent) | `teksistemi` extended logotype, negative — red `tek`, off-white `sistemi`, **red pixel** |
-| department masthead | `tek` monogram, off-white, **green pixel** + descriptor in Overpass Mono |
-| favicon, app icon, social avatar | see §3.4 — **the whole `tek` goes green** |
+| department masthead | `tek` monogram **all green** + descriptor `development` in off-white Overpass Mono |
+| favicon, app icon, social avatar | the same green `tek`, on a tile — see §3.4 |
 
 The icon's dark-tile variant is the manual's own (§3.2 shows the icon on a near-black
 tile); we specify the tile as **Grigio 800 `#2E2C30`** so it is a palette colour and not
@@ -87,21 +91,16 @@ an invented one.
 
 ## 3.4 — Small sizes and avatars
 
-**The one-pixel rule has a floor.** It depends on a detail that is roughly 3% of the
-mark's width. Below about **64px** that detail is sub-pixel, so a mark carrying only the
-green pixel is indistinguishable from the corporate mark — which is the opposite of what
-an avatar has to do.
+**One treatment at every size: the whole `tek` in `#22c55e`.** Standing alone — favicon,
+app icon, team avatar — it sits on a Grigio 800 tile.
 
 > Measured on a contact sheet at 96 / 48 / 32 / 20px against Discord `#1e1f22`, Teams
 > `#1f1f1f`, GitHub `#0d1117` and white: the green `tek` is legible at every size down to
 > 20px. A single green pixel is not visible at any of them.
 
-So there are two states, and the threshold is the rule:
-
-| | treatment |
-|---|---|
-| **≥ 64px**, or shown with the wordmark / in a page that already carries the system | off-white `tek`, **green pixel** (§3.3) |
-| **< 64px**, or standing alone with no supporting context — favicon, app icon, team avatar | **the whole `tek` in `#22c55e`** on a Grigio 800 tile |
+That measurement is why small sizes went green first. Until 2026-10-08 this section kept
+two states — green pixel at 64px and above, green `tek` below — and the threshold was the
+rule; with the masthead now green too (§3.3) the two states are one.
 
 The green mark and the corporate red-and-white one read as an obvious pair at every size:
 same drawing, two colour substitutions.
@@ -192,7 +191,7 @@ Rosso primario.
 
 ### Where green is allowed
 
-The pixel in the mark · the §6.1 step rule · hover and focus states · the active item in
+The department mark (the green `tek`) · the §6.1 step rule · hover and focus states · the active item in
 a set · one emphasis per block of running text · genuine machine output (a passing test, a
 green diff line).
 
@@ -331,4 +330,4 @@ its whole brief. Themes are for argument and feeling; data gets the house style.
 2. **Sign-off on green as a signal colour** from whoever owns the corporate brand. The
    argument is in §4.3; the contrast numbers are the case.
 3. **Light mode for the department**, if we ever need to print or present. Not designed
-   yet; it would be the manual's own light system plus the green pixel.
+   yet; it would be the manual's own light system plus the green `tek`.
