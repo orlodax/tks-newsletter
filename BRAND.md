@@ -222,6 +222,19 @@ What this addendum adds is the split in *role*:
 Mono is not decoration on this channel — it is the working voice, and it carries every
 piece of text the system printed rather than a person wrote.
 
+### Paragraphs are justified (`2026-10-08`)
+
+**Every paragraph of running text is justified, in every issue from 009 on** — the frame,
+every themed room, captions included. The owner's call, made on the 009 drafts.
+
+- `text-align: justify` on `p` (and on any block of running prose), with
+  `text-wrap: pretty` to keep short last lines and wide gaps down.
+- **No automatic hyphenation by default** (`hyphens: manual`). A room may turn it on when
+  the hyphen at the line end is part of the look — 009's manuscript chapter does, because
+  the *trattino a capo* reads as old-school setting. It needs `lang` on the document.
+- Not justified: headings, chrome (Overpass Mono), table cells, chart labels, pull quotes
+  set centred by design.
+
 ---
 
 ## 6.2 — Graphic elements
@@ -294,8 +307,9 @@ and that freedom was worth keeping — but inside a frame that says who is speak
 because the frame tells them, not the room.
 
 **The room — free inside one chapter:** ground, palette, display and body type (Google
-Fonts only, as everywhere), texture, ornament, motion. §4.3's palette, §5.2's type and
-§6.2's "what we do not use" are suspended there, and only there.
+Fonts only, as everywhere), texture, ornament, motion. §4.3's palette, §5.2's typefaces and
+§6.2's "what we do not use" are suspended there, and only there. §5.2's justified
+paragraphs are **not** suspended.
 
 **What a room may not do:**
 
