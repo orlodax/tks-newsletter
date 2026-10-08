@@ -249,6 +249,9 @@ the clip is the point.
 No grid overlays, no generic tech patterns, no gradients, no glow. The archive's front
 door used a hairline grid before this system; it belonged to no one and it is gone.
 
+This list binds the **frame**. Inside a themed chapter it is suspended — see *Applying
+this → Themed chapters*.
+
 ---
 
 ## 7.1 — Voice
@@ -272,10 +275,41 @@ Codified from what the newsletter already does, not invented for it.
 
 **Frozen issues stay frozen.** Issues 001–008 keep their own palettes — each one is a
 bespoke design and the archive rule is that published issues never change. This system
-governs the **index pages** and **new issues** from 009 on.
+governs the **index pages** and **new issues** from 009 on — as a frame, inside which a
+chapter may open a themed room (below).
 
 Worth noting on the way past: issue 008 independently landed on `#21c55d` on near-black —
 one digit from the green specified here. The department was already reaching for it.
+
+### Themed chapters (`2026-10-08`, first used by 009)
+
+An issue may be split into chapters that each wear their own visual theme. **The brand is
+the frame; the theme is the room.** Every issue before this system was a bespoke design,
+and that freedom was worth keeping — but inside a frame that says who is speaking.
+
+**The frame — always on-system, continuous across every chapter:** the masthead
+(monogram + descriptor, §3.3), the `teksistemi` signature, Overpass Mono for all chrome
+(eyebrows, chapter labels, navigation, metadata, colophon), the IT/EN switch, and the
+§6.2 step as the divider between chapters. A reader always knows which room they are in
+because the frame tells them, not the room.
+
+**The room — free inside one chapter:** ground, palette, display and body type (Google
+Fonts only, as everywhere), texture, ornament, motion. §4.3's palette, §5.2's type and
+§6.2's "what we do not use" are suspended there, and only there.
+
+**What a room may not do:**
+
+- **Use Rosso primario or the signal green as a theme colour.** Red stays identity, green
+  stays state. A copper or a vermilion that *looks* near them is fine; the two brand hexes
+  are not.
+- **Drop below 4.5:1 for running text.** Measured on the room's own ground, as in §4.3.
+- **Ignore `prefers-reduced-motion`.** Every animation in a room has a still state.
+- **Break the archive rule.** The issue is still one self-contained file; the room's
+  assets are inlined, and their licences allow it.
+
+**A chapter about numbers stays on-system.** The dark palette with one signal accent is
+already an infographic system, and §7.1's "if a result is good the number says so" is
+its whole brief. Themes are for argument and feeling; data gets the house style.
 
 ### Open items
 
