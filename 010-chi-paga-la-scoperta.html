@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chi paga la scoperta · Teksistemi 010</title>
+<meta name="description" content="569 issue di quattro progetti Odoo dicono da dove entra lo scope creep. Quattro regole perché ogni allargamento abbia un prezzo e una decisione prima di diventare lavoro.">
+<meta name="theme-color" content="#1C1B1E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='797.03 377.02 325.95 325.95'%3E%3Cpath d='M837.77,702.97c-22.5,0-40.74-18.24-40.74-40.74v-233.84c0-34.25,17.83-51.37,53.48-51.37h231.73c22.5,0,40.74,18.24,40.74,40.74v244.46c0,22.5-18.24,40.74-40.74,40.74h-244.46Z' fill='%232E2C30'/%3E%3Cpolygon points='875.38 586.1 898.4 586.1 898.4 508.74 922.01 508.74 922.01 493.27 898.4 493.27 898.4 462.33 875.38 462.33 875.38 493.27 859.64 493.27 859.64 508.74 875.38 508.74 875.38 586.1' fill='%2322C55E'/%3E%3Crect x='898.4' y='586.1' width='23.62' height='23.62' fill='%2322C55E'/%3E%3Cpath d='M1028.49,572.95l29.07-28.23h-24.16l-25.84,25.28v-76.73h-19.38v38.39c-1.69-3.57-3.7-6.81-6.05-9.69-5.05-6.01-11.3-10.1-18.77-12.26-7.47-2.15-15.5-1.88-24.1.83-5.73,1.81-10.72,4.52-14.95,8.13-4.24,3.62-7.57,7.76-10.01,12.44-2.44,4.68-3.87,9.8-4.29,15.36-.42,5.56.27,11.21,2.08,16.94,1.93,6.13,4.69,11.37,8.29,15.72,3.6,4.35,7.8,7.7,12.61,10.04,4.81,2.34,10.01,3.69,15.61,4.04,5.6.36,11.36-.4,17.29-2.27,4.25-1.34,8.13-3.16,11.64-5.46,3.51-2.3,6.56-5.02,9.15-8.18.53-.64,1.01-1.31,1.49-1.98v41.71h19.38v-25.7l7.02-6.88,22.61,32.59h22.61l-31.32-44.1ZM929.69,548.43c-.23-2.1-.14-4.33.26-6.68.4-2.35,1.15-4.54,2.25-6.57,1.1-2.03,2.61-3.86,4.54-5.5,1.93-1.64,4.37-2.92,7.34-3.86,2.86-.9,5.51-1.3,7.93-1.2,2.42.11,4.68.64,6.78,1.61,2.1.97,3.98,2.3,5.66,4,1.68,1.7,3.18,3.64,4.52,5.83l-39.28,12.37ZM976.24,559.67c-.46,4.06-2.09,7.5-4.89,10.34-2.8,2.84-6.33,4.92-10.57,6.26-3.16,1-6.12,1.36-8.86,1.08-2.75-.27-5.3-1.05-7.65-2.32-2.35-1.27-4.43-2.95-6.23-5.04-1.8-2.09-3.28-4.48-4.45-7.15l54.6-17.2v10.26l-11.94,3.76Z' fill='%2322C55E'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@400;600&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+<style>
+/* Cornice di 009 (BRAND.md, "Themed chapters"); il corpo resta on-system: un numero sui numeri non apre stanze. */
+:root{--ink-900:#1C1B1E;--ink-800:#2E2C30;--ink-700:#46444A;--ink-500:#726F76;--ink-300:#A6A3A9;--ink-150:#D4D2D6;--paper:#F7F5F3;
+  --rosso:#e13b4c;--verde:#22c55e;--linea:rgba(167,163,169,.16);--mono:"Overpass Mono",ui-monospace,Consolas,monospace;
+  --rail:clamp(280px,21vw,330px);--passo:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 103.93 8.15'%3E%3Cg fill='black'%3E%3Crect y='.09' width='4.03' height='4.03'/%3E%3Crect x='4.03' y='4.12' width='4.03' height='4.03'/%3E%3Crect x='24.19' width='4.03' height='4.03'/%3E%3Crect x='28.22' y='4.03' width='4.03' height='4.03'/%3E%3Crect x='52.62' y='.09' width='4.03' height='4.03'/%3E%3Crect x='56.65' y='4.12' width='4.03' height='4.03'/%3E%3Crect x='76.81' width='4.03' height='4.03'/%3E%3Crect x='80.84' y='4.03' width='4.03' height='4.03'/%3E%3C/g%3E%3C/svg%3E");color-scheme:dark}
+*{box-sizing:border-box;margin:0;padding:0}
+html{overflow-x:clip}
+body{background:var(--ink-900);color:var(--ink-300);font-family:"Space Grotesk",system-ui,sans-serif;font-weight:400;
+  -webkit-font-smoothing:antialiased;overflow-x:clip}
+.fr-shell{display:grid;grid-template-columns:var(--rail) minmax(0,1fr);align-items:start}
+.fr-rail{position:sticky;top:0;height:100vh;overflow-y:auto;border-right:1px solid var(--linea);
+  padding:26px 24px 28px;display:flex;flex-direction:column;gap:22px;scrollbar-width:thin}
+.fr-main{min-width:0;container:fr / inline-size}
+.fr-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.fr-top .tks-logo{display:block;height:19px;width:auto}
+.fr-top .tks-logo .tek{fill:var(--rosso)}
+.fr-top .tks-logo .word{fill:var(--paper)}
+.fr-nav{display:flex;gap:12px;font-family:var(--mono);font-size:11px;letter-spacing:.18em}
+.fr-nav a,.fr-arch{color:var(--ink-300);text-decoration:none}
+.fr-nav a:hover,.fr-nav a:focus-visible,.fr-arch:hover,.fr-arch:focus-visible{color:var(--verde)}
+.fr-nav b{color:var(--paper);font-weight:400}
+.fr-arch{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;margin-top:14px}
+.fr-lockup{display:flex;align-items:baseline;color:var(--paper);margin-top:30px}
+.fr-lockup svg{height:28px;width:auto;color:var(--verde)}
+.fr-reparto{font-family:var(--mono);font-size:16px;line-height:1;letter-spacing:-.01em}
+.fr-nota,.fr-meta,.fr-cap,.fr-foot{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-500)}
+.fr-nota{margin-top:12px}
+.fr-h1{font-weight:700;font-size:clamp(28px,2.1vw,32px);line-height:.98;letter-spacing:-.035em;color:var(--paper);margin-top:22px}
+.fr-lead{font-size:14.5px;line-height:1.55;color:var(--ink-150);margin-top:14px;font-weight:300;text-align:justify;text-wrap:pretty;hyphens:manual}
+.fr-lead em{color:var(--verde);font-style:normal;font-weight:400}
+.fr-meta{margin-top:14px;color:var(--ink-300)}
+.fr-passo{height:8px;background:var(--verde);-webkit-mask:var(--passo) repeat-x left center / 103px 8px;mask:var(--passo) repeat-x left center / 103px 8px}
+.fr-rail-head .fr-passo{margin-top:22px}
+.fr-menu .fr-cap{padding-bottom:10px}
+.fr-menu ol{list-style:none}
+.fr-menu a{display:grid;grid-template-columns:34px 1fr;gap:0 10px;padding:13px 10px 13px 12px;border-top:1px solid var(--linea);
+  border-left:2px solid transparent;text-decoration:none;color:inherit;transition:background .2s ease,border-color .2s ease}
+.fr-menu li:last-child a{border-bottom:1px solid var(--linea)}
+.fr-menu a:hover,.fr-menu a:focus-visible{background:var(--ink-800);outline:none}
+.fr-menu a[aria-current]{border-left-color:var(--verde);background:var(--ink-800)}
+.fr-menu .n{font-family:var(--mono);font-size:15px;line-height:1.25;color:var(--ink-500)}
+.fr-menu a:hover .n,.fr-menu a:focus-visible .n,.fr-menu a[aria-current] .n{color:var(--verde)}
+.fr-menu .t{display:block;font-weight:500;font-size:17px;line-height:1.2;letter-spacing:-.015em;color:var(--paper)}
+.fr-menu .d{display:block;font-size:13px;line-height:1.45;margin-top:4px;font-weight:300;text-align:justify;text-wrap:pretty;hyphens:manual}
+.fr-rail-foot{margin-top:auto;line-height:2}
+.fr-rail-foot b{color:var(--ink-300);font-weight:400}
+.fr-pager{max-width:1040px;margin:clamp(56px,9vh,96px) auto 0;padding:0 clamp(16px,5cqi,48px) clamp(48px,8vh,88px)}
+.fr-pager .row{display:flex;justify-content:space-between;gap:16px;padding-top:16px}
+.fr-pager a{display:flex;flex-direction:column;gap:6px;max-width:48%;text-decoration:none;color:var(--paper);font-weight:500;font-size:18px;line-height:1.2}
+.fr-pager a span{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-500);font-weight:400}
+.fr-pager a.nx{margin-left:auto;text-align:right}
+.fr-pager a:hover,.fr-pager a:focus-visible{color:var(--verde)}
+.fr-pager .fr-foot{margin-top:40px;padding-top:18px;border-top:1px solid var(--linea);letter-spacing:.14em;line-height:2}
+.fr-pager .fr-foot b{color:var(--ink-300);font-weight:400}
+
+/* ===== la nota ===== */
+.nt{max-width:1040px;margin:0 auto;padding:0 clamp(16px,5cqi,48px);font-size:clamp(16.5px,.3cqi + 15px,18px);line-height:1.62}
+.nt-ch{padding-top:clamp(40px,8vh,88px)}
+.nt-ch>.fr-passo{margin-top:clamp(56px,9vh,96px)}
+.nt p{max-width:40rem;margin:0 0 1em;text-align:justify;text-wrap:pretty;hyphens:manual}
+.nt strong{color:var(--ink-150);font-weight:500}
+.nt .sig{color:var(--verde);font-style:normal}
+.nt a{color:var(--ink-150);text-decoration:underline;text-decoration-color:var(--ink-500);text-decoration-thickness:1px;text-underline-offset:3px}
+.nt a:hover,.nt a:focus-visible{color:var(--verde);text-decoration-color:currentColor}
+.nt code{font-family:var(--mono);font-size:.84em;color:var(--ink-150);background:var(--ink-800);padding:1px 5px}
+.nt p.nt-eye{font-family:var(--mono);font-size:11px;line-height:1.5;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-300);margin:0 0 14px;text-align:left}
+.nt h2{font-weight:700;font-size:clamp(40px,7.4cqi,80px);line-height:.95;letter-spacing:-.038em;color:var(--paper);text-wrap:balance}
+.nt p.nt-dek{font-size:clamp(18px,1.9cqi,21px);line-height:1.45;color:var(--ink-150);font-weight:300;max-width:36em;margin:20px 0 0}
+.nt h3{font-weight:700;font-size:clamp(23px,2.6cqi,28px);line-height:1.15;letter-spacing:-.02em;color:var(--paper);margin:2.6em 0 .7em;max-width:32ch;text-wrap:balance}
+.nt p.nt-bridge{font-size:clamp(18px,1.9cqi,21px);line-height:1.45;color:var(--ink-150);font-weight:300;margin-top:2em}
+/* chrome in Overpass Mono: mai giustificato (BRAND.md §5.2) */
+.nt p.nt-src-note{font-family:var(--mono);font-size:11px;line-height:1.7;letter-spacing:.04em;color:var(--ink-300);max-width:62ch;margin:14px 0 0;text-align:left}
+.nt-sr{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+.nt-fig{margin:2em 0 2.4em}
+.nt-scroll{overflow-x:auto;scrollbar-width:thin}
+.nt-scroll:focus-visible{outline:1px solid var(--verde);outline-offset:4px}
+.nt table{border-collapse:collapse;width:100%;min-width:640px;font-size:15px;line-height:1.35}
+.nt caption{caption-side:top;text-align:left;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-300);padding-bottom:12px}
+.nt th,.nt td{padding:11px 12px;border-bottom:1px solid var(--linea);text-align:left;vertical-align:bottom}
+.nt thead th{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-300);font-weight:400;border-bottom-color:var(--ink-700)}
+.nt thead th.n,.nt td{text-align:right}
+.nt tbody th{font-weight:500;color:var(--paper)}
+.nt td{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--ink-150)}
+.nt tr.tot th,.nt tr.tot td{color:var(--ink-300);font-weight:400;border-bottom:0}
+.nt th:first-child,.nt td:first-child{padding-left:0}
+
+.nt-key{list-style:none;display:flex;flex-wrap:wrap;gap:8px 22px;margin:0 0 14px;font-family:var(--mono);font-size:11px;line-height:1.4;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-300)}
+.nt-key li{display:flex;align-items:center;gap:8px}
+.nt-key i{display:inline-block;width:10px;height:10px}
+.nt-bars{display:grid;gap:10px;max-width:46rem}
+.nt-bar{display:grid;grid-template-columns:6.5em minmax(0,1fr) 3.5em;gap:12px;align-items:center}
+.nt-bar .lbl{font-size:15px;line-height:1.2;color:var(--ink-150)}
+.nt-bar .trk{display:flex;gap:2px;height:14px}
+.nt-bar .val{font-family:var(--mono);font-size:12px;color:var(--ink-300)}
+.nt .on{background:var(--paper)}
+.nt .off{background:var(--ink-500)}
+.nt-figcap{font-size:15px;line-height:1.5;color:var(--ink-300);margin-top:12px;max-width:40rem;text-align:justify;text-wrap:pretty;hyphens:manual}
+
+.nt-tiles{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,14.5rem),1fr));gap:12px;margin:1.4em 0 1em}
+.nt-tiles li{background:var(--ink-800);padding:16px 18px 18px}
+.nt-tiles b{display:block;font-weight:700;font-size:36px;line-height:1;letter-spacing:-.03em;color:var(--paper)}
+.nt-tiles b small{font-size:17px;font-weight:500;letter-spacing:0;color:var(--ink-300)}
+.nt-tiles span{display:block;margin-top:10px;font-size:14.5px;line-height:1.45;color:var(--ink-300)}
+
+.nt-canale{max-width:40rem;border-top:1px solid var(--ink-700);padding-top:16px;margin-top:22px}
+.nt p.nt-tag{font-family:var(--mono);font-size:11px;line-height:1.5;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-300);margin:0;text-align:left}
+.nt h4{font-weight:500;font-size:20px;line-height:1.25;letter-spacing:-.015em;color:var(--paper);margin:8px 0 10px}
+
+.nt-rule{display:grid;grid-template-columns:2.2rem minmax(0,1fr);gap:0 16px;max-width:calc(40rem + 2.2rem + 16px);margin-top:2.6em}
+.nt-rule .id{font-family:var(--mono);font-weight:600;font-size:30px;line-height:1.1;color:var(--ink-500);margin:0;text-align:left}
+.nt-rule h3{margin:0 0 .7em;max-width:none}
+
+.nt-stamps{list-style:none;display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin:1.2em 0 1.4em;max-width:40rem}
+.nt-stamps li{border:1px solid var(--ink-500);padding:12px 14px 14px;font-size:15px;line-height:1.45;color:var(--ink-150)}
+.nt-stamps li:nth-child(2){border-style:dashed}
+.nt-stamps li:nth-child(3){border-style:dotted}
+.nt-stamps b{display:block;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--paper);margin-bottom:6px}
+
+.nt-ol{list-style:none;counter-reset:n;margin:.4em 0 1.4em;max-width:40rem}
+.nt-ol>li{counter-increment:n;position:relative;padding-left:2.4em;margin-bottom:.8em;text-align:justify;text-wrap:pretty;hyphens:manual}
+.nt-ol>li::before{content:counter(n);position:absolute;left:0;top:.25em;width:1.6em;height:1.6em;display:grid;place-items:center;
+  font-family:var(--mono);font-size:.78em;color:var(--ink-150);border:1px solid var(--ink-700)}
+.nt-ul{list-style:none;margin:.4em 0 1.4em;max-width:40rem}
+.nt-ul>li{position:relative;padding-left:1.5em;margin-bottom:.5em;text-align:justify;text-wrap:pretty;hyphens:manual}
+.nt-ul>li::before{content:"";position:absolute;left:0;top:.62em;width:8px;height:8px;background:var(--ink-500)}
+
+.nt-box{background:var(--ink-800);padding:20px 22px;margin:1.4em 0 1.6em;max-width:40rem}
+.nt-box p{color:var(--ink-150);margin:0}
+.nt-box strong{color:var(--paper)}
+
+.nt-ledger{list-style:none;border-top:1px solid var(--ink-700);margin-top:1.2em;max-width:46rem}
+.nt-ledger li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 20px;padding:16px 0;border-bottom:1px solid var(--linea);align-items:start}
+.nt-ledger .q{font-size:17px;line-height:1.45;color:var(--ink-150);margin:0;max-width:none;text-align:left}
+.nt-ledger small{display:block;font-size:14.5px;line-height:1.45;color:var(--ink-300);margin-top:5px}
+.nt-pill{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;padding:4px 9px 3px;white-space:nowrap;border:1px solid}
+.nt-pill.si{color:var(--verde);border-color:var(--verde)}
+.nt-pill.no{color:var(--ink-150);border:1px dashed var(--ink-500)}
+
+@container fr (min-width:640px){.nt-stamps{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@container fr (max-width:520px){
+  .nt-bar{grid-template-columns:minmax(0,1fr) 3em;row-gap:4px}
+  .nt-bar .lbl{grid-column:1 / -1}
+  .nt-ledger li{grid-template-columns:minmax(0,1fr)}
+  .nt-ledger .nt-pill{justify-self:start}
+  .nt-rule{grid-template-columns:minmax(0,1fr)}
+  .nt-rule .id{margin-bottom:6px}
+}
+@media(max-width:999.98px){
+  .fr-shell{display:block}
+  .fr-rail{display:contents}
+  .fr-rail-head{padding:22px clamp(16px,5vw,40px) 20px}
+  .fr-h1{font-size:clamp(40px,11vw,64px);margin-top:26px}
+  .fr-lead{font-size:clamp(15px,2.2vw,17px);max-width:62ch}
+  .fr-menu{position:sticky;top:0;z-index:50;background:var(--ink-900);border-bottom:1px solid var(--linea);padding:0 clamp(8px,3vw,32px)}
+  .fr-menu .fr-cap,.fr-menu .d{display:none}
+  .fr-menu ol{display:grid;grid-template-columns:repeat(3,1fr)}
+  .fr-menu a{grid-template-columns:auto;gap:2px;padding:9px 8px 8px;border:0;border-bottom:2px solid transparent;text-align:center}
+  .fr-menu li:last-child a{border-bottom:2px solid transparent}
+  .fr-menu a[aria-current]{border-bottom-color:var(--verde);border-left-color:transparent;background:none}
+  .fr-menu .n{font-size:11px}
+  .fr-menu .t{font-size:13.5px}
+  .fr-rail-foot{display:none}
+  .nt-ch{scroll-margin-top:72px}
+}
+@media(prefers-reduced-motion:reduce){.fr-menu a{transition:none}}
+@media print{.fr-rail{position:static;height:auto}.fr-menu{display:none}.nt-tiles li,.nt-box{border:1px solid var(--ink-700)}}
+</style>
+</head>
+<body>
+<div class="fr-shell">
+  <aside class="fr-rail">
+    <div class="fr-rail-head">
+      <div class="fr-top">
+        <svg class="tks-logo" viewBox="652.81 458.95 614.68 162.12" role="img" aria-label="Teksistemi">
+      <polygon class="tek" points="669.09 586.95 692.9 586.95 692.9 506.95 717.32 506.95 717.32 490.95 692.9 490.95 692.9 458.95 669.09 458.95 669.09 490.95 652.81 490.95 652.81 506.95 669.09 506.95 669.09 586.95"/>
+      <rect class="tek" x="692.9" y="586.95" width="24.42" height="24.42"/>
+      <path class="tek" d="M827.42,573.34l30.07-29.19h-24.98l-26.72,26.14v-79.34h-20.04v39.7c-1.75-3.7-3.82-7.05-6.26-10.02-5.22-6.22-11.69-10.44-19.41-12.67-7.72-2.23-16.03-1.94-24.92.86-5.93,1.87-11.08,4.67-15.46,8.41-4.38,3.74-7.83,8.03-10.35,12.86-2.52,4.84-4,10.13-4.43,15.88-.44,5.75.28,11.59,2.15,17.52,2,6.34,4.85,11.75,8.57,16.25,3.72,4.5,8.07,7.96,13.04,10.38,4.97,2.42,10.35,3.81,16.14,4.18,5.79.37,11.75-.41,17.88-2.34,4.39-1.38,8.41-3.27,12.04-5.64,3.63-2.38,6.79-5.2,9.47-8.46.54-.66,1.05-1.35,1.54-2.04v43.13h20.04v-26.58l7.26-7.12,23.38,33.7h23.38l-32.39-45.61ZM725.25,547.99c-.24-2.17-.15-4.47.27-6.91.41-2.43,1.19-4.7,2.32-6.8,1.13-2.1,2.7-3.99,4.69-5.69,1.99-1.69,4.52-3.02,7.59-3.99,2.96-.93,5.7-1.34,8.2-1.24,2.5.11,4.84.67,7.01,1.67,2.17,1,4.12,2.38,5.85,4.14,1.73,1.76,3.29,3.77,4.68,6.02l-40.62,12.79ZM773.39,559.62c-.48,4.19-2.16,7.76-5.06,10.69-2.9,2.93-6.54,5.09-10.93,6.48-3.27,1.03-6.33,1.4-9.17,1.12-2.84-.28-5.48-1.08-7.91-2.39-2.43-1.31-4.58-3.05-6.44-5.21-1.86-2.17-3.4-4.63-4.6-7.4l56.46-17.78v10.61l-12.34,3.89Z"/>
+      <path class="word" d="M916.63,615.1c5.44-3.97,8.16-9.61,8.16-16.93,0-4.78-1.25-8.64-3.74-11.59-2.49-2.95-5.85-5.21-10.07-6.79-4.22-1.58-8.98-2.82-14.26-3.74l-6.25-1.07c-4.68-.81-8.42-2.06-11.21-3.74-2.8-1.68-4.2-4.3-4.2-7.86s1.47-6.43,4.42-8.31c2.95-1.88,6.96-2.82,12.05-2.82s9.36,1.09,12.81,3.28c3.46,2.19,5.64,5.98,6.56,11.37l11.29-2.9c-1.53-6.92-4.91-12.28-10.14-16.09-5.24-3.81-12.08-5.72-20.52-5.72s-15.41,1.88-20.59,5.65c-5.19,3.76-7.78,9-7.78,15.71,0,4.48,1.17,8.19,3.51,11.14,2.34,2.95,5.49,5.29,9.46,7.02,3.97,1.73,8.34,3,13.12,3.81l6.25,1.07c5.39,1.02,9.63,2.31,12.74,3.89,3.1,1.58,4.65,4.3,4.65,8.16s-1.63,6.77-4.88,9c-3.26,2.24-7.68,3.36-13.27,3.36-3.76,0-7.3-.58-10.6-1.75-3.31-1.17-6.08-3.15-8.31-5.95-2.24-2.8-3.76-6.64-4.58-11.52l-11.44,2.59c1.32,9.26,5.16,16.02,11.52,20.29,6.35,4.27,14.16,6.41,23.42,6.41s16.45-1.98,21.89-5.95Z"/>
+      <rect class="word" x="929.83" y="544.32" width="12.05" height="74.6"/>
+      <path class="word" d="M935.93,532.72c2.64,0,4.83-.86,6.56-2.59,1.73-1.73,2.59-3.91,2.59-6.56s-.87-4.98-2.59-6.71c-1.73-1.73-3.92-2.59-6.56-2.59s-4.86.87-6.64,2.59c-1.78,1.73-2.67,3.97-2.67,6.71s.89,4.83,2.67,6.56c1.78,1.73,3.99,2.59,6.64,2.59Z"/>
+      <path class="word" d="M1003.89,615.1c5.44-3.97,8.16-9.61,8.16-16.93,0-4.78-1.25-8.64-3.74-11.59-2.49-2.95-5.85-5.21-10.07-6.79-4.22-1.58-8.98-2.82-14.26-3.74l-6.25-1.07c-4.68-.81-8.42-2.06-11.21-3.74-2.8-1.68-4.19-4.3-4.19-7.86s1.47-6.43,4.42-8.31c2.95-1.88,6.97-2.82,12.05-2.82s9.36,1.09,12.81,3.28c3.46,2.19,5.64,5.98,6.56,11.37l11.29-2.9c-1.53-6.92-4.91-12.28-10.14-16.09-5.24-3.81-12.08-5.72-20.52-5.72s-15.41,1.88-20.59,5.65c-5.19,3.76-7.78,9-7.78,15.71,0,4.48,1.17,8.19,3.51,11.14,2.34,2.95,5.49,5.29,9.46,7.02,3.97,1.73,8.34,3,13.12,3.81l6.25,1.07c5.39,1.02,9.63,2.31,12.74,3.89,3.1,1.58,4.65,4.3,4.65,8.16s-1.63,6.77-4.88,9c-3.26,2.24-7.68,3.36-13.27,3.36-3.76,0-7.3-.58-10.6-1.75-3.31-1.17-6.08-3.15-8.31-5.95-2.24-2.8-3.76-6.64-4.58-11.52l-11.44,2.59c1.32,9.26,5.16,16.02,11.52,20.29,6.35,4.27,14.16,6.41,23.42,6.41s16.45-1.98,21.89-5.95Z"/>
+      <path class="word" d="M1039.74,608.54c-2.95,0-4.42-1.53-4.42-4.58v-49.12h24.41v-10.53h-24.41v-26.54h-12.05v26.54h-11.21v10.53h11.21v50.95c0,4.07,1.14,7.27,3.43,9.61,2.29,2.34,5.57,3.51,9.84,3.51h19.83v-10.37h-16.63Z"/>
+      <path class="word" d="M1111.97,617.85c4.32-2.14,7.83-4.78,10.53-7.93,2.69-3.15,4.81-6.3,6.33-9.46l-10.37-5.03c-1.83,4.07-4.48,7.58-7.93,10.53-3.46,2.95-8.39,4.42-14.8,4.42-7.32,0-13.42-2.26-18.31-6.79-4.88-4.52-7.47-10.8-7.78-18.84h60.87v-5.49c0-7.53-1.53-14.08-4.58-19.68-3.05-5.59-7.27-9.89-12.66-12.89-5.39-3-11.59-4.5-18.61-4.5s-13.63,1.6-19.22,4.81c-5.59,3.2-9.97,7.7-13.12,13.5-3.15,5.8-4.73,12.56-4.73,20.29v1.83c0,7.63,1.58,14.34,4.73,20.14,3.15,5.8,7.57,10.3,13.27,13.5,5.69,3.2,12.3,4.8,19.83,4.8,6.71,0,12.23-1.07,16.55-3.2ZM1077.88,558.66c4.37-3.86,9.97-5.8,16.78-5.8s12.23,1.93,16.55,5.8c4.32,3.87,6.69,9.25,7.09,16.17h-48.51c1.02-6.92,3.71-12.3,8.09-16.17Z"/>
+      <path class="word" d="M1239.65,554.77c-2.19-3.81-5.16-6.74-8.92-8.77-3.76-2.03-8.14-3.05-13.12-3.05-6.31,0-11.21,1.27-14.72,3.81-3.51,2.54-6.13,5.65-7.86,9.31h-2.14c-1.63-3.66-4.25-6.76-7.86-9.31-3.61-2.54-8.31-3.81-14.11-3.81s-10.48,1.12-13.73,3.36c-3.26,2.24-5.59,4.68-7.02,7.32h-2.14v-9.3h-11.75v74.6h12.05v-44.85c0-6.71,1.75-11.85,5.26-15.41,3.51-3.56,8.01-5.34,13.5-5.34,5.19,0,9.23,1.45,12.13,4.35,2.9,2.9,4.35,6.84,4.35,11.82v49.43h12.05v-44.85c0-6.71,1.75-11.85,5.26-15.41,3.51-3.56,8.01-5.34,13.5-5.34,5.19,0,9.23,1.45,12.13,4.35,2.9,2.9,4.35,6.84,4.35,11.82v49.43h12.05v-50.49c0-5.29-1.09-9.84-3.28-13.65Z"/>
+      <rect class="word" x="1252.24" y="544.32" width="12.05" height="74.6"/>
+      <path class="word" d="M1258.34,532.72c2.64,0,4.83-.86,6.56-2.59,1.73-1.73,2.59-3.91,2.59-6.56s-.86-4.98-2.59-6.71c-1.73-1.73-3.92-2.59-6.56-2.59s-4.86.87-6.64,2.59c-1.78,1.73-2.67,3.97-2.67,6.71s.89,4.83,2.67,6.56c1.78,1.73,3.99,2.59,6.64,2.59Z"/>
+    </svg>
+        <span class="fr-nav"><b>IT</b><a href="en/010-who-pays-for-discovery.html" data-lang="en">EN</a></span>
+      </div>
+      <a class="fr-arch" href="index.html">← Archivio</a>
+      <div class="fr-lockup"><svg viewBox="747.98 376.33 424.06 327.35" fill="currentColor" role="img" aria-label="tek">
+          <rect x="780.8" y="376.33" width="48.82" height="262.56"/>
+          <rect class="px" x="829.63" y="638.89" width="50.09" height="50.09"/>
+          <rect x="747.98" y="441.97" width="131.74" height="32.82"/>
+          <path d="M1105.58,610.12l61.67-59.88h-51.24l-54.82,53.63v-162.75h-41.11v81.44c-3.58-7.58-7.84-14.45-12.83-20.56-10.7-12.75-23.97-21.42-39.81-26-15.84-4.57-32.88-3.99-51.11,1.76-12.16,3.83-22.73,9.58-31.72,17.25-8.99,7.67-16.07,16.46-21.24,26.39-5.17,9.92-8.2,20.79-9.09,32.58-.89,11.8.58,23.78,4.41,35.94,4.09,13,9.95,24.11,17.59,33.34,7.63,9.23,16.55,16.33,26.75,21.3,10.2,4.97,21.24,7.82,33.11,8.58,11.87.76,24.1-.85,36.67-4.81,9.01-2.84,17.24-6.7,24.69-11.58,7.45-4.88,13.92-10.66,19.42-17.35,1.12-1.36,2.15-2.77,3.17-4.19v88.47h41.11v-54.52l14.9-14.6,47.97,69.12h47.97l-66.44-93.55ZM896,558.11c-.48-4.45-.3-9.18.55-14.17.85-4.99,2.44-9.63,4.77-13.94,2.33-4.3,5.54-8.19,9.63-11.67,4.09-3.47,9.28-6.2,15.57-8.18,6.08-1.91,11.69-2.76,16.83-2.54,5.14.23,9.93,1.37,14.38,3.42,4.45,2.06,8.45,4.89,12,8.49,3.55,3.61,6.75,7.72,9.59,12.36l-83.32,26.24ZM994.75,581.96c-.98,8.6-4.44,15.91-10.37,21.93-5.94,6.02-13.42,10.45-22.43,13.28-6.71,2.11-12.98,2.88-18.8,2.29-5.83-.58-11.24-2.22-16.23-4.91-4.99-2.69-9.4-6.25-13.22-10.7-3.82-4.44-6.96-9.5-9.44-15.17l115.82-36.47v21.77l-25.32,7.97Z"/>
+        </svg><span class="fr-reparto">development</span></div>
+      <p class="fr-nota">Numero 010 · 5 novembre 2026</p>
+      <h1 class="fr-h1">Chi paga la scoperta</h1>
+      <p class="fr-lead">Il cliente scopre che cosa vuole guar&shy;dan&shy;do quello che gli con&shy;se&shy;gnia&shy;mo, ed è nor&shy;ma&shy;le. Il guaio è che quella sco&shy;per&shy;ta oggi la pa&shy;ghia&shy;mo noi. Abbiamo letto 569 issue di quattro pro&shy;get&shy;ti Odoo per capire da dove entra il lavoro in più, e ne sono uscite <em>quattro regole</em> per dargli un prezzo prima che diventi lavoro.</p>
+      <p class="fr-meta">Nota · ~11 min · tre capitoli</p>
+      <div class="fr-passo" aria-hidden="true"></div>
+    </div>
+    <nav class="fr-menu" aria-label="Capitoli">
+      <p class="fr-cap">In questo numero</p>
+      <ol>
+      <li><a href="#ch-1" data-ch="1"><span class="n">I</span><span><span class="t">Le 569 issue</span><span class="d">Che cosa di&shy;co&shy;no quat&shy;tro pro&shy;get&shy;ti Odoo sullo scope creep, e i tre ca&shy;na&shy;li da cui entra.</span></span></a></li>
+      <li><a href="#ch-2" data-ch="2"><span class="n">II</span><span><span class="t">Quattro regole</span><span class="d">Nel pre&shy;ven&shy;ti&shy;vo, nel modo in cui na&shy;sco&shy;no le issue, nelle mail, nelle re&shy;go&shy;le degli agen&shy;ti.</span></span></a></li>
+      <li><a href="#ch-3" data-ch="3"><span class="n">III</span><span><span class="t">Prima e dopo</span><span class="d">Il pre-MVP come sco&shy;per&shy;ta pa&shy;ga&shy;ta, le issue già aper&shy;te, che cosa è de&shy;ci&shy;so e che cosa no.</span></span></a></li>
+      </ol>
+    </nav>
+    <p class="fr-foot fr-rail-foot">Teksistemi · sviluppo software · newsletter tecnica interna<br>Scritta da <b>orlodax</b> · numero 010 · 5 novembre 2026</p>
+  </aside>
+  <main class="fr-main">
+<article class="nt">
+
+<section class="nt-ch" id="ch-1" data-ch="1" aria-labelledby="c1-h">
+  <p class="nt-eye">010 · Capitolo I</p>
+  <h2 id="c1-h">Le 569 issue</h2>
+  <p class="nt-dek">Un blocco pulito al kick-off, settimane di quiete, poi esplosioni a giornate. Quattro progetti, la stessa curva.</p>
+
+  <h3>Il problema in una frase</h3>
+  <p>Il cliente tipo, all’inizio, non ha le idee chiare: scopre che cosa vuole guardando quello che gli consegniamo. È fisiologico, e non è questo il problema. Il problema è che quella scoperta oggi la paghiamo noi: il perimetro cresce, il prezzo e la data no, e le ore e i token che servirebbero ad altri progetti finiscono lì.</p>
+  <p>Il rimedio non è impedire al cliente di scoprire. È fare in modo che ogni allargamento abbia un prezzo e una decisione esplicita prima di diventare lavoro.</p>
+  <p>Ad agosto, nel <a href="007-triangolo-impossibile.html">numero 007</a>, avevamo distinto il churn (un requisito che ne sostituisce un altro) dal creep (un requisito che si aggiunge senza che niente esca), e avevamo scritto che il creep è l’unico dei due che si previene con una regola scritta. Era il quadro della letteratura di settore. Il 4 novembre siamo andati a contare in casa nostra: le 569 issue dei repository di quattro progetti Odoo, lette dalle API di GitHub insieme a sub-issue, tipi, etichette e stato sulla board. I clienti, qui, restano anonimi: sono i progetti A, B, C e D.</p>
+
+  <h3>La stessa curva, in quattro progetti</h3>
+  <p>La forma è la stessa ovunque: un blocco pulito al kick-off, settimane di quiete, poi esplosioni concentrate in poche giornate. Il progetto A sembra l’eccezione e non lo è: è solo il più giovane. Il 22 ottobre ha preso 16 issue in un giorno, da un’analisi funzionale che la consulente del cliente aveva riscritto. È la curva del progetto B, con due mesi di ritardo.</p>
+
+  <figure class="nt-fig">
+    <div class="nt-scroll" role="region" aria-labelledby="c1-tab" tabindex="0">
+      <table>
+        <caption id="c1-tab">Issue per progetto, al 4 novembre 2026</caption>
+        <thead>
+          <tr><th scope="col">Progetto</th><th scope="col" class="n">Issue</th><th scope="col" class="n">Al kick-off<br>(7 giorni)</th><th scope="col" class="n">Dopo</th><th scope="col" class="n">Giornate<br>con 8+ issue</th><th scope="col" class="n">Nate in<br>quelle giornate</th><th scope="col" class="n">Aperte</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Progetto A</th><td>52</td><td>24</td><td>28</td><td>2</td><td>77%</td><td>38</td></tr>
+          <tr><th scope="row">Progetto B</th><td>172</td><td>28</td><td>144</td><td>6</td><td>70%</td><td>69</td></tr>
+          <tr><th scope="row">Progetto C</th><td>152</td><td>8</td><td>144</td><td>5</td><td>57%</td><td>59</td></tr>
+          <tr><th scope="row">Progetto D</th><td>193</td><td>48</td><td>145</td><td>6</td><td>51%</td><td>67</td></tr>
+          <tr class="tot"><th scope="row">Totale</th><td>569</td><td>108</td><td>461</td><td>19</td><td>–</td><td>233</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="nt-src-note">Fonte: issue, sub-issue, tipi, etichette e stato sulla board dei quattro repository, letti dalle API di GitHub il 4 novembre 2026. «Al kick-off»: le issue aperte nei primi sette giorni dalla prima issue del repository. «Giornata con 8+ issue»: un giorno di calendario con almeno otto issue aperte.</p>
+  </figure>
+
+  <figure class="nt-fig">
+    <ul class="nt-key"><li><i class="on"></i>Al kick-off</li><li><i class="off"></i>Aggiunte dopo</li></ul>
+    <div class="nt-bars" aria-hidden="true">
+      <div class="nt-bar"><span class="lbl">Progetto A</span><span class="trk"><span class="on" style="width:46%"></span><span class="off" style="width:54%"></span></span><span class="val">46%</span></div>
+      <div class="nt-bar"><span class="lbl">Progetto B</span><span class="trk"><span class="on" style="width:16%"></span><span class="off" style="width:84%"></span></span><span class="val">16%</span></div>
+      <div class="nt-bar"><span class="lbl">Progetto C</span><span class="trk"><span class="on" style="width:5%"></span><span class="off" style="width:95%"></span></span><span class="val">5%</span></div>
+      <div class="nt-bar"><span class="lbl">Progetto D</span><span class="trk"><span class="on" style="width:25%"></span><span class="off" style="width:75%"></span></span><span class="val">25%</span></div>
+    </div>
+    <figcaption class="nt-figcap">La quota di ogni progetto nata al kick-off. Il resto è arrivato dopo: sul progetto C, il 95%.</figcaption>
+  </figure>
+
+  <h3>Sei numeri che pesano</h3>
+  <ul class="nt-tiles">
+    <li><b>41</b><span>issue aperte sul progetto B il 20 ottobre, in un giorno solo. 21 sono bug, e 13 citano il nostro collaudo a schermo.</span></li>
+    <li><b>52<small> / 103</small></b><span>delle issue chiuse sul progetto B non sono durate più di due giorni: lavoro trovato e risolto nello stesso giro, ma pagato al prezzo pieno di un’issue, con board, brief e review.</span></li>
+    <li><b>40<small> / 60</small></b><span>bug del progetto B trovati dalla nostra review o dal tester, non dal cliente. Sul progetto C, 20 su 37.</span></li>
+    <li><b>16<small> / 16</small></b><span>elementi in Awaiting Quote su tutta la board: tutti del progetto C, tutti dell’8 ottobre. Il progetto B, con 48 feature aperte dopo il kick-off, non ne ha nessuno.</span></li>
+    <li><b>40</b><span>issue di decisione sul progetto B, ognuna con contesto, opzioni e riferimenti al codice: un’analisi fatta, e pagata, prima che il cliente scelga.</span></li>
+    <li><b>88<small> / 152</small></b><span>issue piatte, senza epica, sul progetto C: la struttura a epiche è saltata a metà progetto.</span></li>
+  </ul>
+
+  <h3>Da dove entra il creep</h3>
+  <p>Le issue le apriamo noi, con gli agenti, nel 70–100% dei casi. Ma la fonte che citano nel corpo dice da dove viene il lavoro in più, e i canali sono tre, ciascuno con il suo rimedio.</p>
+
+  <div class="nt-canale">
+    <p class="nt-tag">Canale 1 · il cliente, a giornate</p>
+    <h4>Mail-registro, riunioni di feedback, analisi riscritte</h4>
+    <p>Sul progetto B, 38 issue citano una riunione e 22 una mail; sul progetto C, 62 citano un feedback. La forma tipica è un’epica «Feedback 20 luglio» con 18 figli, o il registro del cliente con le voci numerate R, che diventano 19-21 issue al giorno. Sei giornate fanno il 70% del progetto B.</p>
+    <p><strong>Entra a pacchetti, in giornate note.</strong> Non serve una regola continua: serve un rito per quelle giornate.</p>
+  </div>
+  <div class="nt-canale">
+    <p class="nt-tag">Canale 2 · noi stessi</p>
+    <h4>Difetti trovati dalla pipeline, ognuno con la sua issue</h4>
+    <p>Il collaudo a schermo e il tester funzionano: trovano. Ma oggi ogni ritrovamento diventa un’issue con epica, un corpo da 1.400 caratteri, board e sprint, anche quando si chiude due giorni dopo. Il motore di questo canale è una regola nostra: «trovi lavoro ⇒ apri subito l’issue».</p>
+    <p><strong>È continuo, ed è un effetto della pipeline.</strong> Si corregge nelle regole degli agenti, non nel contratto.</p>
+  </div>
+  <div class="nt-canale">
+    <p class="nt-tag">Canale 3 · il difetto mascherato</p>
+    <h4>Feature vestite da bug, nello stesso pacchetto</h4>
+    <p>Nelle mail del progetto C del 22 ottobre convivono bug veri, come un venditore che riesce a confermare un ordine con approvazioni ancora pendenti, e feature pure: cruscotti direzionali, to-do giornalieri sui Top 50, l’export in Word di un modello. Ricevono lo stesso trattamento. Il cancello esiste, è lo stato Awaiting Quote, ma lo usa un progetto solo.</p>
+    <p><strong>Manca un criterio meccanico per dire «bug» o «feature».</strong> Finché non c’è, tutto è dentro.</p>
+  </div>
+
+  <p class="nt-bridge">Tre canali, tre rimedi. Al terzo manca un criterio, e lo dà la regola A; il primo lo chiudono la B e la C; il secondo è nostro, e lo corregge la D.</p>
+  <div class="fr-passo" aria-hidden="true"></div>
+</section>
+
+<section class="nt-ch" id="ch-2" data-ch="2" aria-labelledby="c2-h">
+  <p class="nt-eye">010 · Capitolo II</p>
+  <h2 id="c2-h">Quattro regole</h2>
+  <p class="nt-dek">Una nel preventivo, una nel modo in cui nascono le issue, una nelle mail, una nelle regole degli agenti.</p>
+
+  <div class="nt-rule">
+    <p class="id" aria-hidden="true">A</p>
+    <div>
+      <h3><span class="nt-sr">A. </span>Il preventivo definisce l’MVP come elenco di percorsi dimostrabili</h3>
+      <p>Un perimetro al kick-off c’è già oggi, ma è scritto per moduli: «modulo onboarding, flusso a 2 step». Quando arriva «il rinnovo dal portale salva la carta anche senza rinnovo automatico», nessuno sa dire se è dentro o fuori. E allora è dentro.</p>
+      <p>La forma che risolve il problema ce l’abbiamo già in pipeline: è il percorso che il collaudo a schermo cammina, e la demo che ne esce. <strong>L’MVP nel preventivo diventa un elenco di dieci-venti frasi</strong> come «il socio rinnova dal portale con la carta salvata» o «l’amministrazione importa l’anagrafica da Excel». La consegna dell’MVP è la demo di quei percorsi, con una data, più la firma del cliente.</p>
+      <p>Da quel momento la definizione di bug è meccanica: un bug <span class="sig">rompe un percorso dimostrato</span>. Tutto il resto è una feature, e una feature dopo la firma è un preventivo. Al cliente diamo una lista di frasi da firmare, non un documento di analisi che non sa scrivere.</p>
+    </div>
+  </div>
+
+  <div class="nt-rule">
+    <p class="id" aria-hidden="true">B</p>
+    <div>
+      <h3><span class="nt-sr">B. </span>Dopo la firma, ogni issue nuova nasce in Awaiting Quote</h3>
+      <p>Oggi un’issue nuova nasce Ready, per inerzia. Con la firma dell’MVP il default si inverte: <strong>tutto quello che nasce e non è una sub-issue di un’epica dell’MVP finisce in Awaiting Quote da solo</strong>, e a tirarlo fuori è chi preventiva. L’onere passa a chi vuole lavorarci.</p>
+      <p>In pratica è un’automazione di board, più l’hook di <code>devkit</code> che già oggi rifiuta un brief quando cita un’issue di decisione o un’issue in Awaiting Quote. Non chiede giudizio all’agente in corsa, che è il punto debole di qualunque «controlla il perimetro».</p>
+    </div>
+  </div>
+
+  <div class="nt-rule">
+    <p class="id" aria-hidden="true">C</p>
+    <div>
+      <h3><span class="nt-sr">C. </span>Mail e riunioni producono un registro a tre timbri, non issue</h3>
+      <p>Una mail o una riunione non genera issue. Genera un registro, scritto da chi gestisce la mail, persona o agente, in cui ogni richiesta riceve uno di tre timbri:</p>
+      <ul class="nt-stamps">
+        <li><b>Bug</b>Rompe un percorso dimostrato. Diventa un’issue Ready e cita il percorso.</li>
+        <li><b>Decisione</b>Il cliente deve scegliere. Un’issue corta: la domanda e le opzioni in dieci righe.</li>
+        <li><b>Fuori perimetro</b>Una riga nel registro, «da preventivare». Nessuna issue finché non è preventivata.</li>
+      </ul>
+      <p>La risposta al cliente è il registro stesso. Il progetto C ha già il suo, con le voci numerate R: oggi lo riceviamo e lo trasformiamo in 21 issue al giorno. Con i timbri il cliente vede che la R102 è «da preventivare», e smette di aspettarsela nella prossima release.</p>
+      <p><strong>Il controllo deve stare nel formato, non in una checklist da eseguire a mano.</strong> Nel giorno in cui arrivano 41 richieste, nessuno esegue una checklist: non deve esistere un modo di trascrivere una mail che non passi dai tre timbri. Il passaggio sulle mail di <code>devkit</code> esiste già, e va esteso con questa classificazione.</p>
+      <p>Lo stesso registro risponde anche al modello in abbonamento, se un giorno ci passiamo: la misura di quanto il cliente chiede e di quanto lavoriamo è quel file, una riga per richiesta, con timbro, stima e stato.</p>
+    </div>
+  </div>
+
+  <div class="nt-rule">
+    <p class="id" aria-hidden="true">D</p>
+    <div>
+      <h3><span class="nt-sr">D. </span>Regole devkit per gli agenti: trovare non è aprire</h3>
+      <p>La regola «trovi lavoro ⇒ apri subito l’issue» va riscritta su tre livelli:</p>
+      <ol class="nt-ol">
+        <li><strong>Trovato dentro il perimetro dell’issue in corso:</strong> si sistema nel fix round, senza issue. La review trova, il builder corregge, fine.</li>
+        <li><strong>Trovato fuori dall’issue ma dentro un percorso dell’MVP:</strong> una sola issue «residui» per ondata, con una checklist, chiusa in blocco. Non venti issue con venti corpi.</li>
+        <li><strong>Trovato fuori dai percorsi dell’MVP:</strong> l’issue sì, ma nasce in Awaiting Quote (regola B), e nessun builder la riceve finché non è preventivata.</li>
+      </ol>
+      <p>E le issue di decisione vanno a dieta: <strong>la domanda e le opzioni in dieci righe, l’analisi dopo la risposta</strong>. Se un’opzione implica sviluppo nuovo, l’issue non è una decisione: è un preventivo.</p>
+    </div>
+  </div>
+  <div class="fr-passo" aria-hidden="true"></div>
+</section>
+
+<section class="nt-ch" id="ch-3" data-ch="3" aria-labelledby="c3-h">
+  <p class="nt-eye">010 · Capitolo III</p>
+  <h2 id="c3-h">Prima e dopo</h2>
+  <p class="nt-dek">Che cosa succede prima dell’MVP, che cosa fare delle issue già aperte, e che cosa è deciso.</p>
+
+  <h3>Il pre-MVP: discovery pagata, non Odoo lasciato al cliente</h3>
+  <p>L’idea della mattina del 4 novembre era questa: installare Odoo senza sviluppi, lasciare che il cliente lo usi nei suoi flussi, e farci dire da lui che cosa vuole davvero. Sulla carta è giusta. I dati la mettono in dubbio, per un motivo preciso.</p>
+  <div class="nt-box">
+    <p>Il progetto A aveva un’analisi funzionale scritta da una consulente, e il 22 ottobre l’analisi è stata riscritta lo stesso. <strong>Il cliente non scopre che cosa vuole guardando Odoo vuoto: lo scopre guardando la sua versione quasi finita.</strong> Odoo senza sviluppi, per un’associazione del terzo settore o per un’azienda di field service, ha due esiti possibili: il cliente non lo usa, oppure produce in anticipo la stessa fiumana di «dovrebbe fare X» che vogliamo evitare.</p>
+  </div>
+  <p>La variante che sta in piedi è una <strong>fase di discovery pagata e a tempo</strong>:</p>
+  <ul class="nt-ul">
+    <li>un’installazione senza sviluppi, più due o tre sessioni di configurazione fatte insieme al cliente e guidate da noi;</li>
+    <li>un prezzo fisso piccolo e una durata fissa;</li>
+    <li>come risultato, l’elenco dei percorsi dell’MVP (regola A) e il preventivo dell’MVP.</li>
+  </ul>
+  <p>Rispetto all’idea di partenza cambia una cosa sola: non si aspetta che il cliente capisca da solo, lo si guida, e quel tempo è fatturato. È la discovery a prezzo fisso, separata dalla costruzione, che il <a href="007-triangolo-impossibile.html">numero 007</a> metteva al quarto posto del suo panorama. Da proporre a chi arriva senza un’analisi; chi ce l’ha passa direttamente alla lista dei percorsi.</p>
+
+  <h3>Le issue già aperte</h3>
+  <p>Le stesse regole, applicate all’indietro, dicono che cosa fare delle 233 issue aperte nei quattro progetti:</p>
+  <ol class="nt-ol">
+    <li><strong>Fissare un perimetro retroattivo</strong> per ogni progetto: le epiche del kick-off; per il progetto C, i codici R dell’analisi.</li>
+    <li><strong>Ri-timbrare le issue aperte:</strong> quelle dentro il perimetro restano dove sono, quelle fuori vanno in Awaiting Quote, le decisioni si accorciano alla domanda e alle opzioni.</li>
+    <li><strong>Raggruppare i residui:</strong> le issue piccole dentro il perimetro finiscono in un’issue «residui» per progetto, chiusa in blocco.</li>
+  </ol>
+  <p>È lavoro da agente, con uno script e una passata umana di conferma. E il «prima» con cui misurare se ha funzionato ce l’abbiamo già: sono i numeri di questa nota.</p>
+
+  <h3>Le decisioni</h3>
+  <p>Al 4 novembre, dei quattro punti due sono decisi e due restano aperti. La regola D non ha una riga qui: riguarda solo i nostri agenti, e va scritta in <code>devkit</code>.</p>
+  <ul class="nt-ledger">
+    <li><p class="q">L’MVP nel preventivo si scrive come elenco di percorsi dimostrabili, con una data e la firma del cliente.<small>Si applica dal prossimo preventivo.</small></p><span class="nt-pill si">Deciso</span></li>
+    <li><p class="q">Dopo la firma, ogni issue nuova fuori dalle epiche dell’MVP nasce in Awaiting Quote.<small>Un’automazione di board, più l’hook di devkit.</small></p><span class="nt-pill si">Deciso</span></li>
+    <li><p class="q">Il pre-MVP diventa una fase di discovery pagata e guidata, proposta a chi arriva senza analisi.<small>Da decidere con Daniele, il nostro commerciale: prezzo, durata, e in quali preventivi offrirla.</small></p><span class="nt-pill no">Aperta</span></li>
+    <li><p class="q">Il registro a tre timbri sostituisce la trascrizione diretta di mail e riunioni in issue.<small>Da decidere chi lo tiene per ogni cliente, e in che forma lo riceve il cliente.</small></p><span class="nt-pill no">Aperta</span></li>
+  </ul>
+</section>
+
+</article>
+<nav class="fr-pager" aria-label="Archivio"><div class="fr-passo" aria-hidden="true"></div><div class="row"><a class="pv" href="009-rifinanziamento.html"><span>← Numero precedente</span>009 · Rifinanziamento</a><a class="nx" href="index.html"><span>Archivio →</span>Tutti i numeri</a></div><p class="fr-foot">Teksistemi · sviluppo software · newsletter tecnica interna<br>Scritta da <b>orlodax</b> · numero 010 · 5 novembre 2026</p></nav>
+  </main>
+</div>
+<script>
+/* Il menu segue la lettura; lo switch di lingua porta allo stesso capitolo. Senza JS restano àncore semplici. */
+(function(){
+  var items=[].slice.call(document.querySelectorAll('.fr-menu a[data-ch]'));
+  var langs=[].slice.call(document.querySelectorAll('.fr-nav a[data-lang]'));
+  var base=langs.map(function(a){return a.getAttribute('href')});
+  function mark(n){
+    items.forEach(function(a){if(a.dataset.ch===n)a.setAttribute('aria-current','true');else a.removeAttribute('aria-current')});
+    langs.forEach(function(a,i){a.setAttribute('href',base[i]+'#ch-'+n)});
+  }
+  var chs=[].slice.call(document.querySelectorAll('.nt-ch'));
+  if('IntersectionObserver' in window){
+    // una striscia al 40% dell'altezza: il capitolo che la attraversa è quello che si sta leggendo
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)mark(e.target.dataset.ch)})},{rootMargin:'-40% 0px -55% 0px'});
+    chs.forEach(function(c){io.observe(c)});
+  }
+  /* una scelta esplicita di lingua vince sul rilevamento automatico dell'indice */
+  langs.forEach(function(a){a.addEventListener('click',function(){try{localStorage.setItem('tks-lang',a.dataset.lang)}catch(e){}})});
+})();
+</script>
+</body>
+</html>

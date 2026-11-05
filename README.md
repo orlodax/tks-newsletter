@@ -20,6 +20,7 @@ Written by **orlodax**. Italian is the source language; every issue has an en-US
 | 007 | [Il Triangolo Impossibile](007-triangolo-impossibile.html) · [The Impossible Triangle](en/007-the-impossible-triangle.html) | Note, ~12 min | 21 Aug 2026 |
 | 008 | [Claustrum](008-claustrum.html) · [Claustrum](en/008-claustrum.html) | Deck, 14 slides | 12 Sep 2026 |
 | 009 | [Rifinanziamento](009-rifinanziamento.html) · [Refinanced](en/009-refinanced.html) | Note, ~25 min | 8 Oct 2026 |
+| 010 | [Chi paga la scoperta](010-chi-paga-la-scoperta.html) · [Who pays for discovery](en/010-who-pays-for-discovery.html) | Note, ~11 min | 5 Nov 2026 |
 
 ## How this is built
 
